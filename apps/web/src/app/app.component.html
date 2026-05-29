@@ -1,0 +1,43 @@
+<main class="app-shell">
+  <section class="workspace">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">Recipe Manager</p>
+        <h1>Plan, collect, and cook from one cloud workspace.</h1>
+      </div>
+      <button type="button">Add recipe</button>
+    </header>
+
+    <section class="summary-grid" aria-label="Recipe overview">
+      <article>
+        <span>Saved recipes</span>
+        <strong>128</strong>
+      </article>
+      <article>
+        <span>This week</span>
+        <strong>7</strong>
+      </article>
+      <article>
+        <span>Shopping lists</span>
+        <strong>3</strong>
+      </article>
+    </section>
+
+    <section class="recipe-list" aria-label="Recent recipes">
+      <div class="section-heading">
+        <h2>Recent recipes</h2>
+        <a href="/" aria-label="View all recipes">View all</a>
+      </div>
+
+      <article class="recipe-row" *ngFor="let recipe of recipes">
+        <div>
+          <h3>{{ recipe.name }}</h3>
+          <p>{{ recipe.time }}</p>
+        </div>
+        <div class="tags" aria-label="Recipe tags">
+          <span *ngFor="let tag of recipe.tags">{{ tag }}</span>
+        </div>
+      </article>
+    </section>
+  </section>
+</main>
