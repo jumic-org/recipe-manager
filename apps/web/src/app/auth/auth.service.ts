@@ -14,6 +14,10 @@ import { environment } from '../../environments/environment';
 export class AuthService {
   private readonly userPool: CognitoUserPool;
   private readonly authenticatedSubject = new BehaviorSubject<boolean>(false);
+  private readonly sessionCheckedSubject = new BehaviorSubject<boolean>(false);
+
+  /** Emits true once the initial session check has completed. */
+  readonly sessionChecked$: Observable<boolean> = this.sessionCheckedSubject.asObservable();
 
   constructor() {
     this.userPool = new CognitoUserPool({
@@ -26,7 +30,10 @@ export class AuthService {
         if (!err && session && session.isValid()) {
           this.authenticatedSubject.next(true);
         }
+        this.sessionCheckedSubject.next(true);
       });
+    } else {
+      this.sessionCheckedSubject.next(true);
     }
   }
 

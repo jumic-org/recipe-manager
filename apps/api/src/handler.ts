@@ -3,6 +3,7 @@ import type {
   APIGatewayProxyHandler,
   APIGatewayProxyResult
 } from 'aws-lambda';
+import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   DynamoDBDocumentClient,
@@ -127,6 +128,27 @@ async function getRecipe(
   return response(200, { recipe: result.Item as Recipe });
 }
 
+function validateRecipeInput(input: unknown): string[] {
+  const errors: string[] = [];
+  if (!input || typeof input !== 'object') {
+    return ['Request body must be a JSON object'];
+  }
+  const body = input as Record<string, unknown>;
+  if (!body['title'] || typeof body['title'] !== 'string') {
+    errors.push('title is required and must be a string');
+  }
+  if (body['servings'] === undefined || typeof body['servings'] !== 'number') {
+    errors.push('servings is required and must be a number');
+  }
+  if (!Array.isArray(body['ingredients'])) {
+    errors.push('ingredients is required and must be an array');
+  }
+  if (!Array.isArray(body['instructions'])) {
+    errors.push('instructions is required and must be an array');
+  }
+  return errors;
+}
+
 async function createRecipe(
   userId: string,
   event: APIGatewayProxyEvent
@@ -135,7 +157,13 @@ async function createRecipe(
     return response(400, { message: 'Request body is required' });
   }
 
-  const input: CreateRecipeInput = JSON.parse(event.body);
+  const parsed = JSON.parse(event.body);
+  const validationErrors = validateRecipeInput(parsed);
+  if (validationErrors.length > 0) {
+    return response(400, { message: 'Validation failed', errors: validationErrors });
+  }
+
+  const input: CreateRecipeInput = parsed;
   const now = new Date().toISOString();
 
   const recipe: Recipe = {
@@ -165,7 +193,13 @@ async function updateRecipe(
     return response(400, { message: 'Request body is required' });
   }
 
-  const input: UpdateRecipeInput = JSON.parse(event.body);
+  const parsed = JSON.parse(event.body);
+  const validationErrors = validateRecipeInput(parsed);
+  if (validationErrors.length > 0) {
+    return response(400, { message: 'Validation failed', errors: validationErrors });
+  }
+
+  const input: UpdateRecipeInput = parsed;
   const now = new Date().toISOString();
 
   const updateExpression = [
@@ -184,51 +218,65 @@ async function updateRecipe(
     'updatedAt = :updatedAt'
   ].join(', ');
 
-  const result = await docClient.send(
-    new UpdateCommand({
-      TableName: TABLE_NAME,
-      Key: { userId, id: recipeId },
-      UpdateExpression: updateExpression,
-      ExpressionAttributeValues: {
-        ':title': input.title,
-        ':description': input.description,
-        ':servings': input.servings,
-        ':prepTimeMinutes': input.prepTimeMinutes,
-        ':cookTimeMinutes': input.cookTimeMinutes,
-        ':totalTimeMinutes': input.totalTimeMinutes,
-        ':ingredients': input.ingredients,
-        ':instructions': input.instructions,
-        ':categories': input.categories,
-        ':tags': input.tags,
-        ':imageKeys': input.imageKeys,
-        ':nutritionalInfo': input.nutritionalInfo,
-        ':updatedAt': now
-      },
-      ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)',
-      ReturnValues: 'ALL_NEW'
-    })
-  );
+  try {
+    const result = await docClient.send(
+      new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { userId, id: recipeId },
+        UpdateExpression: updateExpression,
+        ExpressionAttributeValues: {
+          ':title': input.title,
+          ':description': input.description,
+          ':servings': input.servings,
+          ':prepTimeMinutes': input.prepTimeMinutes,
+          ':cookTimeMinutes': input.cookTimeMinutes,
+          ':totalTimeMinutes': input.totalTimeMinutes,
+          ':ingredients': input.ingredients,
+          ':instructions': input.instructions,
+          ':categories': input.categories,
+          ':tags': input.tags,
+          ':imageKeys': input.imageKeys,
+          ':nutritionalInfo': input.nutritionalInfo,
+          ':updatedAt': now
+        },
+        ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)',
+        ReturnValues: 'ALL_NEW'
+      })
+    );
 
-  if (!result.Attributes) {
-    return response(404, { message: 'Recipe not found' });
+    if (!result.Attributes) {
+      return response(404, { message: 'Recipe not found' });
+    }
+
+    return response(200, { recipe: result.Attributes as Recipe });
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      return response(404, { message: 'Recipe not found' });
+    }
+    throw error;
   }
-
-  return response(200, { recipe: result.Attributes as Recipe });
 }
 
 async function deleteRecipe(
   userId: string,
   recipeId: string
 ): Promise<APIGatewayProxyResult> {
-  await docClient.send(
-    new DeleteCommand({
-      TableName: TABLE_NAME,
-      Key: { userId, id: recipeId },
-      ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)'
-    })
-  );
+  try {
+    await docClient.send(
+      new DeleteCommand({
+        TableName: TABLE_NAME,
+        Key: { userId, id: recipeId },
+        ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)'
+      })
+    );
 
-  return response(204);
+    return response(204);
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      return response(404, { message: 'Recipe not found' });
+    }
+    throw error;
+  }
 }
 
 function response(statusCode: number, body?: unknown): APIGatewayProxyResult {
