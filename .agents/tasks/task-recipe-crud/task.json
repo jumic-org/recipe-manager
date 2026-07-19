@@ -1,0 +1,15 @@
+{
+  "task_id": "task-recipe-crud",
+  "task_description": "Create initial frontend and backend with CRUD operations for a recipe manager. Replace existing scaffold code with: shared data model library, Lambda API with DynamoDB CRUD operations, CDK infrastructure (DynamoDB, Lambda, API Gateway, S3+CloudFront, Cognito, KMS encryption), Angular frontend with auth and recipe management UI, and steering files for follow-up PRs.",
+  "status": "completed",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004"],
+  "blocked_reason": null,
+  "verification": {
+    "build": "pass",
+    "tests": "skipped",
+    "test_quality": "skipped",
+    "docker_build": "skipped",
+    "review": "APPROVED (v2)",
+    "summary": "All three projects (api, infra, web) compile cleanly. CDK synth produces valid CloudFormation template with all required resources (DynamoDB, Lambda, API Gateway, S3, CloudFront, Cognito, KMS). Angular build produces optimized bundles. Review v1 found 4 critical issues (envelope mismatch, error handling, validation, auth race condition) which were fixed in a follow-up commit. Review v2 approved with only non-blocking observations remaining."
+  }
+}
