@@ -30,6 +30,6 @@
       }
     }
   },
-  "implicitDependencies": ["api"],
+  "implicitDependencies": ["api", "shared"],
   "tags": ["scope:infra", "type:cdk"]
 }

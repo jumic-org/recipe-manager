@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Replace the existing CDK infrastructure stack with a full serverless stack including: DynamoDB table with encryption, Lambda functions, API Gateway with Cognito authorizer, S3 bucket with CloudFront distribution for frontend hosting, Cognito user pool for authentication, and KMS encryption where applicable.",
+  "status": "in_progress",
+  "steps": [
+    "Replace apps/infra/src/stacks/recipe-manager-stack.ts with a new comprehensive stack that includes: (1) KMS key for encryption. (2) DynamoDB table with partition key 'userId' (String) and sort key 'id' (String), with encryption using KMS key, point-in-time recovery enabled, removal policy DESTROY for dev. Add a GSI 'byCategory' with partition key 'userId' and sort key 'createdAt' for listing recipes sorted by date. (3) Cognito UserPool with self-signup enabled, email as sign-in alias, password policy (min 8 chars, require lowercase, uppercase, digits, symbols), account recovery via email. UserPoolClient with auth flows: USER_PASSWORD_AUTH, USER_SRP_AUTH. (4) S3 bucket for frontend hosting with KMS encryption, block all public access, removal policy DESTROY with auto-delete objects. (5) CloudFront distribution using S3 as origin with OAC (Origin Access Control), default root object index.html, viewer protocol policy redirect-to-https, custom error responses for SPA routing (403->index.html, 404->index.html). (6) NodejsFunction for the API Lambda using apps/api/src/handler.ts as entry, runtime NODEJS_20_X, environment TABLE_NAME pointing to the DynamoDB table, grant read/write on the table to the Lambda. (7) RestApi with Cognito authorizer on all methods except OPTIONS, CORS configured for all origins, proxy integration with the Lambda. (8) CfnOutputs for: API URL, CloudFront domain, User Pool ID, User Pool Client ID, S3 bucket name.",
+    "Update apps/infra/src/main.ts if needed (should still create the RecipeManagerStack).",
+    "Ensure apps/infra/project.json has implicitDependencies on 'api' and 'shared'.",
+    "Add any missing CDK construct library imports. The existing aws-cdk-lib and constructs dependencies should cover all needed constructs (DynamoDB, Lambda, API Gateway, S3, CloudFront, Cognito, KMS are all in aws-cdk-lib)."
+  ],
+  "acceptance_criteria": [
+    "apps/infra/src/stacks/recipe-manager-stack.ts compiles without errors",
+    "Running pnpm cdk synth produces valid CloudFormation template with DynamoDB table, Lambda, API Gateway, S3, CloudFront, Cognito, and KMS resources",
+    "DynamoDB table uses KMS encryption",
+    "S3 bucket uses KMS encryption and blocks public access",
+    "CloudFront distribution uses OAC for S3 origin access",
+    "API Gateway has Cognito authorizer configured",
+    "Lambda has TABLE_NAME environment variable and DynamoDB read/write permissions"
+  ],
+  "verification": [
+    "Run: cd /projects/sandbox/recipe-manager && pnpm exec tsc --project apps/infra/tsconfig.app.json --noEmit",
+    "Run: cd /projects/sandbox/recipe-manager && pnpm cdk synth 2>&1 | head -50 (verify it produces CloudFormation output)"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
