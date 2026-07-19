@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Replace the existing Angular frontend with a full recipe CRUD application. Includes authentication (login/signup via Cognito), recipe list view, recipe detail view, and recipe create/edit form. Uses Angular standalone components with reactive forms.",
+  "status": "completed",
+  "steps": [
+    "Install frontend dependencies: add @aws-amplify/auth (for Cognito integration) or use amazon-cognito-identity-js directly. Actually, use the lightweight approach with amazon-cognito-identity-js added to package.json dependencies. Also add @angular/material for UI components (optional but recommended for forms), or keep it simple with plain HTML/SCSS.",
+    "Create apps/web/src/environments/environment.ts and environment.prod.ts with placeholder config: apiUrl, userPoolId, userPoolClientId, region. These will be filled after deployment.",
+    "Create an auth service at apps/web/src/app/auth/auth.service.ts that wraps amazon-cognito-identity-js: signUp(email, password), confirmSignUp(email, code), signIn(email, password), signOut(), getIdToken(): Observable<string|null>, isAuthenticated(): Observable<boolean>, getCurrentUser(). Store tokens in memory/localStorage.",
+    "Create auth components: apps/web/src/app/auth/login.component.ts (email + password form with sign-in and link to register), apps/web/src/app/auth/register.component.ts (email + password form with sign-up), apps/web/src/app/auth/confirm.component.ts (verification code input after registration). All standalone components with OnPush change detection.",
+    "Create a recipe service at apps/web/src/app/recipes/recipe.service.ts that calls the API: getRecipes(), getRecipe(id), createRecipe(input), updateRecipe(id, input), deleteRecipe(id). Use HttpClient with an auth interceptor that adds the Cognito ID token as Authorization header.",
+    "Create an HTTP interceptor at apps/web/src/app/auth/auth.interceptor.ts that injects the Authorization: Bearer <idToken> header on API requests.",
+    "Create recipe list component at apps/web/src/app/recipes/recipe-list.component.ts with template showing a grid/list of recipe cards (title, description preview, prep time, cook time, categories). Include a 'New Recipe' button.",
+    "Create recipe detail component at apps/web/src/app/recipes/recipe-detail.component.ts showing full recipe: title, description, time info, servings, ingredients list grouped by group, numbered instructions, categories/tags.",
+    "Create recipe form component at apps/web/src/app/recipes/recipe-form.component.ts with reactive form for create/edit: title, description, servings, prepTimeMinutes, cookTimeMinutes, dynamic ingredient array (add/remove), dynamic instruction array (add/remove/reorder), categories input (comma-separated or chips), tags input. Used for both create and edit routes.",
+    "Update apps/web/src/app/app.routes.ts with routes: '' -> redirect to /recipes, 'login' -> LoginComponent, 'register' -> RegisterComponent, 'confirm' -> ConfirmComponent, 'recipes' -> RecipeListComponent (guarded), 'recipes/new' -> RecipeFormComponent (guarded), 'recipes/:id' -> RecipeDetailComponent (guarded), 'recipes/:id/edit' -> RecipeFormComponent (guarded).",
+    "Create an auth guard at apps/web/src/app/auth/auth.guard.ts that redirects to /login if not authenticated.",
+    "Update apps/web/src/app/app.component.ts and app.component.html to have a simple layout shell: header with app title and login/logout button, router-outlet for content.",
+    "Update apps/web/src/app/app.config.ts to include provideHttpClient(withInterceptors([authInterceptor])) and provideRouter(appRoutes).",
+    "Update apps/web/src/styles.scss with basic global styles (clean, modern look - simple CSS, no external framework needed)."
+  ],
+  "acceptance_criteria": [
+    "pnpm nx build web succeeds without errors",
+    "App has login, register, and confirm routes for authentication",
+    "App has recipe list, detail, create, and edit routes",
+    "Auth interceptor adds Authorization header to API calls",
+    "Auth guard protects recipe routes",
+    "Recipe form supports dynamic ingredients and instructions arrays",
+    "All components use standalone: true and ChangeDetectionStrategy.OnPush"
+  ],
+  "verification": [
+    "Run: cd /projects/sandbox/recipe-manager && pnpm nx build web",
+    "Run: cd /projects/sandbox/recipe-manager && pnpm exec tsc --project apps/web/tsconfig.app.json --noEmit"
+  ],
+  "blocked_reason": null,
+  "findings": "Build succeeds with warnings about CommonJS dependencies from amazon-cognito-identity-js (buffer, @aws-crypto/sha256-js, isomorphic-unfetch). These are benign optimization warnings and do not affect functionality. Used Angular 21 new @if/@for control flow syntax. All components are standalone with OnPush change detection. The auth interceptor uses functional HttpInterceptorFn pattern with inject(). Auth guard uses functional CanActivateFn pattern."
+}

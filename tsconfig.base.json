@@ -17,7 +17,7 @@
     "target": "ES2022",
     "useDefineForClassFields": false,
     "paths": {
-      "@recipe-manager/api": ["apps/api/src/index.ts"]
+      "@recipe-manager/shared": ["libs/shared/src/index.ts"]
     }
   }
 }

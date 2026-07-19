@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Create the shared data model library and replace the existing Lambda API with full CRUD operations backed by DynamoDB. This includes the shared types/interfaces for recipes and the Lambda handler functions for Create, Read (single + list), Update, and Delete operations.",
+  "status": "completed",
+  "steps": [
+    "Create a shared library at libs/shared/src/index.ts with the Recipe data model interfaces. The model should include: Recipe (id: string, userId: string, title: string, description: string, servings: number, prepTimeMinutes: number, cookTimeMinutes: number, totalTimeMinutes: number, ingredients: Ingredient[], instructions: Instruction[], categories: string[], tags: string[], imageKeys: string[], nutritionalInfo: NutritionalInfo | null, createdAt: string, updatedAt: string). Ingredient interface: amount: number, unit: string, name: string, group: string | null. Instruction interface: stepNumber: number, text: string. NutritionalInfo interface: calories: number | null, protein: string | null, carbohydrates: string | null, fat: string | null. Also export CreateRecipeInput and UpdateRecipeInput types (omitting id, userId, createdAt, updatedAt from the input). Add libs/shared/package.json with name @recipe-manager/shared and libs/shared/tsconfig.json extending ../../tsconfig.base.json.",
+    "Add a path alias in tsconfig.base.json: '@recipe-manager/shared': ['libs/shared/src/index.ts'] (replace the existing @recipe-manager/api path).",
+    "Replace apps/api/src/handler.ts completely with a new Lambda handler that routes requests based on HTTP method and path. Support: GET /recipes (list user recipes with optional query params for filtering), GET /recipes/{id} (get single recipe), POST /recipes (create recipe), PUT /recipes/{id} (update recipe), DELETE /recipes/{id} (delete recipe). Use DynamoDB DocumentClient from @aws-sdk/lib-dynamodb and @aws-sdk/client-dynamodb. Table name from env var TABLE_NAME. User ID extracted from event.requestContext.authorizer.claims.sub (Cognito). Include CORS headers on all responses. Generate UUID for new recipe IDs using crypto.randomUUID().",
+    "Update apps/api/src/index.ts to re-export the handler.",
+    "Add @aws-sdk/client-dynamodb and @aws-sdk/lib-dynamodb and uuid as dependencies in the root package.json.",
+    "Update apps/api/tsconfig.json to use module: 'ES2022' and moduleResolution: 'bundler' (since NodejsFunction uses esbuild bundling which handles ESM). Keep types: ['aws-lambda', 'node'].",
+    "Create apps/api/project.json with build target using nx:run-commands to run tsc for type-checking only (bundling is done by CDK NodejsFunction). Add a libs/shared/project.json with name 'shared' and build target."
+  ],
+  "acceptance_criteria": [
+    "libs/shared/src/index.ts exports Recipe, Ingredient, Instruction, NutritionalInfo, CreateRecipeInput, UpdateRecipeInput interfaces",
+    "apps/api/src/handler.ts compiles without errors and handles GET/POST/PUT/DELETE for /recipes and /recipes/{id}",
+    "The handler reads TABLE_NAME from process.env and userId from Cognito authorizer claims",
+    "tsconfig.base.json has @recipe-manager/shared path alias",
+    "pnpm nx build api succeeds (type-check passes)"
+  ],
+  "verification": [
+    "Run: cd /projects/sandbox/recipe-manager && pnpm install && pnpm exec tsc --project apps/api/tsconfig.app.json --noEmit",
+    "Run: cd /projects/sandbox/recipe-manager && pnpm exec tsc --project libs/shared/tsconfig.json --noEmit"
+  ],
+  "blocked_reason": null,
+  "findings": "1. tsconfig.app.json rootDir changed from 'src' to '../..' and shared lib sources included in 'include' to resolve rootDir constraint when path aliases reference files outside apps/api/src. 2. noPropertyAccessFromIndexSignature in tsconfig.base.json requires bracket notation for accessing authorizer claims (event.requestContext?.authorizer?.['claims']?.['sub']). 3. Project references approach not used (would require composite:true in shared); instead included shared source files directly in the API tsconfig.app.json include array. 4. AWS SDK versions resolved to 3.1090.0 (latest available)."
+}

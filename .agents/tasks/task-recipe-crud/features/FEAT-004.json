@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-004",
+  "type": "docs",
+  "description": "Create .kiro/steering/ files for the project to guide follow-up PRs. These files document the architecture decisions, coding conventions, deployment process, and data model for future development.",
+  "status": "completed",
+  "steps": [
+    "Create .kiro/steering/architecture.md documenting: the Nx monorepo structure, the serverless architecture (API Gateway + Lambda + DynamoDB), the frontend hosting (S3 + CloudFront), authentication flow (Cognito), encryption approach (KMS for DynamoDB and S3). Include a diagram of the system components.",
+    "Create .kiro/steering/conventions.md documenting: TypeScript strict mode, Angular standalone components with OnPush, SCSS for styles, rm- prefix for Angular selectors, shared types in libs/shared, Lambda handler patterns (routing, CORS, error handling), CDK patterns (construct organization, naming), import/export conventions.",
+    "Create .kiro/steering/data-model.md documenting: the DynamoDB table design, partition key (userId) and sort key (id), GSI design, the Recipe interface and all sub-interfaces, access patterns supported (list by user, get by id, filter by category), and guidance for adding new fields or indexes.",
+    "Create .kiro/steering/deployment.md documenting: prerequisites (AWS CLI, credentials), build commands, CDK bootstrap and deploy commands, environment configuration (how to set API URL and Cognito IDs in the frontend), CloudFront invalidation after frontend updates.",
+    "Create .kiro/steering/testing.md documenting: testing strategy and conventions, how to add unit tests for Lambda handlers, how to add component tests for Angular, integration testing approach."
+  ],
+  "acceptance_criteria": [
+    ".kiro/steering/architecture.md exists and describes the full system architecture",
+    ".kiro/steering/conventions.md exists and documents coding patterns",
+    ".kiro/steering/data-model.md exists and documents the DynamoDB schema",
+    ".kiro/steering/deployment.md exists and documents deployment steps",
+    ".kiro/steering/testing.md exists and documents testing approach"
+  ],
+  "verification": [
+    "Verify all 5 steering files exist: ls /projects/sandbox/recipe-manager/.kiro/steering/",
+    "Verify each file has meaningful content (not empty): wc -l /projects/sandbox/recipe-manager/.kiro/steering/*.md"
+  ],
+  "blocked_reason": null,
+  "findings": "All 5 steering files created with detailed, accurate content referencing actual project paths, interfaces, and patterns. Total 783 lines across 5 files."
+}
