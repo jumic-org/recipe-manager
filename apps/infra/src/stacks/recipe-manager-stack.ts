@@ -216,5 +216,10 @@ export class RecipeManagerStack extends Stack {
       value: frontendBucket.bucketName,
       description: 'S3 bucket name for frontend hosting'
     });
+
+    new CfnOutput(this, 'CloudFrontDistributionId', {
+      value: distribution.distributionId,
+      description: 'CloudFront distribution ID'
+    });
   }
 }
