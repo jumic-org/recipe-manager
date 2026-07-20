@@ -12,7 +12,7 @@ export class ConfigService {
   private config: AppConfig | null = null;
 
   get apiUrl(): string {
-    return this.getConfig().apiUrl;
+    return this.getConfig().apiUrl.replace(/\/+$/, '');
   }
 
   get userPoolId(): string {
@@ -32,11 +32,26 @@ export class ConfigService {
   }
 
   async load(): Promise<void> {
-    const response = await fetch('config.json');
+    const response = await fetch('/config.json');
     if (!response.ok) {
       throw new Error(`Failed to load config.json: ${response.status} ${response.statusText}`);
     }
-    this.config = await response.json();
+    const json = await response.json();
+    this.validate(json);
+    this.config = json;
+  }
+
+  private validate(json: unknown): asserts json is AppConfig {
+    const requiredKeys: (keyof AppConfig)[] = ['apiUrl', 'userPoolId', 'userPoolClientId', 'region'];
+    if (typeof json !== 'object' || json === null) {
+      throw new Error('config.json must be a JSON object');
+    }
+    const obj = json as Record<string, unknown>;
+    for (const key of requiredKeys) {
+      if (typeof obj[key] !== 'string' || obj[key].length === 0) {
+        throw new Error(`config.json: "${key}" must be a non-empty string`);
+      }
+    }
   }
 
   private getConfig(): AppConfig {
