@@ -35,3 +35,7 @@ pnpm nx deploy infra
 ```
 
 The CDK stack deploys an API Gateway REST API backed by the Lambda handler in `apps/api/src/handler.ts`.
+
+## CI/CD Deployment
+
+The project uses a GitHub Actions workflow to automatically deploy on pushes to `main`. See [DEPLOYMENT.md](./DEPLOYMENT.md) for full details on the deployment pipeline, IAM prerequisites, and required permissions.

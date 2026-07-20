@@ -48,6 +48,11 @@ jobs:
       - name: CDK Deploy
         run: pnpm cdk deploy ${{ env.STACK_NAME }} --require-approval never
 
+      # This step retrieves CDK stack outputs (FrontendBucketName, CloudFrontDistributionId)
+      # that are needed by subsequent steps to deploy the frontend to S3 and invalidate
+      # the CloudFront cache. The aws cloudformation describe-stacks call requires the
+      # IAM role (RecipeManagerGitHubDeployRole) to have the
+      # cloudformation:DescribeStacks permission on the deployed stack.
       - name: Get CDK Outputs
         id: cdk-outputs
         run: |
