@@ -41,7 +41,7 @@
     "@nx/js": "23.1.0",
     "@nx/workspace": "22.7.3",
     "@types/aws-lambda": "8.10.161",
-    "@types/node": "25.9.1",
+    "@types/node": "26.1.1",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.65.0",
     "angular-eslint": "^22.1.0",
