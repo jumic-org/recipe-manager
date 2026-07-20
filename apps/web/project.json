@@ -17,12 +17,7 @@
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/web/src/assets",
-          "apps/web/src/favicon.ico",
-          {
-            "glob": "config.json",
-            "input": "apps/web/src/assets",
-            "output": "/"
-          }
+          "apps/web/src/favicon.ico"
         ],
         "styles": ["apps/web/src/styles.scss"]
       },
