@@ -117,7 +117,7 @@ export class RecipeManagerStack extends Stack {
     });
 
     // Frontend Deployment
-    new BucketDeployment(this, 'FrontendDeployment', {
+    const frontendDeployment = new BucketDeployment(this, 'FrontendDeployment', {
       sources: [Source.asset(path.join(__dirname, '../../../../dist/apps/web/browser'))],
       destinationBucket: frontendBucket,
       distribution,
@@ -181,6 +181,23 @@ export class RecipeManagerStack extends Stack {
     recipe.addMethod('GET', lambdaIntegration, methodOptions);
     recipe.addMethod('PUT', lambdaIntegration, methodOptions);
     recipe.addMethod('DELETE', lambdaIntegration, methodOptions);
+
+    // Config Deployment - deploys runtime config with actual Cognito/API values
+    const configDeployment = new BucketDeployment(this, 'ConfigDeployment', {
+      sources: [
+        Source.jsonData('config.json', {
+          apiUrl: api.url,
+          userPoolId: userPool.userPoolId,
+          userPoolClientId: userPoolClient.userPoolClientId,
+          region: Stack.of(this).region
+        })
+      ],
+      destinationBucket: frontendBucket,
+      distribution,
+      distributionPaths: ['/config.json'],
+      prune: false
+    });
+    configDeployment.node.addDependency(frontendDeployment);
 
     // Outputs
     new CfnOutput(this, 'ApiUrl', {

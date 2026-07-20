@@ -1,15 +1,18 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Recipe, CreateRecipeInput, UpdateRecipeInput } from '@recipe-manager/shared';
-import { environment } from '../../environments/environment';
+import { ConfigService } from '../config/config.service';
 
 @Injectable({ providedIn: 'root' })
 export class RecipeService {
-  private readonly baseUrl = `${environment.apiUrl}/recipes`;
+  private readonly configService = inject(ConfigService);
+  private readonly http = inject(HttpClient);
 
-  constructor(private readonly http: HttpClient) {}
+  private get baseUrl(): string {
+    return `${this.configService.apiUrl}/recipes`;
+  }
 
   getRecipes(): Observable<Recipe[]> {
     return this.http.get<{ recipes: Recipe[] }>(this.baseUrl).pipe(map((res) => res.recipes));

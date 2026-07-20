@@ -11,3 +11,6 @@ coverage/
 .env
 .env.*
 !.env.example
+
+# Local runtime config (contains developer-specific values)
+apps/web/src/assets/config.json
