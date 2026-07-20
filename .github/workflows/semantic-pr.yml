@@ -3,6 +3,7 @@ name: Semantic PR
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
+  merge_group:
 
 permissions:
   contents: read
@@ -11,6 +12,7 @@ permissions:
 jobs:
   semantic-pr:
     name: Validate PR Title
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
