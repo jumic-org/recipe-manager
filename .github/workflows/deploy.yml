@@ -39,6 +39,9 @@ jobs:
       - name: Build all applications
         run: pnpm nx run-many -t build
 
+      - name: Verify web build output
+        run: pnpm verify:web
+
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
