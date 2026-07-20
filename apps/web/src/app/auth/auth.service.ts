@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   AuthenticationDetails,
   CognitoUser,
@@ -7,7 +7,7 @@ import {
   CognitoUserSession
 } from 'amazon-cognito-identity-js';
 import { BehaviorSubject, Observable, from, of } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { ConfigService } from '../config/config.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -18,10 +18,12 @@ export class AuthService {
   /** Emits true once the initial session check has completed. */
   readonly sessionChecked$: Observable<boolean> = this.sessionCheckedSubject.asObservable();
 
+  private readonly configService = inject(ConfigService);
+
   constructor() {
     this.userPool = new CognitoUserPool({
-      UserPoolId: environment.userPoolId,
-      ClientId: environment.userPoolClientId
+      UserPoolId: this.configService.userPoolId,
+      ClientId: this.configService.userPoolClientId
     });
     const currentUser = this.userPool.getCurrentUser();
     if (currentUser) {
