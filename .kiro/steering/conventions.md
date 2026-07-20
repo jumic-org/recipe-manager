@@ -1,5 +1,10 @@
 # Coding Conventions
 
+## Runtime
+
+- **Node.js** >= 24.x is required for local development and CI/CD.
+- The GitHub Actions deploy workflow uses Node 24.
+
 ## TypeScript
 
 - **Strict mode** is enabled globally via `tsconfig.base.json` with additional flags: `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noPropertyAccessFromIndexSignature`.

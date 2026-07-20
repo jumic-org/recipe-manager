@@ -11,7 +11,7 @@ permissions:
 
 env:
   AWS_REGION: eu-west-1
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
   STACK_NAME: RecipeManagerStack
 
 jobs:
@@ -47,27 +47,3 @@ jobs:
 
       - name: CDK Deploy
         run: pnpm cdk deploy ${{ env.STACK_NAME }} --require-approval never
-
-      - name: Get CDK Outputs
-        id: cdk-outputs
-        run: |
-          BUCKET_NAME=$(aws cloudformation describe-stacks \
-            --stack-name ${{ env.STACK_NAME }} \
-            --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" \
-            --output text)
-          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
-            --stack-name ${{ env.STACK_NAME }} \
-            --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
-            --output text)
-          echo "bucket_name=$BUCKET_NAME" >> "$GITHUB_OUTPUT"
-          echo "distribution_id=$DISTRIBUTION_ID" >> "$GITHUB_OUTPUT"
-
-      - name: Deploy frontend to S3
-        run: |
-          aws s3 sync dist/apps/web/browser s3://${{ steps.cdk-outputs.outputs.bucket_name }} --delete
-
-      - name: Invalidate CloudFront cache
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ steps.cdk-outputs.outputs.distribution_id }} \
-            --paths "/*"

@@ -27,6 +27,7 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
+import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
 
 export class RecipeManagerStack extends Stack {
@@ -113,6 +114,14 @@ export class RecipeManagerStack extends Stack {
           ttl: Duration.minutes(5)
         }
       ]
+    });
+
+    // Frontend Deployment
+    new BucketDeployment(this, 'FrontendDeployment', {
+      sources: [Source.asset(path.join(__dirname, '../../../../dist/apps/web/browser'))],
+      destinationBucket: frontendBucket,
+      distribution,
+      distributionPaths: ['/*']
     });
 
     // Lambda Function
