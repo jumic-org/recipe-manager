@@ -1,0 +1,29 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Add a password change feature to the Angular frontend, including a new method in AuthService, a new ChangePasswordComponent, route registration, navigation link, and i18n translations.",
+  "status": "in_progress",
+  "steps": [
+    "Add a 'changePassword(oldPassword: string, newPassword: string): Observable<void>' method to apps/web/src/app/auth/auth.service.ts. Use the CognitoUser.changePassword SDK method. Get the current user via this.userPool.getCurrentUser(), call getSession to ensure an authenticated session exists, then call user.changePassword(oldPassword, newPassword, callback). Wrap the callback in a Promise and return from() as Observable<void>, following the same pattern as signUp/confirmSignUp/signIn methods.",
+    "Create apps/web/src/app/auth/change-password.component.ts as a standalone component following the exact pattern of register.component.ts. Selector: 'rm-change-password'. Use ChangeDetectionStrategy.OnPush. Import CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe. Form fields: currentPassword (required), newPassword (required, minLength 8), confirmNewPassword (required). On submit, validate passwords match, then call authService.changePassword(currentPassword, newPassword). Show a success message on success. Include a link back to /recipes. Use the same CSS structure as the other auth components.",
+    "Add a route entry in apps/web/src/app/app.routes.ts: { path: 'change-password', component: ChangePasswordComponent, canActivate: [authGuard] }. Import the new component at the top of the file.",
+    "Add a 'Change Password' navigation link in apps/web/src/app/app.component.html inside the authenticated section (the @if block), before the sign-out button. Use <a routerLink=\"/change-password\" class=\"nav-link\">{{ 'APP.NAV.CHANGE_PASSWORD' | translate }}</a>.",
+    "Add i18n keys to apps/web/src/assets/i18n/en.json: APP.NAV.CHANGE_PASSWORD = 'Change Password', AUTH.CHANGE_PASSWORD.TITLE = 'Change Password', AUTH.CHANGE_PASSWORD.CURRENT_PASSWORD_LABEL = 'Current Password', AUTH.CHANGE_PASSWORD.NEW_PASSWORD_LABEL = 'New Password', AUTH.CHANGE_PASSWORD.CONFIRM_PASSWORD_LABEL = 'Confirm New Password', AUTH.CHANGE_PASSWORD.SUBMIT = 'Change Password', AUTH.CHANGE_PASSWORD.SUBMITTING = 'Changing...', AUTH.CHANGE_PASSWORD.SUCCESS = 'Password changed successfully!', AUTH.CHANGE_PASSWORD.PASSWORDS_MISMATCH = 'New passwords do not match', AUTH.CHANGE_PASSWORD.BACK_TO_RECIPES = 'Back to Recipes'.",
+    "Add corresponding German i18n keys to apps/web/src/assets/i18n/de.json: APP.NAV.CHANGE_PASSWORD = 'Passwort aendern', AUTH.CHANGE_PASSWORD.TITLE = 'Passwort aendern', AUTH.CHANGE_PASSWORD.CURRENT_PASSWORD_LABEL = 'Aktuelles Passwort', AUTH.CHANGE_PASSWORD.NEW_PASSWORD_LABEL = 'Neues Passwort', AUTH.CHANGE_PASSWORD.CONFIRM_PASSWORD_LABEL = 'Neues Passwort bestaetigen', AUTH.CHANGE_PASSWORD.SUBMIT = 'Passwort aendern', AUTH.CHANGE_PASSWORD.SUBMITTING = 'Wird geaendert...', AUTH.CHANGE_PASSWORD.SUCCESS = 'Passwort erfolgreich geaendert!', AUTH.CHANGE_PASSWORD.PASSWORDS_MISMATCH = 'Neue Passwoerter stimmen nicht ueberein', AUTH.CHANGE_PASSWORD.BACK_TO_RECIPES = 'Zurueck zu Rezepten'."
+  ],
+  "acceptance_criteria": [
+    "apps/web/src/app/auth/auth.service.ts exports a changePassword method that takes oldPassword and newPassword strings and returns Observable<void>",
+    "apps/web/src/app/auth/change-password.component.ts exists as a standalone component with selector 'rm-change-password', OnPush change detection, and a form with 3 password fields",
+    "apps/web/src/app/app.routes.ts includes a '/change-password' route guarded with authGuard pointing to ChangePasswordComponent",
+    "apps/web/src/app/app.component.html includes a navigation link to /change-password visible only to authenticated users",
+    "Both en.json and de.json include AUTH.CHANGE_PASSWORD.* keys and APP.NAV.CHANGE_PASSWORD key",
+    "pnpm nx build web compiles successfully with no errors"
+  ],
+  "verification": [
+    "Run 'pnpm install' to install dependencies",
+    "Run 'pnpm nx build web' and confirm it completes with exit code 0",
+    "Run 'node scripts/verify-web-build.js' to confirm build output is valid"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

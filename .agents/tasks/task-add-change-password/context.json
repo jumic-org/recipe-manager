@@ -1,0 +1,27 @@
+{
+  "project_type": "Nx monorepo with Angular 21 frontend, AWS CDK infra, and TypeScript Lambda API",
+  "language": "TypeScript",
+  "build_system": "Nx 22.7.3 with pnpm 10.14.0. Build via 'pnpm nx build web'. No test runner configured (unitTestRunner: none).",
+  "test_framework": "No test runner currently configured. Vitest recommended per steering docs but not set up.",
+  "build_command": "pnpm nx build web",
+  "test_command": "No test command available (no test runner configured)",
+  "verification_instructions": "1. Run 'pnpm install' to install dependencies. 2. Run 'pnpm nx build web' to compile the Angular frontend. 3. Run 'node scripts/verify-web-build.js' to validate build output.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "1. corepack enable (for pnpm). 2. pnpm install. 3. pnpm nx build web.",
+  "environment_constraints": "node_modules not installed yet. Need to run pnpm install first. Network required for package installation.",
+  "contribution_requirements": "Standalone components only (no NgModules). OnPush change detection. Selector prefix 'rm-'. SCSS for styles. i18n via @ngx-translate/core with en.json and de.json. Reactive forms with FormBuilder. Services use @Injectable({ providedIn: 'root' }). Auth uses amazon-cognito-identity-js library directly.",
+  "key_patterns": "Auth components follow a consistent pattern: standalone component with inline template/styles, ReactiveFormsModule, RouterLink, TranslatePipe imports. Forms use FormBuilder with Validators. Auth operations return Observable<void> wrapping Cognito SDK callbacks in Promises. Error messages displayed via errorMessage string. Loading state managed via boolean. Navigation via Router.navigate(). i18n keys follow AUTH.<FEATURE>.<LABEL> pattern.",
+  "relevant_files": [
+    "apps/web/src/app/auth/auth.service.ts",
+    "apps/web/src/app/auth/login.component.ts",
+    "apps/web/src/app/auth/register.component.ts",
+    "apps/web/src/app/auth/confirm.component.ts",
+    "apps/web/src/app/auth/auth.guard.ts",
+    "apps/web/src/app/app.routes.ts",
+    "apps/web/src/app/app.component.html",
+    "apps/web/src/app/app.component.ts",
+    "apps/web/src/assets/i18n/en.json",
+    "apps/web/src/assets/i18n/de.json"
+  ],
+  "directory_structure": "apps/web/src/app/auth/ - auth module with guard, interceptor, service, and page components. apps/web/src/app/recipes/ - recipe CRUD components. apps/web/src/app/config/ - config service. apps/web/src/assets/i18n/ - translation JSON files. apps/api/src/ - Lambda handler. libs/shared/src/ - shared interfaces."
+}

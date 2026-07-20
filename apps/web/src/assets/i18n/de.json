@@ -4,7 +4,8 @@
     "NAV": {
       "MY_RECIPES": "Meine Rezepte",
       "SIGN_IN": "Anmelden",
-      "SIGN_OUT": "Abmelden"
+      "SIGN_OUT": "Abmelden",
+      "CHANGE_PASSWORD": "Passwort ändern"
     }
   },
   "AUTH": {
@@ -37,6 +38,17 @@
       "SUBMITTING": "Bestätigung...",
       "SUCCESS": "Konto bestätigt! Weiterleitung zur Anmeldung...",
       "BACK_TO_SIGN_IN": "Zurück zur Anmeldung"
+    },
+    "CHANGE_PASSWORD": {
+      "TITLE": "Passwort ändern",
+      "CURRENT_PASSWORD_LABEL": "Aktuelles Passwort",
+      "NEW_PASSWORD_LABEL": "Neues Passwort",
+      "CONFIRM_PASSWORD_LABEL": "Neues Passwort bestätigen",
+      "SUBMIT": "Passwort ändern",
+      "SUBMITTING": "Wird geändert...",
+      "SUCCESS": "Passwort erfolgreich geändert!",
+      "PASSWORDS_MISMATCH": "Neue Passwörter stimmen nicht überein",
+      "BACK_TO_RECIPES": "Zurück zu Rezepten"
     }
   },
   "RECIPES": {
