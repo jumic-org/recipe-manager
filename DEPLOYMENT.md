@@ -9,9 +9,8 @@ The deployment is automated via a GitHub Actions workflow (`.github/workflows/de
 1. Builds all applications using Nx
 2. Assumes the AWS IAM role `RecipeManagerGitHubDeployRole` via OIDC federation
 3. Deploys the CDK stack (`RecipeManagerStack`) to AWS
-4. Retrieves CDK stack outputs (S3 bucket name and CloudFront distribution ID) via `aws cloudformation describe-stacks`
-5. Syncs the Angular frontend build to the S3 bucket
-6. Invalidates the CloudFront distribution cache
+
+The CDK stack uses `BucketDeployment` to handle syncing the Angular frontend build to S3 and invalidating the CloudFront distribution cache automatically as part of the CDK deploy step.
 
 ## Prerequisites
 
@@ -31,12 +30,9 @@ The GitHub Actions workflow assumes the IAM role `arn:aws:iam::352770552266:role
 |---|---|---|
 | `sts:AssumeRoleWithWebIdentity` | (trust policy) | Allow GitHub Actions to assume the role via OIDC |
 | `cloudformation:*` | `arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*` | CDK deploy and stack management |
-| `cloudformation:DescribeStacks` | `arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*` | Retrieve stack outputs (bucket name, distribution ID) after deployment |
-| `s3:PutObject`, `s3:DeleteObject`, `s3:ListBucket` | Frontend S3 bucket | Sync frontend build artifacts |
-| `cloudfront:CreateInvalidation` | CloudFront distribution | Invalidate CDN cache after frontend deploy |
-| CDK bootstrap permissions | Various | CDK requires permissions to manage its staging bucket, Lambda functions, API Gateway, IAM roles, etc. |
+| CDK bootstrap permissions | Various | CDK requires permissions to manage its staging bucket, Lambda functions, API Gateway, IAM roles, S3, CloudFront, etc. |
 
-> **Note**: The `cloudformation:DescribeStacks` permission is critical. After CDK deploys the stack, the workflow calls `aws cloudformation describe-stacks` to read the stack outputs (`FrontendBucketName` and `CloudFrontDistributionId`). These output values are dynamically used in subsequent steps to deploy the frontend to the correct S3 bucket and invalidate the correct CloudFront distribution. Without this permission, the deployment will fail with an `AccessDenied` error.
+> **Note**: The CDK `BucketDeployment` construct handles S3 syncing and CloudFront cache invalidation internally using a custom resource Lambda. The necessary S3 and CloudFront permissions are managed by CDK through the roles it creates for this custom resource, so they do not need to be granted directly to the GitHub Actions role.
 
 #### Minimum Policy Example
 
@@ -45,7 +41,7 @@ The GitHub Actions workflow assumes the IAM role `arn:aws:iam::352770552266:role
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "CDKDeployAndDescribe",
+      "Sid": "CDKDeploy",
       "Effect": "Allow",
       "Action": [
         "cloudformation:CreateStack",
@@ -60,48 +56,21 @@ The GitHub Actions workflow assumes the IAM role `arn:aws:iam::352770552266:role
         "cloudformation:DescribeChangeSet"
       ],
       "Resource": "arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*"
-    },
-    {
-      "Sid": "S3FrontendSync",
-      "Effect": "Allow",
-      "Action": [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:DeleteObject",
-        "s3:ListBucket"
-      ],
-      "Resource": [
-        "arn:aws:s3:::FRONTEND_BUCKET_NAME",
-        "arn:aws:s3:::FRONTEND_BUCKET_NAME/*"
-      ]
-    },
-    {
-      "Sid": "CloudFrontInvalidation",
-      "Effect": "Allow",
-      "Action": "cloudfront:CreateInvalidation",
-      "Resource": "arn:aws:cloudfront::352770552266:distribution/DISTRIBUTION_ID"
     }
   ]
 }
 ```
 
-Replace `FRONTEND_BUCKET_NAME` and `DISTRIBUTION_ID` with the actual resource identifiers from your CDK stack outputs.
-
-> **Important**: CDK itself may require additional permissions depending on the resources defined in the stack (e.g., IAM, Lambda, API Gateway, S3, CloudFront, SSM). Consult the [AWS CDK documentation on IAM permissions](https://docs.aws.amazon.com/cdk/v2/guide/security-iam.html) for a full list.
+> **Important**: CDK itself may require additional permissions depending on the resources defined in the stack (e.g., IAM, Lambda, API Gateway, S3, CloudFront, SSM). The `BucketDeployment` construct creates a custom resource Lambda that needs S3 and CloudFront permissions, but these are granted by CDK to the Lambda execution role automatically. Consult the [AWS CDK documentation on IAM permissions](https://docs.aws.amazon.com/cdk/v2/guide/security-iam.html) for a full list.
 
 ## Troubleshooting
 
-### `AccessDenied` on `DescribeStacks`
+### CDK Deploy Fails
 
-If you see an error like:
+If CDK deploy fails, check the CloudFormation events in the AWS Console for the `RecipeManagerStack` stack. Common issues include:
 
-```
-User: arn:aws:sts::352770552266:assumed-role/RecipeManagerGitHubDeployRole/GitHubActions
-is not authorized to perform: cloudformation:DescribeStacks on resource:
-arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/...
-```
-
-This means the IAM role `RecipeManagerGitHubDeployRole` is missing the `cloudformation:DescribeStacks` permission. Add it to the role's identity-based policy as shown above.
+- Missing permissions for the GitHub Actions role to create/update CloudFormation resources
+- CDK bootstrap resources not available in the target account/region
 
 ### CDK Bootstrap
 
