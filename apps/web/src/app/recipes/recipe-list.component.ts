@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Recipe } from '@recipe-manager/shared';
 import { RecipeService } from './recipe.service';
 
@@ -149,7 +149,10 @@ export class RecipeListComponent implements OnInit {
   loading = false;
   error = '';
 
-  constructor(private readonly recipeService: RecipeService) {}
+  constructor(
+    private readonly recipeService: RecipeService,
+    private readonly translateService: TranslateService
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -159,7 +162,7 @@ export class RecipeListComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = err.message || 'Failed to load recipes';
+        this.error = err.message || this.translateService.instant('RECIPES.LIST.LOAD_ERROR');
         this.loading = false;
       }
     });

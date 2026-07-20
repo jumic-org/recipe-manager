@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CreateRecipeInput } from '@recipe-manager/shared';
 import { RecipeService } from './recipe.service';
 
@@ -308,7 +308,8 @@ export class RecipeFormComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly recipeService: RecipeService,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly translateService: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -360,7 +361,7 @@ export class RecipeFormComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          this.errorMessage = err.message || 'Failed to load recipe';
+          this.errorMessage = err.message || this.translateService.instant('RECIPES.FORM.LOAD_ERROR');
           this.loading = false;
         }
       });
@@ -466,7 +467,7 @@ export class RecipeFormComponent implements OnInit {
       },
       error: (err) => {
         this.submitting = false;
-        this.errorMessage = err.message || 'Failed to save recipe';
+        this.errorMessage = err.message || this.translateService.instant('RECIPES.FORM.SAVE_ERROR');
       }
     });
   }

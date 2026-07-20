@@ -253,7 +253,7 @@ export class RecipeDetailComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = err.message || 'Failed to load recipe';
+        this.error = err.message || this.translateService.instant('RECIPES.DETAIL.LOAD_ERROR');
         this.loading = false;
       }
     });
@@ -265,7 +265,7 @@ export class RecipeDetailComponent implements OnInit {
     this.recipeService.deleteRecipe(this.recipe.id).subscribe({
       next: () => this.router.navigate(['/recipes']),
       error: (err) => {
-        this.error = err.message || 'Failed to delete recipe';
+        this.error = err.message || this.translateService.instant('RECIPES.DETAIL.DELETE_ERROR');
       }
     });
   }

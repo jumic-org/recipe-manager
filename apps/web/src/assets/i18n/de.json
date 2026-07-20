@@ -30,17 +30,17 @@
       "SUBMITTING": "Registrierung...",
       "HAS_ACCOUNT": "Bereits ein Konto?",
       "SIGN_IN_LINK": "Anmelden",
-      "PASSWORDS_MISMATCH": "Passwoerter stimmen nicht ueberein"
+      "PASSWORDS_MISMATCH": "Passwörter stimmen nicht überein"
     },
     "CONFIRM": {
-      "TITLE": "Registrierung bestaetigen",
-      "DESCRIPTION": "Geben Sie den Bestaetigungscode ein, der an Ihre E-Mail gesendet wurde.",
+      "TITLE": "Registrierung bestätigen",
+      "DESCRIPTION": "Geben Sie den Bestätigungscode ein, der an Ihre E-Mail gesendet wurde.",
       "EMAIL_LABEL": "E-Mail",
-      "CODE_LABEL": "Bestaetigungscode",
-      "SUBMIT": "Bestaetigen",
-      "SUBMITTING": "Bestaetigung...",
-      "SUCCESS": "Konto bestaetigt! Weiterleitung zur Anmeldung...",
-      "BACK_TO_SIGN_IN": "Zurueck zur Anmeldung"
+      "CODE_LABEL": "Bestätigungscode",
+      "SUBMIT": "Bestätigen",
+      "SUBMITTING": "Bestätigung...",
+      "SUCCESS": "Konto bestätigt! Weiterleitung zur Anmeldung...",
+      "BACK_TO_SIGN_IN": "Zurück zur Anmeldung"
     }
   },
   "RECIPES": {
@@ -51,22 +51,25 @@
       "EMPTY": "Noch keine Rezepte. Erstellen Sie Ihr erstes Rezept!",
       "PREP": "Vorbereitung",
       "COOK": "Kochen",
-      "SERVES": "Portionen"
+      "SERVES": "Portionen",
+      "LOAD_ERROR": "Rezepte konnten nicht geladen werden"
     },
     "DETAIL": {
       "LOADING": "Rezept wird geladen...",
       "EDIT": "Bearbeiten",
-      "DELETE": "Loeschen",
-      "CONFIRM_DELETE": "Sind Sie sicher, dass Sie dieses Rezept loeschen moechten?",
+      "DELETE": "Löschen",
+      "CONFIRM_DELETE": "Sind Sie sicher, dass Sie dieses Rezept löschen möchten?",
       "PREP_TIME": "Vorbereitungszeit",
       "COOK_TIME": "Kochzeit",
       "TOTAL_TIME": "Gesamtzeit",
       "SERVINGS": "Portionen",
       "INGREDIENTS": "Zutaten",
       "INSTRUCTIONS": "Zubereitung",
-      "BACK": "Zurueck zu Rezepten",
+      "BACK": "Zurück zu Rezepten",
       "NOT_FOUND": "Rezept nicht gefunden",
-      "MIN": "Min"
+      "MIN": "Min",
+      "LOAD_ERROR": "Rezept konnte nicht geladen werden",
+      "DELETE_ERROR": "Rezept konnte nicht gelöscht werden"
     },
     "FORM": {
       "TITLE_NEW": "Neues Rezept",
@@ -81,7 +84,7 @@
       "COOK_TIME_LABEL": "Kochzeit (Min)",
       "INGREDIENTS_TITLE": "Zutaten",
       "INSTRUCTIONS_TITLE": "Zubereitung",
-      "ADD": "+ Hinzufuegen",
+      "ADD": "+ Hinzufügen",
       "AMOUNT_PLACEHOLDER": "Menge",
       "UNIT_PLACEHOLDER": "Einheit",
       "INGREDIENT_NAME_PLACEHOLDER": "Zutat",
@@ -96,7 +99,9 @@
       "CANCEL": "Abbrechen",
       "CREATE": "Rezept erstellen",
       "UPDATE": "Rezept aktualisieren",
-      "SAVING": "Speichern..."
+      "SAVING": "Speichern...",
+      "LOAD_ERROR": "Rezept konnte nicht geladen werden",
+      "SAVE_ERROR": "Rezept konnte nicht gespeichert werden"
     }
   }
 }

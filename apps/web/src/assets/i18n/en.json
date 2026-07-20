@@ -51,7 +51,8 @@
       "EMPTY": "No recipes yet. Create your first recipe!",
       "PREP": "Prep",
       "COOK": "Cook",
-      "SERVES": "Serves"
+      "SERVES": "Serves",
+      "LOAD_ERROR": "Failed to load recipes"
     },
     "DETAIL": {
       "LOADING": "Loading recipe...",
@@ -66,7 +67,9 @@
       "INSTRUCTIONS": "Instructions",
       "BACK": "Back to Recipes",
       "NOT_FOUND": "Recipe not found",
-      "MIN": "min"
+      "MIN": "min",
+      "LOAD_ERROR": "Failed to load recipe",
+      "DELETE_ERROR": "Failed to delete recipe"
     },
     "FORM": {
       "TITLE_NEW": "New Recipe",
@@ -96,7 +99,9 @@
       "CANCEL": "Cancel",
       "CREATE": "Create Recipe",
       "UPDATE": "Update Recipe",
-      "SAVING": "Saving..."
+      "SAVING": "Saving...",
+      "LOAD_ERROR": "Failed to load recipe",
+      "SAVE_ERROR": "Failed to save recipe"
     }
   }
 }
