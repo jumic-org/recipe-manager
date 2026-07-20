@@ -11,6 +11,7 @@
     "lint": "nx run-many -t lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "verify:web": "node scripts/verify-web-build.js",
     "cdk": "cdk"
   },
   "dependencies": {
@@ -53,5 +54,15 @@
     "ts-node": "10.9.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.65.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "less",
+      "lmdb",
+      "msgpackr-extract",
+      "nx"
+    ]
   }
 }
