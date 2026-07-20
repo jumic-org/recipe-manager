@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- **Node.js** >= 20.x
+- **Node.js** >= 24.x
 - **pnpm** >= 10.x (enable via `corepack enable`)
 - **AWS CLI** configured with credentials for the target account
 - **AWS CDK CLI** (installed as a dev dependency, use via `pnpm cdk`)
