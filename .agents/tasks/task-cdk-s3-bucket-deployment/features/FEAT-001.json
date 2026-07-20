@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Add BucketDeployment construct to CDK stack and update deployment documentation",
+  "status": "in_progress",
+  "steps": [
+    "Run `pnpm install` in the workspace root to install all dependencies.",
+    "Modify `apps/infra/src/stacks/recipe-manager-stack.ts`: Add import for `BucketDeployment` and `Source` from `aws-cdk-lib/aws-s3-deployment`.",
+    "Add a `BucketDeployment` construct after the CloudFront distribution definition. Use construct ID `FrontendDeployment` (PascalCase per conventions). Configure it with: `sources: [Source.asset(path.join(__dirname, '../../../../dist/apps/web/browser'))]`, `destinationBucket: frontendBucket`, `distribution: distribution` (for automatic CloudFront cache invalidation), `distributionPaths: ['/*']`.",
+    "Update `.kiro/steering/deployment.md`: Remove the 'Frontend Deployment' section (the manual `aws s3 sync` and CloudFront invalidation steps). Update the 'CDK Deployment' section's resource list to include 'S3 BucketDeployment (deploys Angular build output and invalidates CloudFront)'. Update the 'CI/CD Considerations' section to remove steps 4 and 5 (s3 sync and CloudFront invalidation) since `cdk deploy` now handles frontend deployment automatically.",
+    "Run `pnpm nx build infra` to verify the CDK code compiles successfully.",
+    "Run `pnpm cdk synth` to verify the CloudFormation template generates correctly with the new BucketDeployment resource."
+  ],
+  "acceptance_criteria": [
+    "`pnpm nx build infra` completes without errors",
+    "`pnpm cdk synth` produces a valid CloudFormation template containing an AWS::CloudFormation::CustomResource for the BucketDeployment",
+    "The BucketDeployment construct references the existing frontendBucket and distribution",
+    "The deployment.md no longer contains manual `aws s3 sync` or `aws cloudfront create-invalidation` commands",
+    "The deployment.md mentions that frontend deployment is handled automatically by `cdk deploy`"
+  ],
+  "verification": [
+    "pnpm install",
+    "pnpm nx build infra",
+    "pnpm cdk synth"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
