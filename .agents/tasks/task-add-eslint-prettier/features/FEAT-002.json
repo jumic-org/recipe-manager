@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Create ESLint and Prettier configuration files for the entire Nx monorepo. Set up a root eslint.config.js using flat config format (ESLint 9), a .prettierrc for Prettier settings, a .prettierignore, and per-project eslint.config.js files. Add lint targets to each project.json and lint/format scripts to root package.json. Run lint and format on the codebase, fixing any issues so the repo passes cleanly.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create root eslint.config.js (flat config format) with: base TypeScript rules from typescript-eslint, import of @nx/eslint-plugin for workspace boundaries, Prettier integration via eslint-config-prettier (disables conflicting rules). Export as default array of config objects.",
     "Create apps/web/eslint.config.js that extends the root config and adds Angular ESLint rules: component-selector with prefix rm- and type element, directive-selector with prefix rm- and type attribute, template rules from @angular-eslint/template",

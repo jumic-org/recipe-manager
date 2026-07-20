@@ -8,6 +8,9 @@
     "build": "nx run-many -t build",
     "synth": "nx synth infra",
     "deploy": "nx deploy infra",
+    "lint": "nx run-many -t lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "cdk": "cdk"
   },
   "dependencies": {

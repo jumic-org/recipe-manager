@@ -17,11 +17,13 @@ pnpm install
 ## Build Commands
 
 Build all applications:
+
 ```bash
 pnpm nx run-many -t build
 ```
 
 Build individual apps:
+
 ```bash
 pnpm nx build api    # Lambda handler
 pnpm nx build web    # Angular frontend
@@ -33,6 +35,7 @@ pnpm nx build infra  # CDK infrastructure (compile check)
 ### First-Time Setup (Bootstrap)
 
 Bootstrap CDK in your target AWS account and region:
+
 ```bash
 pnpm cdk bootstrap aws://ACCOUNT_ID/REGION
 ```
@@ -40,6 +43,7 @@ pnpm cdk bootstrap aws://ACCOUNT_ID/REGION
 ### Synthesize CloudFormation
 
 Validate the infrastructure definition without deploying:
+
 ```bash
 pnpm cdk synth
 ```
@@ -53,6 +57,7 @@ pnpm cdk deploy
 ```
 
 This deploys the `RecipeManagerStack` which creates all resources:
+
 - DynamoDB table
 - Lambda function (bundled from `apps/api/src/handler.ts`)
 - API Gateway REST API
@@ -64,6 +69,7 @@ This deploys the `RecipeManagerStack` which creates all resources:
 ### Deployment Outputs
 
 After deployment, CDK prints outputs:
+
 - `ApiUrl` - The API Gateway endpoint URL
 - `CloudFrontDomain` - The CloudFront distribution domain
 - `UserPoolId` - Cognito User Pool ID
@@ -79,7 +85,7 @@ After the first deploy, update the frontend environment files with the actual va
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api',  // or the deployed API URL for remote dev
+  apiUrl: 'http://localhost:3000/api', // or the deployed API URL for remote dev
   userPoolId: 'us-east-1_XXXXXXXXX',
   userPoolClientId: 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
   region: 'us-east-1'
@@ -123,6 +129,7 @@ aws cloudfront create-invalidation \
 ```
 
 To find the distribution ID:
+
 ```bash
 aws cloudfront list-distributions \
   --query "DistributionList.Items[?Origins.Items[?Id=='BUCKET_NAME']].Id" \
@@ -134,6 +141,7 @@ Or retrieve it from CDK outputs / CloudFormation console.
 ## CI/CD Considerations
 
 A typical pipeline would:
+
 1. Run `pnpm install` and `pnpm nx run-many -t build`.
 2. Run `pnpm cdk synth` to validate infrastructure.
 3. Run `pnpm cdk deploy --require-approval never` for automated deployment.
@@ -143,6 +151,7 @@ A typical pipeline would:
 ## Destroying the Stack
 
 To tear down all resources:
+
 ```bash
 pnpm cdk destroy
 ```

@@ -12,9 +12,7 @@ export class RecipeService {
   constructor(private readonly http: HttpClient) {}
 
   getRecipes(): Observable<Recipe[]> {
-    return this.http
-      .get<{ recipes: Recipe[] }>(this.baseUrl)
-      .pipe(map((res) => res.recipes));
+    return this.http.get<{ recipes: Recipe[] }>(this.baseUrl).pipe(map((res) => res.recipes));
   }
 
   getRecipe(id: string): Observable<Recipe> {
@@ -24,9 +22,7 @@ export class RecipeService {
   }
 
   createRecipe(input: CreateRecipeInput): Observable<Recipe> {
-    return this.http
-      .post<{ recipe: Recipe }>(this.baseUrl, input)
-      .pipe(map((res) => res.recipe));
+    return this.http.post<{ recipe: Recipe }>(this.baseUrl, input).pipe(map((res) => res.recipe));
   }
 
   updateRecipe(id: string, input: UpdateRecipeInput): Observable<Recipe> {

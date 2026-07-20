@@ -12,6 +12,7 @@
 All data model interfaces and DTOs live in `libs/shared/src/index.ts` and are imported via the `@recipe-manager/shared` path alias.
 
 When adding a new domain concept:
+
 1. Define the interface in `libs/shared/src/index.ts`.
 2. Export it from the barrel.
 3. Use `Omit<>` to derive input types from full interfaces (see `CreateRecipeInput`, `UpdateRecipeInput`).
@@ -61,6 +62,7 @@ When adding a new domain concept:
 ### CORS
 
 Standard CORS headers are returned on every response:
+
 ```typescript
 const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type,Authorization',

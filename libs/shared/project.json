@@ -4,6 +4,12 @@
   "projectType": "library",
   "sourceRoot": "libs/shared/src",
   "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["libs/shared/**/*.ts"]
+      }
+    },
     "build": {
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/libs/shared"],

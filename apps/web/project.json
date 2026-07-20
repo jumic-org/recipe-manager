@@ -42,6 +42,12 @@
       },
       "defaultConfiguration": "production"
     },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["apps/web/**/*.ts", "apps/web/**/*.html"]
+      }
+    },
     "serve": {
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
