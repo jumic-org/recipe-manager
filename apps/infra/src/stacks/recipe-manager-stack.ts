@@ -121,7 +121,8 @@ export class RecipeManagerStack extends Stack {
       sources: [Source.asset(path.join(__dirname, '../../../../dist/apps/web/browser'))],
       destinationBucket: frontendBucket,
       distribution,
-      distributionPaths: ['/*']
+      distributionPaths: ['/*'],
+      prune: false
     });
 
     // Lambda Function

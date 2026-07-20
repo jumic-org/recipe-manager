@@ -2,65 +2,56 @@
 
 /**
  * Post-build verification script for the web application.
- * Ensures that config.json exists in the build output and contains
- * all required keys as non-empty strings.
+ *
+ * Verifies that:
+ * 1. index.html exists in the build output (proves build succeeded)
+ * 2. config.json does NOT exist in the build output
+ *
+ * config.json is deployed separately by CDK's ConfigDeployment, which generates
+ * it with real Cognito/API values at deploy time. It must NOT be included in the
+ * Angular build to avoid deploying placeholder values.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const CONFIG_PATH = path.resolve(
-  __dirname,
-  '..',
-  'dist',
-  'apps',
-  'web',
-  'browser',
-  'config.json'
-);
-
-const REQUIRED_KEYS = ['apiUrl', 'userPoolId', 'userPoolClientId', 'region'];
+const BUILD_DIR = path.resolve(__dirname, '..', 'dist', 'apps', 'web', 'browser');
+const INDEX_PATH = path.join(BUILD_DIR, 'index.html');
+const CONFIG_PATH = path.join(BUILD_DIR, 'config.json');
 
 function verify() {
-  // Check file exists
-  if (!fs.existsSync(CONFIG_PATH)) {
-    console.error(`ERROR: config.json not found at ${CONFIG_PATH}`);
+  // Check that the build output directory exists
+  if (!fs.existsSync(BUILD_DIR)) {
+    console.error(`ERROR: Build output directory not found at ${BUILD_DIR}`);
+    console.error('Run "pnpm nx build web" before running this script.');
+    process.exit(1);
+  }
+
+  // Check that index.html exists (proves build succeeded)
+  if (!fs.existsSync(INDEX_PATH)) {
+    console.error(`ERROR: index.html not found at ${INDEX_PATH}`);
+    console.error('The Angular build did not produce index.html.');
+    process.exit(1);
+  }
+
+  console.log('OK: index.html exists in build output.');
+
+  // Check that config.json does NOT exist in build output.
+  // config.json is deployed separately by CDK's ConfigDeployment with real
+  // Cognito User Pool and API Gateway values. Including a placeholder in the
+  // Angular build causes production errors ("User pool client YOUR_USER_POOL_CLIENT_ID does not exist").
+  if (fs.existsSync(CONFIG_PATH)) {
+    console.error(`ERROR: config.json found in build output at ${CONFIG_PATH}`);
     console.error(
-      'The Angular build must include config.json in the output. ' +
-        'Ensure apps/web/src/assets/config.json exists.'
+      'config.json must NOT be included in the Angular build. ' +
+        'It is deployed separately by CDK ConfigDeployment with real infrastructure values. ' +
+        'Remove the config.json asset entry from apps/web/project.json.'
     );
     process.exit(1);
   }
 
-  // Read and parse JSON
-  let config;
-  try {
-    const content = fs.readFileSync(CONFIG_PATH, 'utf-8');
-    config = JSON.parse(content);
-  } catch (err) {
-    console.error(`ERROR: config.json is not valid JSON: ${err.message}`);
-    process.exit(1);
-  }
-
-  // Validate required keys
-  const errors = [];
-  for (const key of REQUIRED_KEYS) {
-    if (!(key in config)) {
-      errors.push(`Missing required key: "${key}"`);
-    } else if (typeof config[key] !== 'string' || config[key].trim() === '') {
-      errors.push(`Key "${key}" must be a non-empty string, got: ${JSON.stringify(config[key])}`);
-    }
-  }
-
-  if (errors.length > 0) {
-    console.error('ERROR: config.json validation failed:');
-    errors.forEach((e) => console.error(`  - ${e}`));
-    process.exit(1);
-  }
-
-  console.log('OK: config.json is valid and contains all required keys.');
-  console.log(`  Path: ${CONFIG_PATH}`);
-  console.log(`  Keys: ${REQUIRED_KEYS.join(', ')}`);
+  console.log('OK: config.json is NOT in build output (will be deployed by CDK ConfigDeployment).');
+  console.log('\nBuild verification passed.');
 }
 
 verify();
