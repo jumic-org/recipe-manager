@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-001",
+  "type": "chore",
+  "description": "Install dependencies and set up baseline environment. Install ESLint 9, Prettier, and all related plugins/configs for the Nx monorepo including Angular ESLint, TypeScript ESLint, and Prettier/ESLint integration.",
+  "status": "in_progress",
+  "steps": [
+    "Run pnpm install to restore existing node_modules",
+    "Install ESLint 9 and core TypeScript ESLint packages: eslint, @typescript-eslint/parser, @typescript-eslint/eslint-plugin, typescript-eslint",
+    "Install Angular ESLint packages: angular-eslint, @angular-eslint/eslint-plugin, @angular-eslint/eslint-plugin-template, @angular-eslint/template-parser",
+    "Install Nx ESLint plugin: @nx/eslint (should match nx version 22.7.3) and @nx/eslint-plugin",
+    "Install Prettier and ESLint/Prettier integration: prettier, eslint-config-prettier, eslint-plugin-prettier",
+    "All packages go to devDependencies in the root package.json",
+    "Run pnpm install after adding packages to confirm no resolution errors"
+  ],
+  "acceptance_criteria": [
+    "pnpm install completes without errors",
+    "All ESLint, Prettier, Angular ESLint, and TypeScript ESLint packages are listed in root devDependencies",
+    "No package resolution conflicts"
+  ],
+  "verification": [
+    "Run pnpm install and confirm exit code 0",
+    "Run pnpm exec eslint --version and confirm ESLint 9.x is available",
+    "Run pnpm exec prettier --version and confirm Prettier is available"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

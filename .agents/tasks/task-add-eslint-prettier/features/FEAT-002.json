@@ -1,0 +1,39 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Create ESLint and Prettier configuration files for the entire Nx monorepo. Set up a root eslint.config.js using flat config format (ESLint 9), a .prettierrc for Prettier settings, a .prettierignore, and per-project eslint.config.js files. Add lint targets to each project.json and lint/format scripts to root package.json. Run lint and format on the codebase, fixing any issues so the repo passes cleanly.",
+  "status": "pending",
+  "steps": [
+    "Create root eslint.config.js (flat config format) with: base TypeScript rules from typescript-eslint, import of @nx/eslint-plugin for workspace boundaries, Prettier integration via eslint-config-prettier (disables conflicting rules). Export as default array of config objects.",
+    "Create apps/web/eslint.config.js that extends the root config and adds Angular ESLint rules: component-selector with prefix rm- and type element, directive-selector with prefix rm- and type attribute, template rules from @angular-eslint/template",
+    "Create apps/api/eslint.config.js that extends the root config for Node.js/Lambda TypeScript code",
+    "Create apps/infra/eslint.config.js that extends the root config for CDK TypeScript code",
+    "Create libs/shared/eslint.config.js that extends the root config for the shared library",
+    "Create .prettierrc with settings: singleQuote: true, trailingComma: 'none', printWidth: 100, tabWidth: 2, semi: true, bracketSpacing: true, arrowParens: 'always'",
+    "Create .prettierignore that ignores: dist/, node_modules/, pnpm-lock.yaml, .nx/, coverage/",
+    "Add lint targets to each project.json (apps/web, apps/api, apps/infra, libs/shared) using @nx/eslint:lint executor with lintFilePatterns pointing to their respective src directories",
+    "Add scripts to root package.json: 'lint': 'nx run-many -t lint', 'format': 'prettier --write .', 'format:check': 'prettier --check .'",
+    "Run pnpm format to auto-format all files with Prettier",
+    "Run pnpm lint --fix to auto-fix any ESLint issues across the workspace",
+    "Manually fix any remaining lint errors that auto-fix cannot resolve",
+    "Verify pnpm lint passes cleanly with no errors",
+    "Verify pnpm format:check passes cleanly (all files already formatted)"
+  ],
+  "acceptance_criteria": [
+    "Root eslint.config.js exists and uses flat config format with TypeScript ESLint rules",
+    "Each project (web, api, infra, shared) has its own eslint.config.js extending root",
+    "Angular ESLint rules enforce rm- prefix for selectors in apps/web config",
+    ".prettierrc exists with consistent formatting settings",
+    ".prettierignore exists and excludes build artifacts",
+    "All project.json files have lint targets using @nx/eslint:lint executor",
+    "Root package.json has lint, format, and format:check scripts",
+    "pnpm lint runs successfully with no errors across all projects",
+    "pnpm format:check passes (all source files are properly formatted)"
+  ],
+  "verification": [
+    "Run pnpm nx run-many -t lint and confirm all projects pass with exit code 0",
+    "Run pnpm prettier --check . and confirm all files are formatted with exit code 0"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

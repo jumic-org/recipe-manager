@@ -1,0 +1,27 @@
+{
+  "project_type": "Nx 22.7.3 monorepo with Angular 21 frontend, TypeScript Lambda API, AWS CDK infrastructure, and shared types library",
+  "language": "TypeScript (~5.9.3)",
+  "build_system": "Nx + pnpm 10.14.0 workspaces. Each project has a project.json with targets. Root package.json has scripts: start, build, synth, deploy.",
+  "test_framework": "No test framework currently configured (linter: none, unitTestRunner: none in nx.json generators)",
+  "build_command": "pnpm nx run-many -t build",
+  "test_command": "pnpm nx run-many -t lint",
+  "verification_instructions": "1. Run pnpm install to ensure deps are installed. 2. Run pnpm nx run-many -t lint to verify ESLint works on all projects. 3. Run pnpm prettier --check . to verify Prettier config works.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "1. cd /projects/sandbox/recipe-manager. 2. pnpm install (node_modules not currently present).",
+  "environment_constraints": "OPEN_INTERNET - full network access. Node.js v22 via nvm, pnpm available. No Docker needed for this task.",
+  "contribution_requirements": "TypeScript strict mode. Angular standalone components with OnPush and rm- prefix. Use bracket notation for index-signature access. Prefer explicit types. import type for type-only imports.",
+  "key_patterns": "Flat ESLint config (eslint.config.js) is the modern standard for ESLint 9+. Nx provides @nx/eslint plugin for workspace-aware linting. Angular ESLint uses angular-eslint package. The project has 4 subprojects: apps/web (Angular), apps/api (Lambda), apps/infra (CDK), libs/shared (types library). Each has a project.json. The nx.json already has a lint target default with cache:true.",
+  "relevant_files": [
+    "package.json",
+    "nx.json",
+    "tsconfig.base.json",
+    "apps/web/project.json",
+    "apps/api/project.json",
+    "apps/infra/project.json",
+    "libs/shared/project.json",
+    "apps/web/tsconfig.json",
+    "apps/api/tsconfig.app.json",
+    "apps/infra/tsconfig.json"
+  ],
+  "directory_structure": "Root: nx.json, package.json, tsconfig.base.json, pnpm-workspace.yaml. apps/web: Angular 21 SPA (standalone components, SCSS, OnPush). apps/api: Lambda handler (single handler.ts + index.ts). apps/infra: CDK app (main.ts + stacks/). libs/shared: shared interfaces (single index.ts)."
+}
