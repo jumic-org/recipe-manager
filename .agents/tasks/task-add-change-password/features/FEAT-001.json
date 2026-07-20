@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Add a password change feature to the Angular frontend, including a new method in AuthService, a new ChangePasswordComponent, route registration, navigation link, and i18n translations.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Add a 'changePassword(oldPassword: string, newPassword: string): Observable<void>' method to apps/web/src/app/auth/auth.service.ts. Use the CognitoUser.changePassword SDK method. Get the current user via this.userPool.getCurrentUser(), call getSession to ensure an authenticated session exists, then call user.changePassword(oldPassword, newPassword, callback). Wrap the callback in a Promise and return from() as Observable<void>, following the same pattern as signUp/confirmSignUp/signIn methods.",
     "Create apps/web/src/app/auth/change-password.component.ts as a standalone component following the exact pattern of register.component.ts. Selector: 'rm-change-password'. Use ChangeDetectionStrategy.OnPush. Import CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe. Form fields: currentPassword (required), newPassword (required, minLength 8), confirmNewPassword (required). On submit, validate passwords match, then call authService.changePassword(currentPassword, newPassword). Show a success message on success. Include a link back to /recipes. Use the same CSS structure as the other auth components.",
@@ -25,5 +25,5 @@
     "Run 'node scripts/verify-web-build.js' to confirm build output is valid"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Build succeeded with only pre-existing CommonJS warnings from amazon-cognito-identity-js. All verification steps passed. Used proper German umlauts in de.json translations."
 }
