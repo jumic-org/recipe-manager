@@ -30,16 +30,24 @@ import { RecipeService } from './recipe.service';
 
         <div class="meta-bar">
           @if (recipe.prepTimeMinutes) {
-            <div class="meta-item"><strong>Prep Time</strong><span>{{ recipe.prepTimeMinutes }} min</span></div>
+            <div class="meta-item">
+              <strong>Prep Time</strong><span>{{ recipe.prepTimeMinutes }} min</span>
+            </div>
           }
           @if (recipe.cookTimeMinutes) {
-            <div class="meta-item"><strong>Cook Time</strong><span>{{ recipe.cookTimeMinutes }} min</span></div>
+            <div class="meta-item">
+              <strong>Cook Time</strong><span>{{ recipe.cookTimeMinutes }} min</span>
+            </div>
           }
           @if (recipe.totalTimeMinutes) {
-            <div class="meta-item"><strong>Total Time</strong><span>{{ recipe.totalTimeMinutes }} min</span></div>
+            <div class="meta-item">
+              <strong>Total Time</strong><span>{{ recipe.totalTimeMinutes }} min</span>
+            </div>
           }
           @if (recipe.servings) {
-            <div class="meta-item"><strong>Servings</strong><span>{{ recipe.servings }}</span></div>
+            <div class="meta-item">
+              <strong>Servings</strong><span>{{ recipe.servings }}</span>
+            </div>
           }
         </div>
 
@@ -81,47 +89,140 @@ import { RecipeService } from './recipe.service';
       }
     </div>
   `,
-  styles: [`
-    .recipe-detail-container { max-width: 800px; margin: 0 auto; padding: 24px; }
-    .loading { text-align: center; color: #666; padding: 40px 0; }
-    .error { color: #c0392b; text-align: center; }
-    .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-    .detail-header h2 { margin: 0 0 8px; }
-    .description { color: #666; margin: 0; line-height: 1.5; }
-    .actions { display: flex; gap: 8px; }
-    .btn-edit {
-      background: #1c5b55; color: #fff; text-decoration: none;
-      padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 0.9rem;
-    }
-    .btn-delete {
-      background: #c0392b; color: #fff; border: none;
-      padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer;
-    }
-    .meta-bar {
-      display: flex; gap: 24px; padding: 16px 20px; background: #f8f7f2;
-      border-radius: 8px; margin-bottom: 24px;
-    }
-    .meta-item { display: flex; flex-direction: column; gap: 4px; }
-    .meta-item strong { font-size: 0.8rem; color: #888; text-transform: uppercase; }
-    .meta-item span { font-size: 1.1rem; font-weight: 600; }
-    .tags-section { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-    .category-tag {
-      background: #e8f5f3; color: #1c5b55; padding: 4px 10px;
-      border-radius: 4px; font-size: 0.85rem; font-weight: 600;
-    }
-    .recipe-tag {
-      background: #ece7d9; color: #5b4536; padding: 4px 10px;
-      border-radius: 4px; font-size: 0.85rem; font-weight: 600;
-    }
-    .ingredients-section, .instructions-section { margin-bottom: 32px; }
-    h3 { margin: 0 0 16px; color: #20201d; }
-    .group-name { margin: 16px 0 8px; color: #666; font-size: 0.95rem; }
-    ul { list-style: disc; padding-left: 20px; margin: 0; }
-    ul li { padding: 4px 0; line-height: 1.5; }
-    ol { padding-left: 20px; margin: 0; }
-    ol li { padding: 8px 0; line-height: 1.6; }
-    .back-link { color: #1c5b55; font-weight: 600; text-decoration: none; }
-  `],
+  styles: [
+    `
+      .recipe-detail-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .loading {
+        text-align: center;
+        color: #666;
+        padding: 40px 0;
+      }
+      .error {
+        color: #c0392b;
+        text-align: center;
+      }
+      .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+      }
+      .detail-header h2 {
+        margin: 0 0 8px;
+      }
+      .description {
+        color: #666;
+        margin: 0;
+        line-height: 1.5;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+      .btn-edit {
+        background: #1c5b55;
+        color: #fff;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .btn-delete {
+        background: #c0392b;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+      .meta-bar {
+        display: flex;
+        gap: 24px;
+        padding: 16px 20px;
+        background: #f8f7f2;
+        border-radius: 8px;
+        margin-bottom: 24px;
+      }
+      .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .meta-item strong {
+        font-size: 0.8rem;
+        color: #888;
+        text-transform: uppercase;
+      }
+      .meta-item span {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+      .tags-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+      .category-tag {
+        background: #e8f5f3;
+        color: #1c5b55;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .recipe-tag {
+        background: #ece7d9;
+        color: #5b4536;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .ingredients-section,
+      .instructions-section {
+        margin-bottom: 32px;
+      }
+      h3 {
+        margin: 0 0 16px;
+        color: #20201d;
+      }
+      .group-name {
+        margin: 16px 0 8px;
+        color: #666;
+        font-size: 0.95rem;
+      }
+      ul {
+        list-style: disc;
+        padding-left: 20px;
+        margin: 0;
+      }
+      ul li {
+        padding: 4px 0;
+        line-height: 1.5;
+      }
+      ol {
+        padding-left: 20px;
+        margin: 0;
+      }
+      ol li {
+        padding: 8px 0;
+        line-height: 1.6;
+      }
+      .back-link {
+        color: #1c5b55;
+        font-weight: 600;
+        text-decoration: none;
+      }
+    `
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecipeDetailComponent implements OnInit {
@@ -167,7 +268,9 @@ export class RecipeDetailComponent implements OnInit {
     });
   }
 
-  private groupIngredients(ingredients: Recipe['ingredients']): { name: string | null; items: Recipe['ingredients'] }[] {
+  private groupIngredients(
+    ingredients: Recipe['ingredients']
+  ): { name: string | null; items: Recipe['ingredients'] }[] {
     const groups = new Map<string | null, Recipe['ingredients']>();
     for (const ing of ingredients) {
       const key = ing.group;

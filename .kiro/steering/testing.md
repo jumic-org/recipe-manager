@@ -7,6 +7,7 @@ The project does not currently have a test runner configured (Nx generators were
 ## Recommended Test Runner
 
 Use **Vitest** for all test types in this monorepo. It provides:
+
 - Fast execution with native ESM support
 - Compatible with TypeScript and the ES2022 target
 - Works well with Nx caching
@@ -14,11 +15,13 @@ Use **Vitest** for all test types in this monorepo. It provides:
 ## Setup
 
 Install Vitest as a dev dependency:
+
 ```bash
 pnpm add -D vitest @vitest/coverage-v8
 ```
 
 For Angular component tests, also install:
+
 ```bash
 pnpm add -D @analogjs/vitest-angular jsdom
 ```
@@ -28,6 +31,7 @@ pnpm add -D @analogjs/vitest-angular jsdom
 ### Strategy
 
 Test the handler logic by mocking DynamoDB operations. Focus on:
+
 - Route matching (correct handler for path + method)
 - Authentication extraction (userId from claims)
 - Input validation
@@ -116,6 +120,7 @@ describe('handler', () => {
 ### Strategy
 
 Test components in isolation using Angular's `TestBed`. Mock services to avoid HTTP calls. Focus on:
+
 - Component rendering
 - User interaction (form submission, button clicks)
 - Reactive state changes
@@ -146,10 +151,7 @@ describe('RecipeListComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [RecipeListComponent],
-      providers: [
-        { provide: RecipeService, useValue: mockRecipeService },
-        provideRouter([])
-      ]
+      providers: [{ provide: RecipeService, useValue: mockRecipeService }, provideRouter([])]
     }).compileComponents();
 
     fixture = TestBed.createComponent(RecipeListComponent);
@@ -171,6 +173,7 @@ describe('RecipeListComponent', () => {
 ### Strategy
 
 Use CDK assertions (`aws-cdk-lib/assertions`) to validate synthesized templates. Focus on:
+
 - Expected resources exist
 - Resource properties match expectations
 - IAM permissions are correctly scoped
@@ -255,6 +258,7 @@ For end-to-end testing against a deployed stack:
 ## Running Tests
 
 Once configured, run tests via Nx:
+
 ```bash
 # All tests
 pnpm nx run-many -t test
@@ -268,6 +272,7 @@ pnpm nx test infra
 ## Test Coverage
 
 Configure coverage in `vitest.config.ts`:
+
 ```typescript
 export default defineConfig({
   test: {

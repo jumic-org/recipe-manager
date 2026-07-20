@@ -7,7 +7,6 @@ import {
   CognitoUserSession
 } from 'amazon-cognito-identity-js';
 import { BehaviorSubject, Observable, from, of } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -40,9 +39,7 @@ export class AuthService {
   signUp(email: string, password: string): Observable<void> {
     return from(
       new Promise<void>((resolve, reject) => {
-        const attributes = [
-          new CognitoUserAttribute({ Name: 'email', Value: email })
-        ];
+        const attributes = [new CognitoUserAttribute({ Name: 'email', Value: email })];
         this.userPool.signUp(email, password, attributes, [], (err) => {
           if (err) {
             reject(err);

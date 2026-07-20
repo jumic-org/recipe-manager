@@ -6,8 +6,5 @@ import { appRoutes } from './app.routes';
 import { authInterceptor } from './auth/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideHttpClient(withInterceptors([authInterceptor])),
-    provideRouter(appRoutes)
-  ]
+  providers: [provideHttpClient(withInterceptors([authInterceptor])), provideRouter(appRoutes)]
 };

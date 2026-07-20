@@ -110,10 +110,7 @@ async function listRecipes(
   return response(200, { recipes });
 }
 
-async function getRecipe(
-  userId: string,
-  recipeId: string
-): Promise<APIGatewayProxyResult> {
+async function getRecipe(userId: string, recipeId: string): Promise<APIGatewayProxyResult> {
   const result = await docClient.send(
     new GetCommand({
       TableName: TABLE_NAME,
@@ -257,10 +254,7 @@ async function updateRecipe(
   }
 }
 
-async function deleteRecipe(
-  userId: string,
-  recipeId: string
-): Promise<APIGatewayProxyResult> {
+async function deleteRecipe(userId: string, recipeId: string): Promise<APIGatewayProxyResult> {
   try {
     await docClient.send(
       new DeleteCommand({

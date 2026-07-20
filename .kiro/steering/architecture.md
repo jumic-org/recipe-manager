@@ -52,11 +52,11 @@ Recipe Manager is an Nx monorepo implementing a serverless full-stack applicatio
 
 This is an Nx 22.7.3 workspace managed with pnpm.
 
-| Path | Purpose |
-|------|---------|
-| `apps/api/` | Lambda handler for CRUD operations |
-| `apps/infra/` | CDK infrastructure-as-code |
-| `apps/web/` | Angular 21 single-page application |
+| Path           | Purpose                                |
+| -------------- | -------------------------------------- |
+| `apps/api/`    | Lambda handler for CRUD operations     |
+| `apps/infra/`  | CDK infrastructure-as-code             |
+| `apps/web/`    | Angular 21 single-page application     |
 | `libs/shared/` | Shared TypeScript interfaces and types |
 
 Cross-project references use the `@recipe-manager/shared` path alias defined in `tsconfig.base.json`.
@@ -86,6 +86,7 @@ Cross-project references use the `@recipe-manager/shared` path alias defined in 
 ## Encryption
 
 A single KMS key (`EncryptionKey`) with automatic rotation encrypts:
+
 - DynamoDB table data (customer-managed encryption)
 - S3 frontend bucket (KMS bucket encryption)
 

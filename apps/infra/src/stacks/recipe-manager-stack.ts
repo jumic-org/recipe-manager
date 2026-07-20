@@ -1,12 +1,6 @@
 import * as path from 'node:path';
 
-import {
-  CfnOutput,
-  Duration,
-  RemovalPolicy,
-  Stack,
-  type StackProps
-} from 'aws-cdk-lib';
+import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
 import {
   AuthorizationType,
   CognitoUserPoolsAuthorizer,
@@ -21,11 +15,7 @@ import {
   ViewerProtocolPolicy
 } from 'aws-cdk-lib/aws-cloudfront';
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
-import {
-  AccountRecovery,
-  UserPool,
-  UserPoolClient
-} from 'aws-cdk-lib/aws-cognito';
+import { AccountRecovery, UserPool, UserPoolClient } from 'aws-cdk-lib/aws-cognito';
 import {
   AttributeType,
   BillingMode,
@@ -36,11 +26,7 @@ import {
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
-import {
-  BlockPublicAccess,
-  Bucket,
-  BucketEncryption
-} from 'aws-cdk-lib/aws-s3';
+import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
 
@@ -132,11 +118,7 @@ export class RecipeManagerStack extends Stack {
 
     // Frontend Deployment
     new BucketDeployment(this, 'FrontendDeployment', {
-      sources: [
-        Source.asset(
-          path.join(__dirname, '../../../../dist/apps/web/browser')
-        )
-      ],
+      sources: [Source.asset(path.join(__dirname, '../../../../dist/apps/web/browser'))],
       destinationBucket: frontendBucket,
       distribution,
       distributionPaths: ['/*']
@@ -162,13 +144,9 @@ export class RecipeManagerStack extends Stack {
     recipesTable.grantReadWriteData(apiHandler);
 
     // API Gateway with Cognito Authorizer
-    const cognitoAuthorizer = new CognitoUserPoolsAuthorizer(
-      this,
-      'CognitoAuthorizer',
-      {
-        cognitoUserPools: [userPool]
-      }
-    );
+    const cognitoAuthorizer = new CognitoUserPoolsAuthorizer(this, 'CognitoAuthorizer', {
+      cognitoUserPools: [userPool]
+    });
 
     const api = new RestApi(this, 'RecipeApi', {
       restApiName: 'recipe-manager-api',

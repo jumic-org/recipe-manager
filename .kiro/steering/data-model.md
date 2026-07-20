@@ -6,16 +6,16 @@
 
 ### Keys
 
-| Key | Attribute | Type | Description |
-|-----|-----------|------|-------------|
-| Partition Key | `userId` | String | Cognito user `sub` claim |
-| Sort Key | `id` | String | UUID v4, generated via `crypto.randomUUID()` |
+| Key           | Attribute | Type   | Description                                  |
+| ------------- | --------- | ------ | -------------------------------------------- |
+| Partition Key | `userId`  | String | Cognito user `sub` claim                     |
+| Sort Key      | `id`      | String | UUID v4, generated via `crypto.randomUUID()` |
 
 ### Global Secondary Indexes
 
-| Index Name | Partition Key | Sort Key | Projection |
-|------------|---------------|----------|------------|
-| `byCategory` | `userId` (String) | `createdAt` (String) | ALL |
+| Index Name   | Partition Key     | Sort Key             | Projection |
+| ------------ | ----------------- | -------------------- | ---------- |
+| `byCategory` | `userId` (String) | `createdAt` (String) | ALL        |
 
 The `byCategory` GSI allows querying a user's recipes sorted by creation date. Despite the name, category filtering is done application-side after the query.
 
@@ -34,8 +34,8 @@ All interfaces are defined in `libs/shared/src/index.ts`.
 
 ```typescript
 interface Recipe {
-  id: string;               // UUID v4, sort key
-  userId: string;           // Cognito sub, partition key
+  id: string; // UUID v4, sort key
+  userId: string; // Cognito sub, partition key
   title: string;
   description: string;
   servings: number;
@@ -44,12 +44,12 @@ interface Recipe {
   totalTimeMinutes: number;
   ingredients: Ingredient[];
   instructions: Instruction[];
-  categories: string[];     // e.g., ["dinner", "italian"]
-  tags: string[];           // e.g., ["quick", "vegetarian"]
-  imageKeys: string[];      // S3 object keys for images
+  categories: string[]; // e.g., ["dinner", "italian"]
+  tags: string[]; // e.g., ["quick", "vegetarian"]
+  imageKeys: string[]; // S3 object keys for images
   nutritionalInfo: NutritionalInfo | null;
-  createdAt: string;        // ISO 8601 timestamp
-  updatedAt: string;        // ISO 8601 timestamp
+  createdAt: string; // ISO 8601 timestamp
+  updatedAt: string; // ISO 8601 timestamp
 }
 ```
 
@@ -58,9 +58,9 @@ interface Recipe {
 ```typescript
 interface Ingredient {
   amount: number;
-  unit: string;           // e.g., "cups", "tbsp", "g"
+  unit: string; // e.g., "cups", "tbsp", "g"
   name: string;
-  group: string | null;   // optional grouping, e.g., "sauce", "dough"
+  group: string | null; // optional grouping, e.g., "sauce", "dough"
 }
 ```
 
@@ -78,9 +78,9 @@ interface Instruction {
 ```typescript
 interface NutritionalInfo {
   calories: number | null;
-  protein: string | null;       // e.g., "25g"
+  protein: string | null; // e.g., "25g"
   carbohydrates: string | null; // e.g., "40g"
-  fat: string | null;           // e.g., "12g"
+  fat: string | null; // e.g., "12g"
 }
 ```
 
@@ -125,14 +125,38 @@ Below are three complete JSON examples that conform to the `Recipe` interface. T
     { "amount": 200, "unit": "ml", "name": "heavy cream", "group": "filling" }
   ],
   "instructions": [
-    { "stepNumber": 1, "text": "Warm the milk to lukewarm and dissolve the yeast with a pinch of sugar. Let it activate for 10 minutes." },
-    { "stepNumber": 2, "text": "Combine flour, sugar, melted butter, egg, and yeast mixture. Knead for 8 minutes until smooth and elastic." },
-    { "stepNumber": 3, "text": "Cover the dough and let it rise in a warm place for 45 minutes until doubled in size." },
-    { "stepNumber": 4, "text": "For the topping, melt butter in a saucepan, add sugar, cream, and almonds. Stir until combined and slightly caramelized." },
-    { "stepNumber": 5, "text": "Roll out the dough onto a greased baking sheet and spread the almond topping evenly over it." },
-    { "stepNumber": 6, "text": "Bake at 180C (350F) for 25-30 minutes until golden brown. Let cool completely." },
-    { "stepNumber": 7, "text": "Prepare vanilla pudding according to package directions. Let cool, then fold in whipped cream." },
-    { "stepNumber": 8, "text": "Slice the cake horizontally, spread the custard filling on the bottom half, and place the top back on." }
+    {
+      "stepNumber": 1,
+      "text": "Warm the milk to lukewarm and dissolve the yeast with a pinch of sugar. Let it activate for 10 minutes."
+    },
+    {
+      "stepNumber": 2,
+      "text": "Combine flour, sugar, melted butter, egg, and yeast mixture. Knead for 8 minutes until smooth and elastic."
+    },
+    {
+      "stepNumber": 3,
+      "text": "Cover the dough and let it rise in a warm place for 45 minutes until doubled in size."
+    },
+    {
+      "stepNumber": 4,
+      "text": "For the topping, melt butter in a saucepan, add sugar, cream, and almonds. Stir until combined and slightly caramelized."
+    },
+    {
+      "stepNumber": 5,
+      "text": "Roll out the dough onto a greased baking sheet and spread the almond topping evenly over it."
+    },
+    {
+      "stepNumber": 6,
+      "text": "Bake at 180C (350F) for 25-30 minutes until golden brown. Let cool completely."
+    },
+    {
+      "stepNumber": 7,
+      "text": "Prepare vanilla pudding according to package directions. Let cool, then fold in whipped cream."
+    },
+    {
+      "stepNumber": 8,
+      "text": "Slice the cake horizontally, spread the custard filling on the bottom half, and place the top back on."
+    }
   ],
   "categories": ["baking", "german"],
   "tags": ["cake", "classic", "afternoon-coffee", "yeast-dough"],
@@ -174,12 +198,30 @@ Below are three complete JSON examples that conform to the `Recipe` interface. T
     { "amount": 1, "unit": "pinch", "name": "salt and pepper", "group": null }
   ],
   "instructions": [
-    { "stepNumber": 1, "text": "Heat olive oil in a large pot over medium heat. Saute onion and garlic for 2 minutes until fragrant." },
-    { "stepNumber": 2, "text": "Add the diced pumpkin and cook for 3 minutes, stirring occasionally." },
-    { "stepNumber": 3, "text": "Add pasta, vegetable broth, and cream. Bring to a boil, then reduce to a simmer." },
-    { "stepNumber": 4, "text": "Cook for 15 minutes, stirring every few minutes, until pasta is al dente and pumpkin is soft." },
-    { "stepNumber": 5, "text": "Meanwhile, fry sage leaves in a small pan with a little butter until crispy. Set aside on paper towel." },
-    { "stepNumber": 6, "text": "Stir in parmesan and nutmeg. Season with salt and pepper. The sauce should be creamy and coat the pasta." },
+    {
+      "stepNumber": 1,
+      "text": "Heat olive oil in a large pot over medium heat. Saute onion and garlic for 2 minutes until fragrant."
+    },
+    {
+      "stepNumber": 2,
+      "text": "Add the diced pumpkin and cook for 3 minutes, stirring occasionally."
+    },
+    {
+      "stepNumber": 3,
+      "text": "Add pasta, vegetable broth, and cream. Bring to a boil, then reduce to a simmer."
+    },
+    {
+      "stepNumber": 4,
+      "text": "Cook for 15 minutes, stirring every few minutes, until pasta is al dente and pumpkin is soft."
+    },
+    {
+      "stepNumber": 5,
+      "text": "Meanwhile, fry sage leaves in a small pan with a little butter until crispy. Set aside on paper towel."
+    },
+    {
+      "stepNumber": 6,
+      "text": "Stir in parmesan and nutmeg. Season with salt and pepper. The sauce should be creamy and coat the pasta."
+    },
     { "stepNumber": 7, "text": "Serve topped with crispy sage leaves and extra parmesan." }
   ],
   "categories": ["dinner", "italian"],
@@ -224,13 +266,31 @@ Below are three complete JSON examples that conform to the `Recipe` interface. T
     { "amount": 1, "unit": "piece", "name": "bell pepper, diced small", "group": "topping" }
   ],
   "instructions": [
-    { "stepNumber": 1, "text": "Mix flour, yeast, sugar, and salt in a bowl. Add warm water and olive oil, then knead for 5 minutes until smooth." },
+    {
+      "stepNumber": 1,
+      "text": "Mix flour, yeast, sugar, and salt in a bowl. Add warm water and olive oil, then knead for 5 minutes until smooth."
+    },
     { "stepNumber": 2, "text": "Let the dough rest for 10 minutes covered with a towel." },
-    { "stepNumber": 3, "text": "Mix passata with oregano and a pinch of sugar for a mild pizza sauce." },
-    { "stepNumber": 4, "text": "Divide dough into 8 small balls. Roll or press each into a mini pizza round (about 10cm diameter)." },
-    { "stepNumber": 5, "text": "Place on a lined baking sheet. Spread sauce on each mini pizza, then add cheese and toppings." },
-    { "stepNumber": 6, "text": "Bake at 220C (425F) for 10-12 minutes until cheese is bubbly and edges are golden." },
-    { "stepNumber": 7, "text": "Let cool for 2 minutes before serving. These freeze well for quick weekday meals." }
+    {
+      "stepNumber": 3,
+      "text": "Mix passata with oregano and a pinch of sugar for a mild pizza sauce."
+    },
+    {
+      "stepNumber": 4,
+      "text": "Divide dough into 8 small balls. Roll or press each into a mini pizza round (about 10cm diameter)."
+    },
+    {
+      "stepNumber": 5,
+      "text": "Place on a lined baking sheet. Spread sauce on each mini pizza, then add cheese and toppings."
+    },
+    {
+      "stepNumber": 6,
+      "text": "Bake at 220C (425F) for 10-12 minutes until cheese is bubbly and edges are golden."
+    },
+    {
+      "stepNumber": 7,
+      "text": "Let cool for 2 minutes before serving. These freeze well for quick weekday meals."
+    }
   ],
   "categories": ["dinner", "snack"],
   "tags": ["kid-friendly", "freezer-friendly", "fun", "easy"],
@@ -248,16 +308,16 @@ Below are three complete JSON examples that conform to the `Recipe` interface. T
 
 ## Access Patterns
 
-| Pattern | Implementation |
-|---------|---------------|
-| List all recipes for a user | `Query` on PK `userId` |
-| Get a single recipe | `GetItem` with PK `userId` + SK `id` |
+| Pattern                       | Implementation                                            |
+| ----------------------------- | --------------------------------------------------------- |
+| List all recipes for a user   | `Query` on PK `userId`                                    |
+| Get a single recipe           | `GetItem` with PK `userId` + SK `id`                      |
 | List recipes by creation date | `Query` on GSI `byCategory` (PK `userId`, SK `createdAt`) |
-| Filter by category | Application-side filter on `categories` array after query |
-| Filter by tag | Application-side filter on `tags` array after query |
-| Create recipe | `PutItem` with full Recipe object |
-| Update recipe | `UpdateCommand` with condition check for existence |
-| Delete recipe | `DeleteCommand` with condition check for existence |
+| Filter by category            | Application-side filter on `categories` array after query |
+| Filter by tag                 | Application-side filter on `tags` array after query       |
+| Create recipe                 | `PutItem` with full Recipe object                         |
+| Update recipe                 | `UpdateCommand` with condition check for existence        |
+| Delete recipe                 | `DeleteCommand` with condition check for existence        |
 
 ## Adding New Fields
 
