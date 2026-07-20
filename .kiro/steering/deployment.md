@@ -58,6 +58,7 @@ This deploys the `RecipeManagerStack` which creates all resources:
 - API Gateway REST API
 - Cognito User Pool and Client
 - S3 bucket for frontend
+- S3 BucketDeployment (deploys Angular build output and invalidates CloudFront)
 - CloudFront distribution
 - KMS encryption key
 
@@ -100,45 +101,12 @@ export const environment = {
 
 Replace the placeholder values with actual CDK output values.
 
-## Frontend Deployment
-
-After building the Angular app, upload it to the S3 bucket:
-
-```bash
-# Build production frontend
-pnpm nx build web
-
-# Sync to S3
-aws s3 sync dist/apps/web/browser s3://BUCKET_NAME --delete
-```
-
-### CloudFront Invalidation
-
-After uploading new frontend assets, invalidate the CloudFront cache:
-
-```bash
-aws cloudfront create-invalidation \
-  --distribution-id DISTRIBUTION_ID \
-  --paths "/*"
-```
-
-To find the distribution ID:
-```bash
-aws cloudfront list-distributions \
-  --query "DistributionList.Items[?Origins.Items[?Id=='BUCKET_NAME']].Id" \
-  --output text
-```
-
-Or retrieve it from CDK outputs / CloudFormation console.
-
 ## CI/CD Considerations
 
 A typical pipeline would:
 1. Run `pnpm install` and `pnpm nx run-many -t build`.
 2. Run `pnpm cdk synth` to validate infrastructure.
-3. Run `pnpm cdk deploy --require-approval never` for automated deployment.
-4. Run `aws s3 sync` for frontend upload.
-5. Run CloudFront invalidation.
+3. Run `pnpm cdk deploy --require-approval never` for automated deployment (this also deploys the frontend and invalidates CloudFront automatically).
 
 ## Destroying the Stack
 
