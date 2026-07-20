@@ -2,45 +2,46 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CreateRecipeInput } from '@recipe-manager/shared';
 import { RecipeService } from './recipe.service';
 
 @Component({
   selector: 'rm-recipe-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `
     <div class="form-container">
-      <h2>{{ isEdit ? 'Edit Recipe' : 'New Recipe' }}</h2>
+      <h2>{{ (isEdit ? 'RECIPES.FORM.TITLE_EDIT' : 'RECIPES.FORM.TITLE_NEW') | translate }}</h2>
       @if (loading) {
-        <p class="loading">Loading...</p>
+        <p class="loading">{{ 'RECIPES.FORM.LOADING' | translate }}</p>
       }
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-section">
           <div class="form-field">
-            <label for="title">Title</label>
-            <input id="title" type="text" formControlName="title" placeholder="Recipe title" />
+            <label for="title">{{ 'RECIPES.FORM.TITLE_LABEL' | translate }}</label>
+            <input id="title" type="text" formControlName="title" [placeholder]="'RECIPES.FORM.TITLE_PLACEHOLDER' | translate" />
           </div>
           <div class="form-field">
-            <label for="description">Description</label>
+            <label for="description">{{ 'RECIPES.FORM.DESCRIPTION_LABEL' | translate }}</label>
             <textarea
               id="description"
               formControlName="description"
               rows="3"
-              placeholder="Brief description"
+              [placeholder]="'RECIPES.FORM.DESCRIPTION_PLACEHOLDER' | translate"
             ></textarea>
           </div>
           <div class="form-row">
             <div class="form-field">
-              <label for="servings">Servings</label>
+              <label for="servings">{{ 'RECIPES.FORM.SERVINGS_LABEL' | translate }}</label>
               <input id="servings" type="number" formControlName="servings" min="1" />
             </div>
             <div class="form-field">
-              <label for="prepTime">Prep Time (min)</label>
+              <label for="prepTime">{{ 'RECIPES.FORM.PREP_TIME_LABEL' | translate }}</label>
               <input id="prepTime" type="number" formControlName="prepTimeMinutes" min="0" />
             </div>
             <div class="form-field">
-              <label for="cookTime">Cook Time (min)</label>
+              <label for="cookTime">{{ 'RECIPES.FORM.COOK_TIME_LABEL' | translate }}</label>
               <input id="cookTime" type="number" formControlName="cookTimeMinutes" min="0" />
             </div>
           </div>
@@ -48,24 +49,24 @@ import { RecipeService } from './recipe.service';
 
         <div class="form-section">
           <div class="section-header">
-            <h3>Ingredients</h3>
-            <button type="button" class="btn-add" (click)="addIngredient()">+ Add</button>
+            <h3>{{ 'RECIPES.FORM.INGREDIENTS_TITLE' | translate }}</h3>
+            <button type="button" class="btn-add" (click)="addIngredient()">{{ 'RECIPES.FORM.ADD' | translate }}</button>
           </div>
           <div formArrayName="ingredients">
             @for (ing of ingredientsArray.controls; track $index; let i = $index) {
               <div class="ingredient-row" [formGroupName]="i">
-                <input type="number" formControlName="amount" placeholder="Amt" class="input-sm" />
-                <input type="text" formControlName="unit" placeholder="Unit" class="input-sm" />
+                <input type="number" formControlName="amount" [placeholder]="'RECIPES.FORM.AMOUNT_PLACEHOLDER' | translate" class="input-sm" />
+                <input type="text" formControlName="unit" [placeholder]="'RECIPES.FORM.UNIT_PLACEHOLDER' | translate" class="input-sm" />
                 <input
                   type="text"
                   formControlName="name"
-                  placeholder="Ingredient name"
+                  [placeholder]="'RECIPES.FORM.INGREDIENT_NAME_PLACEHOLDER' | translate"
                   class="input-lg"
                 />
                 <input
                   type="text"
                   formControlName="group"
-                  placeholder="Group (optional)"
+                  [placeholder]="'RECIPES.FORM.GROUP_PLACEHOLDER' | translate"
                   class="input-md"
                 />
                 <button type="button" class="btn-remove" (click)="removeIngredient(i)">x</button>
@@ -76,14 +77,14 @@ import { RecipeService } from './recipe.service';
 
         <div class="form-section">
           <div class="section-header">
-            <h3>Instructions</h3>
-            <button type="button" class="btn-add" (click)="addInstruction()">+ Add</button>
+            <h3>{{ 'RECIPES.FORM.INSTRUCTIONS_TITLE' | translate }}</h3>
+            <button type="button" class="btn-add" (click)="addInstruction()">{{ 'RECIPES.FORM.ADD' | translate }}</button>
           </div>
           <div formArrayName="instructions">
             @for (inst of instructionsArray.controls; track $index; let i = $index) {
               <div class="instruction-row" [formGroupName]="i">
                 <span class="step-number">{{ i + 1 }}.</span>
-                <textarea formControlName="text" rows="2" placeholder="Step description"></textarea>
+                <textarea formControlName="text" rows="2" [placeholder]="'RECIPES.FORM.STEP_PLACEHOLDER' | translate"></textarea>
                 <div class="instruction-actions">
                   <button
                     type="button"
@@ -91,7 +92,7 @@ import { RecipeService } from './recipe.service';
                     [disabled]="i === 0"
                     (click)="moveInstruction(i, -1)"
                   >
-                    Up
+                    {{ 'RECIPES.FORM.UP' | translate }}
                   </button>
                   <button
                     type="button"
@@ -99,7 +100,7 @@ import { RecipeService } from './recipe.service';
                     [disabled]="i === instructionsArray.length - 1"
                     (click)="moveInstruction(i, 1)"
                   >
-                    Down
+                    {{ 'RECIPES.FORM.DOWN' | translate }}
                   </button>
                   <button type="button" class="btn-remove" (click)="removeInstruction(i)">x</button>
                 </div>
@@ -110,17 +111,17 @@ import { RecipeService } from './recipe.service';
 
         <div class="form-section">
           <div class="form-field">
-            <label for="categories">Categories (comma-separated)</label>
+            <label for="categories">{{ 'RECIPES.FORM.CATEGORIES_LABEL' | translate }}</label>
             <input
               id="categories"
               type="text"
               formControlName="categories"
-              placeholder="e.g. dinner, vegetarian"
+              [placeholder]="'RECIPES.FORM.CATEGORIES_PLACEHOLDER' | translate"
             />
           </div>
           <div class="form-field">
-            <label for="tags">Tags (comma-separated)</label>
-            <input id="tags" type="text" formControlName="tags" placeholder="e.g. quick, healthy" />
+            <label for="tags">{{ 'RECIPES.FORM.TAGS_LABEL' | translate }}</label>
+            <input id="tags" type="text" formControlName="tags" [placeholder]="'RECIPES.FORM.TAGS_PLACEHOLDER' | translate" />
           </div>
         </div>
 
@@ -129,9 +130,9 @@ import { RecipeService } from './recipe.service';
         }
 
         <div class="form-actions">
-          <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
+          <button type="button" class="btn-cancel" (click)="cancel()">{{ 'RECIPES.FORM.CANCEL' | translate }}</button>
           <button type="submit" class="btn-submit" [disabled]="form.invalid || submitting">
-            {{ submitting ? 'Saving...' : isEdit ? 'Update Recipe' : 'Create Recipe' }}
+            {{ submitting ? ('RECIPES.FORM.SAVING' | translate) : (isEdit ? ('RECIPES.FORM.UPDATE' | translate) : ('RECIPES.FORM.CREATE' | translate)) }}
           </button>
         </div>
       </form>

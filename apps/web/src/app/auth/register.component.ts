@@ -2,22 +2,23 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from './auth.service';
 
 @Component({
   selector: 'rm-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   template: `
     <div class="auth-container">
-      <h2>Create Account</h2>
+      <h2>{{ 'AUTH.REGISTER.TITLE' | translate }}</h2>
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-field">
-          <label for="email">Email</label>
+          <label for="email">{{ 'AUTH.REGISTER.EMAIL_LABEL' | translate }}</label>
           <input id="email" type="email" formControlName="email" autocomplete="email" />
         </div>
         <div class="form-field">
-          <label for="password">Password</label>
+          <label for="password">{{ 'AUTH.REGISTER.PASSWORD_LABEL' | translate }}</label>
           <input
             id="password"
             type="password"
@@ -26,7 +27,7 @@ import { AuthService } from './auth.service';
           />
         </div>
         <div class="form-field">
-          <label for="confirmPassword">Confirm Password</label>
+          <label for="confirmPassword">{{ 'AUTH.REGISTER.CONFIRM_PASSWORD_LABEL' | translate }}</label>
           <input
             id="confirmPassword"
             type="password"
@@ -38,10 +39,10 @@ import { AuthService } from './auth.service';
           <p class="error">{{ errorMessage }}</p>
         }
         <button type="submit" [disabled]="form.invalid || loading">
-          {{ loading ? 'Registering...' : 'Register' }}
+          {{ loading ? ('AUTH.REGISTER.SUBMITTING' | translate) : ('AUTH.REGISTER.SUBMIT' | translate) }}
         </button>
       </form>
-      <p class="link">Already have an account? <a routerLink="/login">Sign In</a></p>
+      <p class="link">{{ 'AUTH.REGISTER.HAS_ACCOUNT' | translate }} <a routerLink="/login">{{ 'AUTH.REGISTER.SIGN_IN_LINK' | translate }}</a></p>
     </div>
   `,
   styles: [
@@ -120,7 +121,8 @@ export class RegisterComponent {
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly translateService: TranslateService
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -133,7 +135,7 @@ export class RegisterComponent {
     if (this.form.invalid) return;
     const { email, password, confirmPassword } = this.form.value;
     if (password !== confirmPassword) {
-      this.errorMessage = 'Passwords do not match';
+      this.errorMessage = this.translateService.instant('AUTH.REGISTER.PASSWORDS_MISMATCH');
       return;
     }
     this.loading = true;

@@ -2,22 +2,23 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from './auth.service';
 
 @Component({
   selector: 'rm-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   template: `
     <div class="auth-container">
-      <h2>Sign In</h2>
+      <h2>{{ 'AUTH.LOGIN.TITLE' | translate }}</h2>
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-field">
-          <label for="email">Email</label>
+          <label for="email">{{ 'AUTH.LOGIN.EMAIL_LABEL' | translate }}</label>
           <input id="email" type="email" formControlName="email" autocomplete="email" />
         </div>
         <div class="form-field">
-          <label for="password">Password</label>
+          <label for="password">{{ 'AUTH.LOGIN.PASSWORD_LABEL' | translate }}</label>
           <input
             id="password"
             type="password"
@@ -29,10 +30,10 @@ import { AuthService } from './auth.service';
           <p class="error">{{ errorMessage }}</p>
         }
         <button type="submit" [disabled]="form.invalid || loading">
-          {{ loading ? 'Signing in...' : 'Sign In' }}
+          {{ loading ? ('AUTH.LOGIN.SUBMITTING' | translate) : ('AUTH.LOGIN.SUBMIT' | translate) }}
         </button>
       </form>
-      <p class="link">Don't have an account? <a routerLink="/register">Register</a></p>
+      <p class="link">{{ 'AUTH.LOGIN.NO_ACCOUNT' | translate }} <a routerLink="/register">{{ 'AUTH.LOGIN.REGISTER_LINK' | translate }}</a></p>
     </div>
   `,
   styles: [

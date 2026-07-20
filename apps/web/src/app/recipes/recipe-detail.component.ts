@@ -1,17 +1,18 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Recipe } from '@recipe-manager/shared';
 import { RecipeService } from './recipe.service';
 
 @Component({
   selector: 'rm-recipe-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
     <div class="recipe-detail-container">
       @if (loading) {
-        <p class="loading">Loading recipe...</p>
+        <p class="loading">{{ 'RECIPES.DETAIL.LOADING' | translate }}</p>
       }
       @if (error) {
         <p class="error">{{ error }}</p>
@@ -23,30 +24,30 @@ import { RecipeService } from './recipe.service';
             <p class="description">{{ recipe.description }}</p>
           </div>
           <div class="actions">
-            <a [routerLink]="['/recipes', recipe.id, 'edit']" class="btn-edit">Edit</a>
-            <button class="btn-delete" (click)="deleteRecipe()">Delete</button>
+            <a [routerLink]="['/recipes', recipe.id, 'edit']" class="btn-edit">{{ 'RECIPES.DETAIL.EDIT' | translate }}</a>
+            <button class="btn-delete" (click)="deleteRecipe()">{{ 'RECIPES.DETAIL.DELETE' | translate }}</button>
           </div>
         </div>
 
         <div class="meta-bar">
           @if (recipe.prepTimeMinutes) {
             <div class="meta-item">
-              <strong>Prep Time</strong><span>{{ recipe.prepTimeMinutes }} min</span>
+              <strong>{{ 'RECIPES.DETAIL.PREP_TIME' | translate }}</strong><span>{{ recipe.prepTimeMinutes }} {{ 'RECIPES.DETAIL.MIN' | translate }}</span>
             </div>
           }
           @if (recipe.cookTimeMinutes) {
             <div class="meta-item">
-              <strong>Cook Time</strong><span>{{ recipe.cookTimeMinutes }} min</span>
+              <strong>{{ 'RECIPES.DETAIL.COOK_TIME' | translate }}</strong><span>{{ recipe.cookTimeMinutes }} {{ 'RECIPES.DETAIL.MIN' | translate }}</span>
             </div>
           }
           @if (recipe.totalTimeMinutes) {
             <div class="meta-item">
-              <strong>Total Time</strong><span>{{ recipe.totalTimeMinutes }} min</span>
+              <strong>{{ 'RECIPES.DETAIL.TOTAL_TIME' | translate }}</strong><span>{{ recipe.totalTimeMinutes }} {{ 'RECIPES.DETAIL.MIN' | translate }}</span>
             </div>
           }
           @if (recipe.servings) {
             <div class="meta-item">
-              <strong>Servings</strong><span>{{ recipe.servings }}</span>
+              <strong>{{ 'RECIPES.DETAIL.SERVINGS' | translate }}</strong><span>{{ recipe.servings }}</span>
             </div>
           }
         </div>
@@ -63,7 +64,7 @@ import { RecipeService } from './recipe.service';
         }
 
         <section class="ingredients-section">
-          <h3>Ingredients</h3>
+          <h3>{{ 'RECIPES.DETAIL.INGREDIENTS' | translate }}</h3>
           @for (group of ingredientGroups; track group.name) {
             @if (group.name) {
               <h4 class="group-name">{{ group.name }}</h4>
@@ -77,7 +78,7 @@ import { RecipeService } from './recipe.service';
         </section>
 
         <section class="instructions-section">
-          <h3>Instructions</h3>
+          <h3>{{ 'RECIPES.DETAIL.INSTRUCTIONS' | translate }}</h3>
           <ol>
             @for (step of recipe.instructions; track step.stepNumber) {
               <li>{{ step.text }}</li>
@@ -85,7 +86,7 @@ import { RecipeService } from './recipe.service';
           </ol>
         </section>
 
-        <a routerLink="/recipes" class="back-link">Back to Recipes</a>
+        <a routerLink="/recipes" class="back-link">{{ 'RECIPES.DETAIL.BACK' | translate }}</a>
       }
     </div>
   `,
@@ -234,13 +235,14 @@ export class RecipeDetailComponent implements OnInit {
   constructor(
     private readonly recipeService: RecipeService,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly translateService: TranslateService
   ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.error = 'Recipe not found';
+      this.error = this.translateService.instant('RECIPES.DETAIL.NOT_FOUND');
       return;
     }
     this.loading = true;
@@ -259,7 +261,7 @@ export class RecipeDetailComponent implements OnInit {
 
   deleteRecipe(): void {
     if (!this.recipe) return;
-    if (!confirm('Are you sure you want to delete this recipe?')) return;
+    if (!confirm(this.translateService.instant('RECIPES.DETAIL.CONFIRM_DELETE'))) return;
     this.recipeService.deleteRecipe(this.recipe.id).subscribe({
       next: () => this.router.navigate(['/recipes']),
       error: (err) => {

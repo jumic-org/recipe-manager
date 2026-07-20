@@ -1,27 +1,28 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Recipe } from '@recipe-manager/shared';
 import { RecipeService } from './recipe.service';
 
 @Component({
   selector: 'rm-recipe-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
     <div class="recipe-list-container">
       <div class="list-header">
-        <h2>My Recipes</h2>
-        <a routerLink="/recipes/new" class="btn-new">New Recipe</a>
+        <h2>{{ 'RECIPES.LIST.TITLE' | translate }}</h2>
+        <a routerLink="/recipes/new" class="btn-new">{{ 'RECIPES.LIST.NEW_RECIPE' | translate }}</a>
       </div>
       @if (loading) {
-        <p class="loading">Loading recipes...</p>
+        <p class="loading">{{ 'RECIPES.LIST.LOADING' | translate }}</p>
       }
       @if (error) {
         <p class="error">{{ error }}</p>
       }
       @if (!loading && recipes.length === 0 && !error) {
-        <p class="empty">No recipes yet. Create your first recipe!</p>
+        <p class="empty">{{ 'RECIPES.LIST.EMPTY' | translate }}</p>
       }
       <div class="recipe-grid">
         @for (recipe of recipes; track recipe.id) {
@@ -31,13 +32,13 @@ import { RecipeService } from './recipe.service';
               <p class="description">{{ recipe.description }}</p>
               <div class="meta">
                 @if (recipe.prepTimeMinutes) {
-                  <span>Prep: {{ recipe.prepTimeMinutes }}min</span>
+                  <span>{{ 'RECIPES.LIST.PREP' | translate }}: {{ recipe.prepTimeMinutes }}min</span>
                 }
                 @if (recipe.cookTimeMinutes) {
-                  <span>Cook: {{ recipe.cookTimeMinutes }}min</span>
+                  <span>{{ 'RECIPES.LIST.COOK' | translate }}: {{ recipe.cookTimeMinutes }}min</span>
                 }
                 @if (recipe.servings) {
-                  <span>Serves: {{ recipe.servings }}</span>
+                  <span>{{ 'RECIPES.LIST.SERVES' | translate }}: {{ recipe.servings }}</span>
                 }
               </div>
               @if (recipe.categories.length > 0) {
