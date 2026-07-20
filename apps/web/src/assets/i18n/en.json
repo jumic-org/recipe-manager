@@ -5,10 +5,6 @@
       "MY_RECIPES": "My Recipes",
       "SIGN_IN": "Sign In",
       "SIGN_OUT": "Sign Out"
-    },
-    "LANGUAGE": {
-      "EN": "EN",
-      "DE": "DE"
     }
   },
   "AUTH": {
