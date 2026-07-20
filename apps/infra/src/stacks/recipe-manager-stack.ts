@@ -116,15 +116,6 @@ export class RecipeManagerStack extends Stack {
       ]
     });
 
-    // Frontend Deployment
-    const frontendDeployment = new BucketDeployment(this, 'FrontendDeployment', {
-      sources: [Source.asset(path.join(__dirname, '../../../../dist/apps/web/browser'))],
-      destinationBucket: frontendBucket,
-      distribution,
-      distributionPaths: ['/*'],
-      prune: false
-    });
-
     // Lambda Function
     const apiHandler = new NodejsFunction(this, 'RecipeApiHandler', {
       entry: path.join(__dirname, '../../../api/src/handler.ts'),
@@ -183,9 +174,13 @@ export class RecipeManagerStack extends Stack {
     recipe.addMethod('PUT', lambdaIntegration, methodOptions);
     recipe.addMethod('DELETE', lambdaIntegration, methodOptions);
 
-    // Config Deployment - deploys runtime config with actual Cognito/API values
-    const configDeployment = new BucketDeployment(this, 'ConfigDeployment', {
+    // Frontend Deployment - deploys Angular build files AND runtime config.json
+    // config.json is generated with real Cognito/API values resolved at deploy time.
+    // Both sources are combined in a single BucketDeployment to ensure config.json
+    // is always deployed atomically with the frontend, eliminating any race conditions.
+    new BucketDeployment(this, 'FrontendDeployment', {
       sources: [
+        Source.asset(path.join(__dirname, '../../../../dist/apps/web/browser')),
         Source.jsonData('config.json', {
           apiUrl: api.url,
           userPoolId: userPool.userPoolId,
@@ -195,10 +190,8 @@ export class RecipeManagerStack extends Stack {
       ],
       destinationBucket: frontendBucket,
       distribution,
-      distributionPaths: ['/config.json'],
-      prune: false
+      distributionPaths: ['/*']
     });
-    configDeployment.node.addDependency(frontendDeployment);
 
     // Outputs
     new CfnOutput(this, 'ApiUrl', {
