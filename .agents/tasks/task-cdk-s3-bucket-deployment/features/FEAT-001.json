@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Add BucketDeployment construct to CDK stack and update deployment documentation",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Run `pnpm install` in the workspace root to install all dependencies.",
     "Modify `apps/infra/src/stacks/recipe-manager-stack.ts`: Add import for `BucketDeployment` and `Source` from `aws-cdk-lib/aws-s3-deployment`.",
@@ -24,5 +24,5 @@
     "pnpm cdk synth"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "BucketDeployment requires the source asset directory to exist at synth time. Created a placeholder dist/apps/web/browser directory for cdk synth verification. The generated CloudFormation template correctly contains Custom::CDKBucketDeployment resources with DistributionPaths set to ['/*']."
 }
