@@ -89,6 +89,17 @@ export class AuthService {
           },
           onFailure: (err) => {
             reject(err);
+          },
+          newPasswordRequired: () => {
+            user.completeNewPasswordChallenge(password, {}, {
+              onSuccess: () => {
+                this.authenticatedSubject.next(true);
+                resolve();
+              },
+              onFailure: (err) => {
+                reject(err);
+              }
+            });
           }
         });
       })
