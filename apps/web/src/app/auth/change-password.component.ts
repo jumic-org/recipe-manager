@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -135,7 +135,8 @@ export class ChangePasswordComponent {
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       currentPassword: ['', [Validators.required]],
@@ -158,10 +159,13 @@ export class ChangePasswordComponent {
       next: () => {
         this.loading = false;
         this.successMessage = this.translateService.instant('AUTH.CHANGE_PASSWORD.SUCCESS');
+        this.form.reset();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.loading = false;
         this.errorMessage = err.message || 'Password change failed';
+        this.cdr.markForCheck();
       }
     });
   }

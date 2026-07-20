@@ -25,5 +25,5 @@
     "Run 'node scripts/verify-web-build.js' to confirm build output is valid"
   ],
   "blocked_reason": null,
-  "findings": "Build succeeded with only pre-existing CommonJS warnings from amazon-cognito-identity-js. All verification steps passed. Used proper German umlauts in de.json translations."
+  "findings": "Build succeeded with only pre-existing CommonJS warnings from amazon-cognito-identity-js. All verification steps passed. Used proper German umlauts in de.json translations. Post-review fix: injected ChangeDetectorRef and added markForCheck() calls to fix OnPush change detection stall; added form.reset() after successful password change to clear sensitive values from DOM."
 }
