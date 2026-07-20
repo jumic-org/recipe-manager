@@ -1,13 +1,25 @@
 <div class="app-shell">
   <header class="app-header">
-    <a routerLink="/" class="app-title">Recipe Manager</a>
+    <a routerLink="/" class="app-title">{{ 'APP.TITLE' | translate }}</a>
     <nav>
       @if (isAuthenticated$ | async) {
-        <a routerLink="/recipes" class="nav-link">My Recipes</a>
-        <button class="btn-logout" (click)="signOut()">Sign Out</button>
+        <a routerLink="/recipes" class="nav-link">{{ 'APP.NAV.MY_RECIPES' | translate }}</a>
+        <button class="btn-logout" (click)="signOut()">{{ 'APP.NAV.SIGN_OUT' | translate }}</button>
       } @else {
-        <a routerLink="/login" class="nav-link">Sign In</a>
+        <a routerLink="/login" class="nav-link">{{ 'APP.NAV.SIGN_IN' | translate }}</a>
       }
+      <span class="lang-switcher">
+        <button
+          class="btn-lang"
+          [class.active]="currentLang === 'en'"
+          (click)="switchLanguage('en')"
+        >EN</button>
+        <button
+          class="btn-lang"
+          [class.active]="currentLang === 'de'"
+          (click)="switchLanguage('de')"
+        >DE</button>
+      </span>
     </nav>
   </header>
   <main class="app-content">

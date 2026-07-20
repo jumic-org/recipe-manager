@@ -1,0 +1,103 @@
+{
+  "APP": {
+    "TITLE": "Recipe Manager",
+    "NAV": {
+      "MY_RECIPES": "My Recipes",
+      "SIGN_IN": "Sign In",
+      "SIGN_OUT": "Sign Out"
+    }
+  },
+  "AUTH": {
+    "LOGIN": {
+      "TITLE": "Sign In",
+      "EMAIL_LABEL": "Email",
+      "PASSWORD_LABEL": "Password",
+      "SUBMIT": "Sign In",
+      "SUBMITTING": "Signing in...",
+      "NO_ACCOUNT": "Don't have an account?",
+      "REGISTER_LINK": "Register"
+    },
+    "REGISTER": {
+      "TITLE": "Create Account",
+      "EMAIL_LABEL": "Email",
+      "PASSWORD_LABEL": "Password",
+      "CONFIRM_PASSWORD_LABEL": "Confirm Password",
+      "SUBMIT": "Register",
+      "SUBMITTING": "Registering...",
+      "HAS_ACCOUNT": "Already have an account?",
+      "SIGN_IN_LINK": "Sign In",
+      "PASSWORDS_MISMATCH": "Passwords do not match"
+    },
+    "CONFIRM": {
+      "TITLE": "Confirm Registration",
+      "DESCRIPTION": "Enter the verification code sent to your email.",
+      "EMAIL_LABEL": "Email",
+      "CODE_LABEL": "Verification Code",
+      "SUBMIT": "Confirm",
+      "SUBMITTING": "Confirming...",
+      "SUCCESS": "Account confirmed! Redirecting to login...",
+      "BACK_TO_SIGN_IN": "Back to Sign In"
+    }
+  },
+  "RECIPES": {
+    "LIST": {
+      "TITLE": "My Recipes",
+      "NEW_RECIPE": "New Recipe",
+      "LOADING": "Loading recipes...",
+      "EMPTY": "No recipes yet. Create your first recipe!",
+      "PREP": "Prep",
+      "COOK": "Cook",
+      "SERVES": "Serves",
+      "LOAD_ERROR": "Failed to load recipes"
+    },
+    "DETAIL": {
+      "LOADING": "Loading recipe...",
+      "EDIT": "Edit",
+      "DELETE": "Delete",
+      "CONFIRM_DELETE": "Are you sure you want to delete this recipe?",
+      "PREP_TIME": "Prep Time",
+      "COOK_TIME": "Cook Time",
+      "TOTAL_TIME": "Total Time",
+      "SERVINGS": "Servings",
+      "INGREDIENTS": "Ingredients",
+      "INSTRUCTIONS": "Instructions",
+      "BACK": "Back to Recipes",
+      "NOT_FOUND": "Recipe not found",
+      "MIN": "min",
+      "LOAD_ERROR": "Failed to load recipe",
+      "DELETE_ERROR": "Failed to delete recipe"
+    },
+    "FORM": {
+      "TITLE_NEW": "New Recipe",
+      "TITLE_EDIT": "Edit Recipe",
+      "LOADING": "Loading...",
+      "TITLE_LABEL": "Title",
+      "TITLE_PLACEHOLDER": "Recipe title",
+      "DESCRIPTION_LABEL": "Description",
+      "DESCRIPTION_PLACEHOLDER": "Brief description",
+      "SERVINGS_LABEL": "Servings",
+      "PREP_TIME_LABEL": "Prep Time (min)",
+      "COOK_TIME_LABEL": "Cook Time (min)",
+      "INGREDIENTS_TITLE": "Ingredients",
+      "INSTRUCTIONS_TITLE": "Instructions",
+      "ADD": "+ Add",
+      "AMOUNT_PLACEHOLDER": "Amt",
+      "UNIT_PLACEHOLDER": "Unit",
+      "INGREDIENT_NAME_PLACEHOLDER": "Ingredient name",
+      "GROUP_PLACEHOLDER": "Group (optional)",
+      "STEP_PLACEHOLDER": "Step description",
+      "UP": "Up",
+      "DOWN": "Down",
+      "CATEGORIES_LABEL": "Categories (comma-separated)",
+      "CATEGORIES_PLACEHOLDER": "e.g. dinner, vegetarian",
+      "TAGS_LABEL": "Tags (comma-separated)",
+      "TAGS_PLACEHOLDER": "e.g. quick, healthy",
+      "CANCEL": "Cancel",
+      "CREATE": "Create Recipe",
+      "UPDATE": "Update Recipe",
+      "SAVING": "Saving...",
+      "LOAD_ERROR": "Failed to load recipe",
+      "SAVE_ERROR": "Failed to save recipe"
+    }
+  }
+}

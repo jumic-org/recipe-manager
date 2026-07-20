@@ -1,0 +1,29 @@
+{
+  "project_type": "Angular 21 SPA in Nx monorepo (standalone components, OnPush change detection)",
+  "language": "TypeScript",
+  "build_system": "Nx 22.7.3 with pnpm, @angular-devkit/build-angular:application executor",
+  "test_framework": "No test framework configured (no spec files, unit test runner set to 'none')",
+  "build_command": "pnpm nx build web",
+  "test_command": "No unit test command available. Verification is via build + verify:web script.",
+  "verification_instructions": "1. Run 'pnpm nx build web' to confirm Angular build succeeds. 2. Run 'node scripts/verify-web-build.js' to confirm index.html is produced and config.json is excluded.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "1. corepack enable. 2. pnpm install.",
+  "environment_constraints": "OPEN_INTERNET - full network access. Node 22 available. Project conventions require Node >= 24 but build works on 22.",
+  "contribution_requirements": "Standalone components only (no NgModules). ChangeDetectionStrategy.OnPush required. Selector prefix: rm-. SCSS co-located with components. providedIn: 'root' for services. Strict TypeScript with noPropertyAccessFromIndexSignature.",
+  "key_patterns": "Standalone components with direct imports array. Services use @Injectable({ providedIn: 'root' }). App uses APP_INITIALIZER for config loading. Components use inline templates (except app.component which uses templateUrl). ReactiveFormsModule used in form components. AuthService/RecipeService pattern. Routes in app.routes.ts with authGuard.",
+  "relevant_files": [
+    "apps/web/src/app/app.config.ts",
+    "apps/web/src/app/app.component.ts",
+    "apps/web/src/app/app.component.html",
+    "apps/web/src/app/auth/login.component.ts",
+    "apps/web/src/app/auth/register.component.ts",
+    "apps/web/src/app/auth/confirm.component.ts",
+    "apps/web/src/app/recipes/recipe-list.component.ts",
+    "apps/web/src/app/recipes/recipe-detail.component.ts",
+    "apps/web/src/app/recipes/recipe-form.component.ts",
+    "apps/web/project.json",
+    "apps/web/src/index.html",
+    "package.json"
+  ],
+  "directory_structure": "Nx monorepo: apps/web (Angular frontend), apps/api (Lambda), apps/infra (CDK), libs/shared (shared types). Web app: src/app/auth/ (login, register, confirm components + auth.service), src/app/recipes/ (list, detail, form components + recipe.service), src/app/config/ (config.service). Assets in src/assets/."
+}

@@ -1,0 +1,103 @@
+{
+  "APP": {
+    "TITLE": "Rezeptmanager",
+    "NAV": {
+      "MY_RECIPES": "Meine Rezepte",
+      "SIGN_IN": "Anmelden",
+      "SIGN_OUT": "Abmelden"
+    }
+  },
+  "AUTH": {
+    "LOGIN": {
+      "TITLE": "Anmelden",
+      "EMAIL_LABEL": "E-Mail",
+      "PASSWORD_LABEL": "Passwort",
+      "SUBMIT": "Anmelden",
+      "SUBMITTING": "Anmeldung...",
+      "NO_ACCOUNT": "Noch kein Konto?",
+      "REGISTER_LINK": "Registrieren"
+    },
+    "REGISTER": {
+      "TITLE": "Konto erstellen",
+      "EMAIL_LABEL": "E-Mail",
+      "PASSWORD_LABEL": "Passwort",
+      "CONFIRM_PASSWORD_LABEL": "Passwort wiederholen",
+      "SUBMIT": "Registrieren",
+      "SUBMITTING": "Registrierung...",
+      "HAS_ACCOUNT": "Bereits ein Konto?",
+      "SIGN_IN_LINK": "Anmelden",
+      "PASSWORDS_MISMATCH": "Passwörter stimmen nicht überein"
+    },
+    "CONFIRM": {
+      "TITLE": "Registrierung bestätigen",
+      "DESCRIPTION": "Geben Sie den Bestätigungscode ein, der an Ihre E-Mail gesendet wurde.",
+      "EMAIL_LABEL": "E-Mail",
+      "CODE_LABEL": "Bestätigungscode",
+      "SUBMIT": "Bestätigen",
+      "SUBMITTING": "Bestätigung...",
+      "SUCCESS": "Konto bestätigt! Weiterleitung zur Anmeldung...",
+      "BACK_TO_SIGN_IN": "Zurück zur Anmeldung"
+    }
+  },
+  "RECIPES": {
+    "LIST": {
+      "TITLE": "Meine Rezepte",
+      "NEW_RECIPE": "Neues Rezept",
+      "LOADING": "Rezepte werden geladen...",
+      "EMPTY": "Noch keine Rezepte. Erstellen Sie Ihr erstes Rezept!",
+      "PREP": "Vorbereitung",
+      "COOK": "Kochen",
+      "SERVES": "Portionen",
+      "LOAD_ERROR": "Rezepte konnten nicht geladen werden"
+    },
+    "DETAIL": {
+      "LOADING": "Rezept wird geladen...",
+      "EDIT": "Bearbeiten",
+      "DELETE": "Löschen",
+      "CONFIRM_DELETE": "Sind Sie sicher, dass Sie dieses Rezept löschen möchten?",
+      "PREP_TIME": "Vorbereitungszeit",
+      "COOK_TIME": "Kochzeit",
+      "TOTAL_TIME": "Gesamtzeit",
+      "SERVINGS": "Portionen",
+      "INGREDIENTS": "Zutaten",
+      "INSTRUCTIONS": "Zubereitung",
+      "BACK": "Zurück zu Rezepten",
+      "NOT_FOUND": "Rezept nicht gefunden",
+      "MIN": "Min",
+      "LOAD_ERROR": "Rezept konnte nicht geladen werden",
+      "DELETE_ERROR": "Rezept konnte nicht gelöscht werden"
+    },
+    "FORM": {
+      "TITLE_NEW": "Neues Rezept",
+      "TITLE_EDIT": "Rezept bearbeiten",
+      "LOADING": "Laden...",
+      "TITLE_LABEL": "Titel",
+      "TITLE_PLACEHOLDER": "Rezepttitel",
+      "DESCRIPTION_LABEL": "Beschreibung",
+      "DESCRIPTION_PLACEHOLDER": "Kurze Beschreibung",
+      "SERVINGS_LABEL": "Portionen",
+      "PREP_TIME_LABEL": "Vorbereitungszeit (Min)",
+      "COOK_TIME_LABEL": "Kochzeit (Min)",
+      "INGREDIENTS_TITLE": "Zutaten",
+      "INSTRUCTIONS_TITLE": "Zubereitung",
+      "ADD": "+ Hinzufügen",
+      "AMOUNT_PLACEHOLDER": "Menge",
+      "UNIT_PLACEHOLDER": "Einheit",
+      "INGREDIENT_NAME_PLACEHOLDER": "Zutat",
+      "GROUP_PLACEHOLDER": "Gruppe (optional)",
+      "STEP_PLACEHOLDER": "Schritt-Beschreibung",
+      "UP": "Hoch",
+      "DOWN": "Runter",
+      "CATEGORIES_LABEL": "Kategorien (kommagetrennt)",
+      "CATEGORIES_PLACEHOLDER": "z.B. Abendessen, vegetarisch",
+      "TAGS_LABEL": "Tags (kommagetrennt)",
+      "TAGS_PLACEHOLDER": "z.B. schnell, gesund",
+      "CANCEL": "Abbrechen",
+      "CREATE": "Rezept erstellen",
+      "UPDATE": "Rezept aktualisieren",
+      "SAVING": "Speichern...",
+      "LOAD_ERROR": "Rezept konnte nicht geladen werden",
+      "SAVE_ERROR": "Rezept konnte nicht gespeichert werden"
+    }
+  }
+}

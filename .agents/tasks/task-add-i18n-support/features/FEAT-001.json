@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Install ngx-translate, create English and German translation JSON files, configure the translate module in app.config.ts, integrate translations into all components with translatable strings, and add a language switcher UI in the app header.",
+  "status": "completed",
+  "review_fixes_applied": true,
+  "review_findings": "Fixed 3 of 5 review issues from v1: (1) German umlauts corrected from ASCII approximations to proper Unicode, (2) error fallback strings translated using translateService.instant() with new keys RECIPES.LIST.LOAD_ERROR, RECIPES.DETAIL.LOAD_ERROR, RECIPES.DETAIL.DELETE_ERROR, RECIPES.FORM.LOAD_ERROR, RECIPES.FORM.SAVE_ERROR, (3) language preference persisted in localStorage under key 'rm-lang'. Fixed 2 of 3 review issues from v2: (1) removed lang:'en' from provideTranslateService to avoid double HTTP fetch for DE users, (2) hardcoded EN/DE labels in language switcher buttons and removed APP.LANGUAGE keys from both JSON files. Issue #2 from v2 (no test coverage) is not applicable because the project has no test framework configured.",
+  "steps": [
+    "Install @ngx-translate/core and @ngx-translate/http-loader as dependencies in the root package.json. Run pnpm install.",
+    "Create translation files at apps/web/src/assets/i18n/en.json and apps/web/src/assets/i18n/de.json with all translatable strings extracted from the component templates. Organize keys hierarchically: APP (title, nav items), AUTH (login, register, confirm pages), RECIPES (list, detail, form pages). Include all user-visible strings: headings, labels, buttons, links, placeholders, loading states, error messages, empty states, confirmation dialogs.",
+    "Update apps/web/src/app/app.config.ts to add TranslateModule.forRoot() configuration with HttpLoaderFactory. Import provideHttpClient dependencies needed for the TranslateHttpLoader. Set default language to 'en'. Use importProvidersFrom to register the translate module providers.",
+    "Update apps/web/src/app/app.component.ts and apps/web/src/app/app.component.html: import TranslateModule in the component imports array, replace hardcoded strings with translate pipe (e.g., 'Recipe Manager' becomes {{ 'APP.TITLE' | translate }}). Add a language switcher (dropdown or toggle buttons) in the header nav area that calls TranslateService.use() to switch between 'en' and 'de'.",
+    "Update apps/web/src/app/auth/login.component.ts: import TranslateModule in imports array, replace all hardcoded text in the inline template with translate pipe usage (headings, labels, button text, link text).",
+    "Update apps/web/src/app/auth/register.component.ts: import TranslateModule in imports array, replace all hardcoded text in the inline template with translate pipe usage.",
+    "Update apps/web/src/app/auth/confirm.component.ts: import TranslateModule in imports array, replace all hardcoded text in the inline template with translate pipe usage.",
+    "Update apps/web/src/app/recipes/recipe-list.component.ts: import TranslateModule in imports array, replace all hardcoded text (heading, button text, loading message, empty state message, time labels) with translate pipe.",
+    "Update apps/web/src/app/recipes/recipe-detail.component.ts: import TranslateModule in imports array, replace all hardcoded text (loading, error, button labels like Edit/Delete, section headings like Ingredients/Instructions, time labels, confirm dialog text, back link) with translate pipe.",
+    "Update apps/web/src/app/recipes/recipe-form.component.ts: import TranslateModule in imports array, replace all hardcoded text (page title for new/edit, all form labels, placeholder text, button text like Cancel/Create Recipe/Update Recipe/Saving, section headers, Add button text) with translate pipe. For dynamic strings like the form title (Edit/New), use translate pipe with conditional keys.",
+    "Update apps/web/project.json to include 'apps/web/src/assets/i18n' in the assets array so translation JSON files are copied to the build output.",
+    "Run 'pnpm nx build web' to verify the build succeeds with all changes."
+  ],
+  "acceptance_criteria": [
+    "Translation files exist at apps/web/src/assets/i18n/en.json and apps/web/src/assets/i18n/de.json with comprehensive translations for all UI strings",
+    "The German translation file (de.json) has the same keys as the English file with proper German translations",
+    "TranslateModule is configured in app.config.ts with HttpLoader pointing to ./assets/i18n/",
+    "All components import TranslateModule and use the translate pipe for user-visible strings",
+    "A language switcher is visible in the app header allowing switching between English and German",
+    "The Angular production build succeeds without errors (pnpm nx build web)"
+  ],
+  "verification": [
+    "Run 'pnpm nx build web' and confirm it completes without errors",
+    "Run 'node scripts/verify-web-build.js' to confirm build output is valid",
+    "Verify translation files exist in the build output at dist/apps/web/browser/assets/i18n/en.json and dist/apps/web/browser/assets/i18n/de.json"
+  ],
+  "blocked_reason": null,
+  "findings": "@ngx-translate/core v18 removed TranslateModule. The new API uses standalone TranslatePipe directly in component imports, provideTranslateService() for configuration, and provideTranslateHttpLoader() for the HTTP loader (no constructor arguments - use config object). currentLang is now a Signal. addLangs() still works but setDefaultLang() is removed - use fallbackLang in config instead."
+}

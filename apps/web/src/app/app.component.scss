@@ -58,6 +58,35 @@ nav {
   background: #f0f0f0;
 }
 
+.lang-switcher {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+  border-left: 1px solid #ddd;
+  padding-left: 16px;
+}
+
+.btn-lang {
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.btn-lang:hover {
+  background: #f0f0f0;
+}
+
+.btn-lang.active {
+  background: #1c5b55;
+  color: #fff;
+  border-color: #1c5b55;
+}
+
 .app-content {
   padding: 24px 0;
 }

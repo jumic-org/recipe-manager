@@ -2,23 +2,24 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from './auth.service';
 
 @Component({
   selector: 'rm-confirm',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   template: `
     <div class="auth-container">
-      <h2>Confirm Registration</h2>
-      <p class="description">Enter the verification code sent to your email.</p>
+      <h2>{{ 'AUTH.CONFIRM.TITLE' | translate }}</h2>
+      <p class="description">{{ 'AUTH.CONFIRM.DESCRIPTION' | translate }}</p>
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-field">
-          <label for="email">Email</label>
+          <label for="email">{{ 'AUTH.CONFIRM.EMAIL_LABEL' | translate }}</label>
           <input id="email" type="email" formControlName="email" autocomplete="email" />
         </div>
         <div class="form-field">
-          <label for="code">Verification Code</label>
+          <label for="code">{{ 'AUTH.CONFIRM.CODE_LABEL' | translate }}</label>
           <input id="code" type="text" formControlName="code" autocomplete="one-time-code" />
         </div>
         @if (errorMessage) {
@@ -28,10 +29,10 @@ import { AuthService } from './auth.service';
           <p class="success">{{ successMessage }}</p>
         }
         <button type="submit" [disabled]="form.invalid || loading">
-          {{ loading ? 'Confirming...' : 'Confirm' }}
+          {{ loading ? ('AUTH.CONFIRM.SUBMITTING' | translate) : ('AUTH.CONFIRM.SUBMIT' | translate) }}
         </button>
       </form>
-      <p class="link"><a routerLink="/login">Back to Sign In</a></p>
+      <p class="link"><a routerLink="/login">{{ 'AUTH.CONFIRM.BACK_TO_SIGN_IN' | translate }}</a></p>
     </div>
   `,
   styles: [
@@ -123,7 +124,8 @@ export class ConfirmComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly translateService: TranslateService
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -147,7 +149,7 @@ export class ConfirmComponent implements OnInit {
     this.authService.confirmSignUp(email, code).subscribe({
       next: () => {
         this.loading = false;
-        this.successMessage = 'Account confirmed! Redirecting to login...';
+        this.successMessage = this.translateService.instant('AUTH.CONFIRM.SUCCESS');
         setTimeout(() => this.router.navigate(['/login']), 2000);
       },
       error: (err) => {
