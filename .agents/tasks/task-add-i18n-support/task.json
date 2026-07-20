@@ -1,0 +1,7 @@
+{
+  "task_id": "task-add-i18n-support",
+  "task_description": "Add internationalization (i18n) support to the Angular web application with English and German translation files, using ngx-translate. All UI strings should be extracted to JSON translation files and a language switcher should allow users to toggle between English and German.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001"],
+  "blocked_reason": null
+}
