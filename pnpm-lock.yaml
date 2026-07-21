@@ -100,8 +100,8 @@ importers:
         specifier: ^22.1.0
         version: 22.1.0(@angular/cli@22.0.7(@types/node@26.1.1)(chokidar@5.0.0))(chokidar@5.0.0)(eslint@10.7.0(jiti@2.7.0))(typescript-eslint@8.65.0(eslint@10.7.0(jiti@2.7.0))(typescript@5.9.3))(typescript@5.9.3)
       aws-cdk:
-        specifier: 2.1124.1
-        version: 2.1124.1
+        specifier: 2.1132.0
+        version: 2.1132.0
       esbuild:
         specifier: 0.28.1
         version: 0.28.1
@@ -4085,8 +4085,8 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.1124.1:
-    resolution: {integrity: sha512-sRYdPMdkX+02EHaT946AFV0w0CMfbHKWpLZPv525xTCkaVu1eYu6DzHFuTdimxdSN0uGQ2D4LHrD1sr94tRhow==}
+  aws-cdk@2.1132.0:
+    resolution: {integrity: sha512-kcIzBZQO+2v+F97iaeI29fdOUQEx44wr0qDb9HXNqdU82V+1ZKI1KuFlHwH2nq7+6iNc1bu60se4hFf+2d7vXg==}
     engines: {node: '>= 18.0.0'}
     hasBin: true
 
@@ -12683,7 +12683,7 @@ snapshots:
       '@aws-cdk/cloud-assembly-schema': 54.12.0
       constructs: 10.6.0
 
-  aws-cdk@2.1124.1: {}
+  aws-cdk@2.1132.0: {}
 
   axios@1.16.0:
     dependencies:
