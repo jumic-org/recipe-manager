@@ -33,7 +33,10 @@ import { AuthService } from './auth.service';
           {{ loading ? ('AUTH.LOGIN.SUBMITTING' | translate) : ('AUTH.LOGIN.SUBMIT' | translate) }}
         </button>
       </form>
-      <p class="link">{{ 'AUTH.LOGIN.NO_ACCOUNT' | translate }} <a routerLink="/register">{{ 'AUTH.LOGIN.REGISTER_LINK' | translate }}</a></p>
+      <p class="link">
+        {{ 'AUTH.LOGIN.NO_ACCOUNT' | translate }}
+        <a routerLink="/register">{{ 'AUTH.LOGIN.REGISTER_LINK' | translate }}</a>
+      </p>
     </div>
   `,
   styles: [
@@ -100,9 +103,9 @@ import { AuthService } from './auth.service';
         color: #1c5b55;
         font-weight: 600;
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
   form: FormGroup;
@@ -112,11 +115,11 @@ export class LoginComponent {
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]]
+      password: ['', [Validators.required]],
     });
   }
 
@@ -133,7 +136,7 @@ export class LoginComponent {
       error: (err) => {
         this.loading = false;
         this.errorMessage = err.message || 'Sign in failed';
-      }
+      },
     });
   }
 }

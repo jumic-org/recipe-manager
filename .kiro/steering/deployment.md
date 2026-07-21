@@ -89,7 +89,7 @@ export const environment = {
   apiUrl: 'http://localhost:3000/api', // or the deployed API URL for remote dev
   userPoolId: 'us-east-1_XXXXXXXXX',
   userPoolClientId: 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
-  region: 'us-east-1'
+  region: 'us-east-1',
 };
 ```
 
@@ -101,7 +101,7 @@ export const environment = {
   apiUrl: 'https://XXXXXXXXXX.execute-api.us-east-1.amazonaws.com/prod',
   userPoolId: 'us-east-1_XXXXXXXXX',
   userPoolClientId: 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
-  region: 'us-east-1'
+  region: 'us-east-1',
 };
 ```
 

@@ -42,7 +42,12 @@ export class ConfigService {
   }
 
   private validate(json: unknown): asserts json is AppConfig {
-    const requiredKeys: (keyof AppConfig)[] = ['apiUrl', 'userPoolId', 'userPoolClientId', 'region'];
+    const requiredKeys: (keyof AppConfig)[] = [
+      'apiUrl',
+      'userPoolId',
+      'userPoolClientId',
+      'region',
+    ];
     if (typeof json !== 'object' || json === null) {
       throw new Error('config.json must be a JSON object');
     }

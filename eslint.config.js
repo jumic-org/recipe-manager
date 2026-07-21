@@ -4,20 +4,20 @@ const eslintConfigPrettier = require('eslint-config-prettier');
 
 module.exports = tseslint.config(
   {
-    ignores: ['**/dist/', '**/node_modules/', '**/.nx/', '**/coverage/', '**/.angular/']
+    ignores: ['**/dist/', '**/node_modules/', '**/.nx/', '**/coverage/', '**/.angular/'],
   },
   {
     plugins: {
-      '@nx': nxPlugin
-    }
+      '@nx': nxPlugin,
+    },
   },
   ...tseslint.configs.recommended,
   {
     files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
-        projectService: true
-      }
+        projectService: true,
+      },
     },
     rules: {
       '@nx/enforce-module-boundaries': [
@@ -27,12 +27,12 @@ module.exports = tseslint.config(
           depConstraints: [
             {
               sourceTag: '*',
-              onlyDependOnLibsWithTags: ['*']
-            }
-          ]
-        }
-      ]
-    }
+              onlyDependOnLibsWithTags: ['*'],
+            },
+          ],
+        },
+      ],
+    },
   },
-  eslintConfigPrettier
+  eslintConfigPrettier,
 );

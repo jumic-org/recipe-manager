@@ -5,5 +5,5 @@ import { RecipeManagerStack } from './stacks/recipe-manager-stack';
 const app = new App();
 
 new RecipeManagerStack(app, 'RecipeManagerStack', {
-  description: 'Recipe Manager cloud resources'
+  description: 'Recipe Manager cloud resources',
 });

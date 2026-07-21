@@ -45,7 +45,7 @@ function verify() {
     console.error(
       'config.json must NOT be included in the Angular build. ' +
         'It is deployed separately by CDK ConfigDeployment with real infrastructure values. ' +
-        'Remove the config.json asset entry from apps/web/project.json.'
+        'Remove the config.json asset entry from apps/web/project.json.',
     );
     process.exit(1);
   }

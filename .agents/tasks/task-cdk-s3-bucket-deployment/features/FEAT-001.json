@@ -18,11 +18,7 @@
     "The deployment.md no longer contains manual `aws s3 sync` or `aws cloudfront create-invalidation` commands",
     "The deployment.md mentions that frontend deployment is handled automatically by `cdk deploy`"
   ],
-  "verification": [
-    "pnpm install",
-    "pnpm nx build infra",
-    "pnpm cdk synth"
-  ],
+  "verification": ["pnpm install", "pnpm nx build infra", "pnpm cdk synth"],
   "blocked_reason": null,
   "findings": "BucketDeployment requires the source asset directory to exist at synth time. Created a placeholder dist/apps/web/browser directory for cdk synth verification. The generated CloudFormation template correctly contains Custom::CDKBucketDeployment resources with DistributionPaths set to ['/*']."
 }

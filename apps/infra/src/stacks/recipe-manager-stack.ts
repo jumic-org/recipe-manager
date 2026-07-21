@@ -6,13 +6,13 @@ import {
   CognitoUserPoolsAuthorizer,
   Cors,
   LambdaIntegration,
-  RestApi
+  RestApi,
 } from 'aws-cdk-lib/aws-apigateway';
 import {
   AllowedMethods,
   Distribution,
   HttpVersion,
-  ViewerProtocolPolicy
+  ViewerProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { AccountRecovery, UserPool, UserPoolClient } from 'aws-cdk-lib/aws-cognito';
@@ -21,7 +21,7 @@ import {
   BillingMode,
   ProjectionType,
   Table,
-  TableEncryption
+  TableEncryption,
 } from 'aws-cdk-lib/aws-dynamodb';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -38,7 +38,7 @@ export class RecipeManagerStack extends Stack {
     const encryptionKey = new Key(this, 'EncryptionKey', {
       description: 'KMS key for Recipe Manager encryption',
       enableKeyRotation: true,
-      removalPolicy: RemovalPolicy.DESTROY
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     // DynamoDB Table
@@ -49,14 +49,14 @@ export class RecipeManagerStack extends Stack {
       encryption: TableEncryption.CUSTOMER_MANAGED,
       encryptionKey,
       pointInTimeRecovery: true,
-      removalPolicy: RemovalPolicy.DESTROY
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     recipesTable.addGlobalSecondaryIndex({
       indexName: 'byCategory',
       partitionKey: { name: 'userId', type: AttributeType.STRING },
       sortKey: { name: 'createdAt', type: AttributeType.STRING },
-      projectionType: ProjectionType.ALL
+      projectionType: ProjectionType.ALL,
     });
 
     // Cognito User Pool
@@ -68,18 +68,18 @@ export class RecipeManagerStack extends Stack {
         requireLowercase: true,
         requireUppercase: true,
         requireDigits: true,
-        requireSymbols: true
+        requireSymbols: true,
       },
       accountRecovery: AccountRecovery.EMAIL_ONLY,
-      removalPolicy: RemovalPolicy.DESTROY
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     const userPoolClient = new UserPoolClient(this, 'UserPoolClient', {
       userPool,
       authFlows: {
         userPassword: true,
-        userSrp: true
-      }
+        userSrp: true,
+      },
     });
 
     // S3 Bucket for frontend hosting
@@ -88,7 +88,7 @@ export class RecipeManagerStack extends Stack {
       encryptionKey,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true
+      autoDeleteObjects: true,
     });
 
     // CloudFront Distribution with OAC
@@ -96,7 +96,7 @@ export class RecipeManagerStack extends Stack {
       defaultBehavior: {
         origin: S3BucketOrigin.withOriginAccessControl(frontendBucket),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS
+        allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
       },
       defaultRootObject: 'index.html',
       httpVersion: HttpVersion.HTTP2,
@@ -105,15 +105,15 @@ export class RecipeManagerStack extends Stack {
           httpStatus: 403,
           responseHttpStatus: 200,
           responsePagePath: '/index.html',
-          ttl: Duration.minutes(5)
+          ttl: Duration.minutes(5),
         },
         {
           httpStatus: 404,
           responseHttpStatus: 200,
           responsePagePath: '/index.html',
-          ttl: Duration.minutes(5)
-        }
-      ]
+          ttl: Duration.minutes(5),
+        },
+      ],
     });
 
     // Lambda Function
@@ -124,20 +124,20 @@ export class RecipeManagerStack extends Stack {
       memorySize: 256,
       timeout: Duration.seconds(10),
       environment: {
-        TABLE_NAME: recipesTable.tableName
+        TABLE_NAME: recipesTable.tableName,
       },
       bundling: {
         format: OutputFormat.CJS,
         minify: true,
-        sourceMap: true
-      }
+        sourceMap: true,
+      },
     });
 
     recipesTable.grantReadWriteData(apiHandler);
 
     // API Gateway with Cognito Authorizer
     const cognitoAuthorizer = new CognitoUserPoolsAuthorizer(this, 'CognitoAuthorizer', {
-      cognitoUserPools: [userPool]
+      cognitoUserPools: [userPool],
     });
 
     const api = new RestApi(this, 'RecipeApi', {
@@ -146,18 +146,18 @@ export class RecipeManagerStack extends Stack {
       defaultCorsPreflightOptions: {
         allowHeaders: Cors.DEFAULT_HEADERS,
         allowMethods: Cors.ALL_METHODS,
-        allowOrigins: Cors.ALL_ORIGINS
+        allowOrigins: Cors.ALL_ORIGINS,
       },
       deployOptions: {
-        stageName: 'prod'
-      }
+        stageName: 'prod',
+      },
     });
 
     const lambdaIntegration = new LambdaIntegration(apiHandler);
 
     const methodOptions = {
       authorizationType: AuthorizationType.COGNITO,
-      authorizer: cognitoAuthorizer
+      authorizer: cognitoAuthorizer,
     };
 
     // Root resource
@@ -185,43 +185,43 @@ export class RecipeManagerStack extends Stack {
           apiUrl: api.url,
           userPoolId: userPool.userPoolId,
           userPoolClientId: userPoolClient.userPoolClientId,
-          region: Stack.of(this).region
-        })
+          region: Stack.of(this).region,
+        }),
       ],
       destinationBucket: frontendBucket,
       distribution,
-      distributionPaths: ['/*']
+      distributionPaths: ['/*'],
     });
 
     // Outputs
     new CfnOutput(this, 'ApiUrl', {
       value: api.url,
-      description: 'Recipe Manager API URL'
+      description: 'Recipe Manager API URL',
     });
 
     new CfnOutput(this, 'CloudFrontDomain', {
       value: distribution.distributionDomainName,
-      description: 'CloudFront distribution domain name'
+      description: 'CloudFront distribution domain name',
     });
 
     new CfnOutput(this, 'UserPoolId', {
       value: userPool.userPoolId,
-      description: 'Cognito User Pool ID'
+      description: 'Cognito User Pool ID',
     });
 
     new CfnOutput(this, 'UserPoolClientId', {
       value: userPoolClient.userPoolClientId,
-      description: 'Cognito User Pool Client ID'
+      description: 'Cognito User Pool Client ID',
     });
 
     new CfnOutput(this, 'FrontendBucketName', {
       value: frontendBucket.bucketName,
-      description: 'S3 bucket name for frontend hosting'
+      description: 'S3 bucket name for frontend hosting',
     });
 
     new CfnOutput(this, 'CloudFrontDistributionId', {
       value: distribution.distributionId,
-      description: 'CloudFront distribution ID'
+      description: 'CloudFront distribution ID',
     });
   }
 }

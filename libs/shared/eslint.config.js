@@ -3,5 +3,5 @@ const tseslint = require('typescript-eslint');
 
 module.exports = tseslint.config(...baseConfig, {
   files: ['src/**/*.ts'],
-  rules: {}
+  rules: {},
 });

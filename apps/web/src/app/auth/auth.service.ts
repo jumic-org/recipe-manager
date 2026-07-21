@@ -4,7 +4,7 @@ import {
   CognitoUser,
   CognitoUserAttribute,
   CognitoUserPool,
-  CognitoUserSession
+  CognitoUserSession,
 } from 'amazon-cognito-identity-js';
 import { BehaviorSubject, Observable, from, of } from 'rxjs';
 import { ConfigService } from '../config/config.service';
@@ -23,7 +23,7 @@ export class AuthService {
   constructor() {
     this.userPool = new CognitoUserPool({
       UserPoolId: this.configService.userPoolId,
-      ClientId: this.configService.userPoolClientId
+      ClientId: this.configService.userPoolClientId,
     });
     const currentUser = this.userPool.getCurrentUser();
     if (currentUser) {
@@ -49,7 +49,7 @@ export class AuthService {
             resolve();
           }
         });
-      })
+      }),
     );
   }
 
@@ -58,7 +58,7 @@ export class AuthService {
       new Promise<void>((resolve, reject) => {
         const user = new CognitoUser({
           Username: email,
-          Pool: this.userPool
+          Pool: this.userPool,
         });
         user.confirmRegistration(code, true, (err) => {
           if (err) {
@@ -67,7 +67,7 @@ export class AuthService {
             resolve();
           }
         });
-      })
+      }),
     );
   }
 
@@ -76,11 +76,11 @@ export class AuthService {
       new Promise<void>((resolve, reject) => {
         const user = new CognitoUser({
           Username: email,
-          Pool: this.userPool
+          Pool: this.userPool,
         });
         const authDetails = new AuthenticationDetails({
           Username: email,
-          Password: password
+          Password: password,
         });
         user.authenticateUser(authDetails, {
           onSuccess: () => {
@@ -91,18 +91,22 @@ export class AuthService {
             reject(err);
           },
           newPasswordRequired: () => {
-            user.completeNewPasswordChallenge(password, {}, {
-              onSuccess: () => {
-                this.authenticatedSubject.next(true);
-                resolve();
+            user.completeNewPasswordChallenge(
+              password,
+              {},
+              {
+                onSuccess: () => {
+                  this.authenticatedSubject.next(true);
+                  resolve();
+                },
+                onFailure: (err) => {
+                  reject(err);
+                },
               },
-              onFailure: (err) => {
-                reject(err);
-              }
-            });
-          }
+            );
+          },
         });
-      })
+      }),
     );
   }
 
@@ -128,7 +132,7 @@ export class AuthService {
             resolve(session.getIdToken().getJwtToken());
           }
         });
-      })
+      }),
     );
   }
 

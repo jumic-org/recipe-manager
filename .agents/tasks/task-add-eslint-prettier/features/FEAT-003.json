@@ -1,0 +1,24 @@
+{
+  "id": "FEAT-003",
+  "type": "chore",
+  "description": "Change Prettier trailingComma setting from 'none' to 'all' and reformat the entire codebase. This ensures trailing commas are added to all multi-line structures (function parameters, arguments, arrays, objects, imports, exports).",
+  "status": "in_progress",
+  "steps": [
+    "Update .prettierrc to change trailingComma from 'none' to 'all'",
+    "Run pnpm format to reformat all files with the new trailing comma setting",
+    "Run pnpm format:check to verify all files are formatted correctly",
+    "Run pnpm lint to verify no new lint errors introduced"
+  ],
+  "acceptance_criteria": [
+    ".prettierrc has trailingComma set to 'all'",
+    "All files in the codebase are formatted with trailing commas in multi-line structures",
+    "pnpm format:check passes cleanly",
+    "pnpm lint passes cleanly"
+  ],
+  "verification": [
+    "Run pnpm prettier --check . and confirm exit code 0",
+    "Run pnpm nx run-many -t lint and confirm exit code 0"
+  ],
+  "blocked_reason": null,
+  "findings": null
+}

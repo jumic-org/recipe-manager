@@ -1,7 +1,7 @@
 import type {
   APIGatewayProxyEvent,
   APIGatewayProxyHandler,
-  APIGatewayProxyResult
+  APIGatewayProxyResult,
 } from 'aws-lambda';
 import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
@@ -11,7 +11,7 @@ import {
   PutCommand,
   QueryCommand,
   UpdateCommand,
-  DeleteCommand
+  DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { Recipe, CreateRecipeInput, UpdateRecipeInput } from '@recipe-manager/shared';
 
@@ -23,11 +23,11 @@ const TABLE_NAME = process.env['TABLE_NAME'] ?? '';
 const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type,Authorization',
   'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-  'Access-Control-Allow-Origin': '*'
+  'Access-Control-Allow-Origin': '*',
 };
 
 export const handler: APIGatewayProxyHandler = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   if (event.httpMethod === 'OPTIONS') {
     return response(204);
@@ -82,7 +82,7 @@ export const handler: APIGatewayProxyHandler = async (
 
 async function listRecipes(
   userId: string,
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
   const category = event.queryStringParameters?.['category'];
   const tag = event.queryStringParameters?.['tag'];
@@ -92,9 +92,9 @@ async function listRecipes(
       TableName: TABLE_NAME,
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
-        ':userId': userId
-      }
-    })
+        ':userId': userId,
+      },
+    }),
   );
 
   let recipes = (result.Items ?? []) as Recipe[];
@@ -114,8 +114,8 @@ async function getRecipe(userId: string, recipeId: string): Promise<APIGatewayPr
   const result = await docClient.send(
     new GetCommand({
       TableName: TABLE_NAME,
-      Key: { userId, id: recipeId }
-    })
+      Key: { userId, id: recipeId },
+    }),
   );
 
   if (!result.Item) {
@@ -148,7 +148,7 @@ function validateRecipeInput(input: unknown): string[] {
 
 async function createRecipe(
   userId: string,
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
   if (!event.body) {
     return response(400, { message: 'Request body is required' });
@@ -168,14 +168,14 @@ async function createRecipe(
     id: crypto.randomUUID(),
     userId,
     createdAt: now,
-    updatedAt: now
+    updatedAt: now,
   };
 
   await docClient.send(
     new PutCommand({
       TableName: TABLE_NAME,
-      Item: recipe
-    })
+      Item: recipe,
+    }),
   );
 
   return response(201, { recipe });
@@ -184,7 +184,7 @@ async function createRecipe(
 async function updateRecipe(
   userId: string,
   recipeId: string,
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
   if (!event.body) {
     return response(400, { message: 'Request body is required' });
@@ -212,7 +212,7 @@ async function updateRecipe(
     'tags = :tags',
     'imageKeys = :imageKeys',
     'nutritionalInfo = :nutritionalInfo',
-    'updatedAt = :updatedAt'
+    'updatedAt = :updatedAt',
   ].join(', ');
 
   try {
@@ -234,11 +234,11 @@ async function updateRecipe(
           ':tags': input.tags,
           ':imageKeys': input.imageKeys,
           ':nutritionalInfo': input.nutritionalInfo,
-          ':updatedAt': now
+          ':updatedAt': now,
         },
         ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)',
-        ReturnValues: 'ALL_NEW'
-      })
+        ReturnValues: 'ALL_NEW',
+      }),
     );
 
     if (!result.Attributes) {
@@ -260,8 +260,8 @@ async function deleteRecipe(userId: string, recipeId: string): Promise<APIGatewa
       new DeleteCommand({
         TableName: TABLE_NAME,
         Key: { userId, id: recipeId },
-        ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)'
-      })
+        ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)',
+      }),
     );
 
     return response(204);
@@ -277,6 +277,6 @@ function response(statusCode: number, body?: unknown): APIGatewayProxyResult {
   return {
     statusCode,
     headers: corsHeaders,
-    body: body === undefined ? '' : JSON.stringify(body)
+    body: body === undefined ? '' : JSON.stringify(body),
   };
 }

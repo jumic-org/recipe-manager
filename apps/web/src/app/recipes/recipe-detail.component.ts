@@ -24,30 +24,38 @@ import { RecipeService } from './recipe.service';
             <p class="description">{{ recipe.description }}</p>
           </div>
           <div class="actions">
-            <a [routerLink]="['/recipes', recipe.id, 'edit']" class="btn-edit">{{ 'RECIPES.DETAIL.EDIT' | translate }}</a>
-            <button class="btn-delete" (click)="deleteRecipe()">{{ 'RECIPES.DETAIL.DELETE' | translate }}</button>
+            <a [routerLink]="['/recipes', recipe.id, 'edit']" class="btn-edit">{{
+              'RECIPES.DETAIL.EDIT' | translate
+            }}</a>
+            <button class="btn-delete" (click)="deleteRecipe()">
+              {{ 'RECIPES.DETAIL.DELETE' | translate }}
+            </button>
           </div>
         </div>
 
         <div class="meta-bar">
           @if (recipe.prepTimeMinutes) {
             <div class="meta-item">
-              <strong>{{ 'RECIPES.DETAIL.PREP_TIME' | translate }}</strong><span>{{ recipe.prepTimeMinutes }} {{ 'RECIPES.DETAIL.MIN' | translate }}</span>
+              <strong>{{ 'RECIPES.DETAIL.PREP_TIME' | translate }}</strong
+              ><span>{{ recipe.prepTimeMinutes }} {{ 'RECIPES.DETAIL.MIN' | translate }}</span>
             </div>
           }
           @if (recipe.cookTimeMinutes) {
             <div class="meta-item">
-              <strong>{{ 'RECIPES.DETAIL.COOK_TIME' | translate }}</strong><span>{{ recipe.cookTimeMinutes }} {{ 'RECIPES.DETAIL.MIN' | translate }}</span>
+              <strong>{{ 'RECIPES.DETAIL.COOK_TIME' | translate }}</strong
+              ><span>{{ recipe.cookTimeMinutes }} {{ 'RECIPES.DETAIL.MIN' | translate }}</span>
             </div>
           }
           @if (recipe.totalTimeMinutes) {
             <div class="meta-item">
-              <strong>{{ 'RECIPES.DETAIL.TOTAL_TIME' | translate }}</strong><span>{{ recipe.totalTimeMinutes }} {{ 'RECIPES.DETAIL.MIN' | translate }}</span>
+              <strong>{{ 'RECIPES.DETAIL.TOTAL_TIME' | translate }}</strong
+              ><span>{{ recipe.totalTimeMinutes }} {{ 'RECIPES.DETAIL.MIN' | translate }}</span>
             </div>
           }
           @if (recipe.servings) {
             <div class="meta-item">
-              <strong>{{ 'RECIPES.DETAIL.SERVINGS' | translate }}</strong><span>{{ recipe.servings }}</span>
+              <strong>{{ 'RECIPES.DETAIL.SERVINGS' | translate }}</strong
+              ><span>{{ recipe.servings }}</span>
             </div>
           }
         </div>
@@ -222,9 +230,9 @@ import { RecipeService } from './recipe.service';
         font-weight: 600;
         text-decoration: none;
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecipeDetailComponent implements OnInit {
   recipe: Recipe | null = null;
@@ -236,7 +244,7 @@ export class RecipeDetailComponent implements OnInit {
     private readonly recipeService: RecipeService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -255,7 +263,7 @@ export class RecipeDetailComponent implements OnInit {
       error: (err) => {
         this.error = err.message || this.translateService.instant('RECIPES.DETAIL.LOAD_ERROR');
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -266,12 +274,12 @@ export class RecipeDetailComponent implements OnInit {
       next: () => this.router.navigate(['/recipes']),
       error: (err) => {
         this.error = err.message || this.translateService.instant('RECIPES.DETAIL.DELETE_ERROR');
-      }
+      },
     });
   }
 
   private groupIngredients(
-    ingredients: Recipe['ingredients']
+    ingredients: Recipe['ingredients'],
   ): { name: string | null; items: Recipe['ingredients'] }[] {
     const groups = new Map<string | null, Recipe['ingredients']>();
     for (const ing of ingredients) {
