@@ -153,7 +153,7 @@ export class AuthService {
             reject(err || new Error('No session'));
             return;
           }
-          user.changePassword(oldPassword, newPassword, (err2, result) => {
+          user.changePassword(oldPassword, newPassword, (err2) => {
             if (err2) {
               reject(err2);
             } else {
