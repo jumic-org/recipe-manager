@@ -41,7 +41,7 @@
     "@nx/eslint": "23.1.0",
     "@nx/eslint-plugin": "23.1.0",
     "@nx/js": "23.1.0",
-    "@nx/workspace": "22.7.3",
+    "@nx/workspace": "23.1.0",
     "@types/aws-lambda": "8.10.162",
     "@types/node": "26.1.1",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
