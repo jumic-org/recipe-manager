@@ -27,7 +27,7 @@
     "@ngx-translate/core": "^18.0.0",
     "@ngx-translate/http-loader": "^18.0.0",
     "amazon-cognito-identity-js": "^6.3.20",
-    "aws-cdk-lib": "2.257.0",
+    "aws-cdk-lib": "2.261.0",
     "constructs": "10.6.0",
     "rxjs": "7.8.2",
     "tslib": "2.8.1",
