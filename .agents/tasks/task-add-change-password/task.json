@@ -1,0 +1,14 @@
+{
+  "task_id": "task-add-change-password",
+  "task_description": "Add a password change feature so authenticated users can change their password. This includes a new AuthService method, a ChangePasswordComponent, route registration, navigation link, and i18n translations in English and German.",
+  "status": "completed",
+  "feature_order": ["FEAT-001"],
+  "blocked_reason": null,
+  "verification": {
+    "build": "pass",
+    "tests": "pass",
+    "test_quality": "skipped",
+    "docker_build": "skipped",
+    "summary": "pnpm nx build web passed successfully. verify-web-build.js script passed. No test runner configured in this project so test quality check is skipped."
+  }
+}

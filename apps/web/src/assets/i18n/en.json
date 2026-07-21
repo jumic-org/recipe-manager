@@ -4,7 +4,8 @@
     "NAV": {
       "MY_RECIPES": "My Recipes",
       "SIGN_IN": "Sign In",
-      "SIGN_OUT": "Sign Out"
+      "SIGN_OUT": "Sign Out",
+      "CHANGE_PASSWORD": "Change Password"
     }
   },
   "AUTH": {
@@ -37,6 +38,17 @@
       "SUBMITTING": "Confirming...",
       "SUCCESS": "Account confirmed! Redirecting to login...",
       "BACK_TO_SIGN_IN": "Back to Sign In"
+    },
+    "CHANGE_PASSWORD": {
+      "TITLE": "Change Password",
+      "CURRENT_PASSWORD_LABEL": "Current Password",
+      "NEW_PASSWORD_LABEL": "New Password",
+      "CONFIRM_PASSWORD_LABEL": "Confirm New Password",
+      "SUBMIT": "Change Password",
+      "SUBMITTING": "Changing...",
+      "SUCCESS": "Password changed successfully!",
+      "PASSWORDS_MISMATCH": "New passwords do not match",
+      "BACK_TO_RECIPES": "Back to Recipes"
     }
   },
   "RECIPES": {

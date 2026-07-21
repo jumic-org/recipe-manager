@@ -140,6 +140,31 @@ export class AuthService {
     return this.authenticatedSubject.getValue();
   }
 
+  changePassword(oldPassword: string, newPassword: string): Observable<void> {
+    return from(
+      new Promise<void>((resolve, reject) => {
+        const user = this.userPool.getCurrentUser();
+        if (!user) {
+          reject(new Error('No authenticated user'));
+          return;
+        }
+        user.getSession((err: Error | null, session: CognitoUserSession | null) => {
+          if (err || !session) {
+            reject(err || new Error('No session'));
+            return;
+          }
+          user.changePassword(oldPassword, newPassword, (err2) => {
+            if (err2) {
+              reject(err2);
+            } else {
+              resolve();
+            }
+          });
+        });
+      })
+    );
+  }
+
   getCurrentUser(): CognitoUser | null {
     return this.userPool.getCurrentUser();
   }
