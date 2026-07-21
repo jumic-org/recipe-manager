@@ -32,10 +32,14 @@ import { RecipeService } from './recipe.service';
               <p class="description">{{ recipe.description }}</p>
               <div class="meta">
                 @if (recipe.prepTimeMinutes) {
-                  <span>{{ 'RECIPES.LIST.PREP' | translate }}: {{ recipe.prepTimeMinutes }}min</span>
+                  <span
+                    >{{ 'RECIPES.LIST.PREP' | translate }}: {{ recipe.prepTimeMinutes }}min</span
+                  >
                 }
                 @if (recipe.cookTimeMinutes) {
-                  <span>{{ 'RECIPES.LIST.COOK' | translate }}: {{ recipe.cookTimeMinutes }}min</span>
+                  <span
+                    >{{ 'RECIPES.LIST.COOK' | translate }}: {{ recipe.cookTimeMinutes }}min</span
+                  >
                 }
                 @if (recipe.servings) {
                   <span>{{ 'RECIPES.LIST.SERVES' | translate }}: {{ recipe.servings }}</span>
@@ -140,9 +144,9 @@ import { RecipeService } from './recipe.service';
         border-radius: 4px;
         font-weight: 600;
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecipeListComponent implements OnInit {
   recipes: Recipe[] = [];
@@ -151,7 +155,7 @@ export class RecipeListComponent implements OnInit {
 
   constructor(
     private readonly recipeService: RecipeService,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -164,7 +168,7 @@ export class RecipeListComponent implements OnInit {
       error: (err) => {
         this.error = err.message || this.translateService.instant('RECIPES.LIST.LOAD_ERROR');
         this.loading = false;
-      }
+      },
     });
   }
 }

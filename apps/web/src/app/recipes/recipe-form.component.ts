@@ -20,7 +20,12 @@ import { RecipeService } from './recipe.service';
         <div class="form-section">
           <div class="form-field">
             <label for="title">{{ 'RECIPES.FORM.TITLE_LABEL' | translate }}</label>
-            <input id="title" type="text" formControlName="title" [placeholder]="'RECIPES.FORM.TITLE_PLACEHOLDER' | translate" />
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              [placeholder]="'RECIPES.FORM.TITLE_PLACEHOLDER' | translate"
+            />
           </div>
           <div class="form-field">
             <label for="description">{{ 'RECIPES.FORM.DESCRIPTION_LABEL' | translate }}</label>
@@ -50,13 +55,25 @@ import { RecipeService } from './recipe.service';
         <div class="form-section">
           <div class="section-header">
             <h3>{{ 'RECIPES.FORM.INGREDIENTS_TITLE' | translate }}</h3>
-            <button type="button" class="btn-add" (click)="addIngredient()">{{ 'RECIPES.FORM.ADD' | translate }}</button>
+            <button type="button" class="btn-add" (click)="addIngredient()">
+              {{ 'RECIPES.FORM.ADD' | translate }}
+            </button>
           </div>
           <div formArrayName="ingredients">
             @for (ing of ingredientsArray.controls; track $index; let i = $index) {
               <div class="ingredient-row" [formGroupName]="i">
-                <input type="number" formControlName="amount" [placeholder]="'RECIPES.FORM.AMOUNT_PLACEHOLDER' | translate" class="input-sm" />
-                <input type="text" formControlName="unit" [placeholder]="'RECIPES.FORM.UNIT_PLACEHOLDER' | translate" class="input-sm" />
+                <input
+                  type="number"
+                  formControlName="amount"
+                  [placeholder]="'RECIPES.FORM.AMOUNT_PLACEHOLDER' | translate"
+                  class="input-sm"
+                />
+                <input
+                  type="text"
+                  formControlName="unit"
+                  [placeholder]="'RECIPES.FORM.UNIT_PLACEHOLDER' | translate"
+                  class="input-sm"
+                />
                 <input
                   type="text"
                   formControlName="name"
@@ -78,13 +95,19 @@ import { RecipeService } from './recipe.service';
         <div class="form-section">
           <div class="section-header">
             <h3>{{ 'RECIPES.FORM.INSTRUCTIONS_TITLE' | translate }}</h3>
-            <button type="button" class="btn-add" (click)="addInstruction()">{{ 'RECIPES.FORM.ADD' | translate }}</button>
+            <button type="button" class="btn-add" (click)="addInstruction()">
+              {{ 'RECIPES.FORM.ADD' | translate }}
+            </button>
           </div>
           <div formArrayName="instructions">
             @for (inst of instructionsArray.controls; track $index; let i = $index) {
               <div class="instruction-row" [formGroupName]="i">
                 <span class="step-number">{{ i + 1 }}.</span>
-                <textarea formControlName="text" rows="2" [placeholder]="'RECIPES.FORM.STEP_PLACEHOLDER' | translate"></textarea>
+                <textarea
+                  formControlName="text"
+                  rows="2"
+                  [placeholder]="'RECIPES.FORM.STEP_PLACEHOLDER' | translate"
+                ></textarea>
                 <div class="instruction-actions">
                   <button
                     type="button"
@@ -121,7 +144,12 @@ import { RecipeService } from './recipe.service';
           </div>
           <div class="form-field">
             <label for="tags">{{ 'RECIPES.FORM.TAGS_LABEL' | translate }}</label>
-            <input id="tags" type="text" formControlName="tags" [placeholder]="'RECIPES.FORM.TAGS_PLACEHOLDER' | translate" />
+            <input
+              id="tags"
+              type="text"
+              formControlName="tags"
+              [placeholder]="'RECIPES.FORM.TAGS_PLACEHOLDER' | translate"
+            />
           </div>
         </div>
 
@@ -130,9 +158,17 @@ import { RecipeService } from './recipe.service';
         }
 
         <div class="form-actions">
-          <button type="button" class="btn-cancel" (click)="cancel()">{{ 'RECIPES.FORM.CANCEL' | translate }}</button>
+          <button type="button" class="btn-cancel" (click)="cancel()">
+            {{ 'RECIPES.FORM.CANCEL' | translate }}
+          </button>
           <button type="submit" class="btn-submit" [disabled]="form.invalid || submitting">
-            {{ submitting ? ('RECIPES.FORM.SAVING' | translate) : (isEdit ? ('RECIPES.FORM.UPDATE' | translate) : ('RECIPES.FORM.CREATE' | translate)) }}
+            {{
+              submitting
+                ? ('RECIPES.FORM.SAVING' | translate)
+                : isEdit
+                  ? ('RECIPES.FORM.UPDATE' | translate)
+                  : ('RECIPES.FORM.CREATE' | translate)
+            }}
           </button>
         </div>
       </form>
@@ -292,9 +328,9 @@ import { RecipeService } from './recipe.service';
         opacity: 0.6;
         cursor: not-allowed;
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecipeFormComponent implements OnInit {
   form!: FormGroup;
@@ -309,7 +345,7 @@ export class RecipeFormComponent implements OnInit {
     private readonly recipeService: RecipeService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -322,7 +358,7 @@ export class RecipeFormComponent implements OnInit {
       ingredients: this.fb.array([]),
       instructions: this.fb.array([]),
       categories: [''],
-      tags: ['']
+      tags: [''],
     });
 
     this.recipeId = this.route.snapshot.paramMap.get('id') || '';
@@ -339,7 +375,7 @@ export class RecipeFormComponent implements OnInit {
             prepTimeMinutes: recipe.prepTimeMinutes,
             cookTimeMinutes: recipe.cookTimeMinutes,
             categories: recipe.categories.join(', '),
-            tags: recipe.tags.join(', ')
+            tags: recipe.tags.join(', '),
           });
           recipe.ingredients.forEach((ing) => {
             this.ingredientsArray.push(
@@ -347,23 +383,24 @@ export class RecipeFormComponent implements OnInit {
                 amount: [ing.amount],
                 unit: [ing.unit],
                 name: [ing.name, Validators.required],
-                group: [ing.group || '']
-              })
+                group: [ing.group || ''],
+              }),
             );
           });
           recipe.instructions.forEach((inst) => {
             this.instructionsArray.push(
               this.fb.group({
-                text: [inst.text, Validators.required]
-              })
+                text: [inst.text, Validators.required],
+              }),
             );
           });
           this.loading = false;
         },
         error: (err) => {
-          this.errorMessage = err.message || this.translateService.instant('RECIPES.FORM.LOAD_ERROR');
+          this.errorMessage =
+            err.message || this.translateService.instant('RECIPES.FORM.LOAD_ERROR');
           this.loading = false;
-        }
+        },
       });
     } else {
       this.addIngredient();
@@ -385,8 +422,8 @@ export class RecipeFormComponent implements OnInit {
         amount: [1],
         unit: [''],
         name: ['', Validators.required],
-        group: ['']
-      })
+        group: [''],
+      }),
     );
   }
 
@@ -397,8 +434,8 @@ export class RecipeFormComponent implements OnInit {
   addInstruction(): void {
     this.instructionsArray.push(
       this.fb.group({
-        text: ['', Validators.required]
-      })
+        text: ['', Validators.required],
+      }),
     );
   }
 
@@ -443,17 +480,17 @@ export class RecipeFormComponent implements OnInit {
           amount: ing.amount,
           unit: ing.unit,
           name: ing.name,
-          group: ing.group || null
-        })
+          group: ing.group || null,
+        }),
       ),
       instructions: formValue.instructions.map((inst: { text: string }, idx: number) => ({
         stepNumber: idx + 1,
-        text: inst.text
+        text: inst.text,
       })),
       categories: this.splitCommaSeparated(formValue.categories),
       tags: this.splitCommaSeparated(formValue.tags),
       imageKeys: [],
-      nutritionalInfo: null
+      nutritionalInfo: null,
     };
 
     const request$ = this.isEdit
@@ -468,7 +505,7 @@ export class RecipeFormComponent implements OnInit {
       error: (err) => {
         this.submitting = false;
         this.errorMessage = err.message || this.translateService.instant('RECIPES.FORM.SAVE_ERROR');
-      }
+      },
     });
   }
 

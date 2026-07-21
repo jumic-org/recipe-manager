@@ -29,10 +29,14 @@ import { AuthService } from './auth.service';
           <p class="success">{{ successMessage }}</p>
         }
         <button type="submit" [disabled]="form.invalid || loading">
-          {{ loading ? ('AUTH.CONFIRM.SUBMITTING' | translate) : ('AUTH.CONFIRM.SUBMIT' | translate) }}
+          {{
+            loading ? ('AUTH.CONFIRM.SUBMITTING' | translate) : ('AUTH.CONFIRM.SUBMIT' | translate)
+          }}
         </button>
       </form>
-      <p class="link"><a routerLink="/login">{{ 'AUTH.CONFIRM.BACK_TO_SIGN_IN' | translate }}</a></p>
+      <p class="link">
+        <a routerLink="/login">{{ 'AUTH.CONFIRM.BACK_TO_SIGN_IN' | translate }}</a>
+      </p>
     </div>
   `,
   styles: [
@@ -110,9 +114,9 @@ import { AuthService } from './auth.service';
         color: #1c5b55;
         font-weight: 600;
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmComponent implements OnInit {
   form: FormGroup;
@@ -125,11 +129,11 @@ export class ConfirmComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      code: ['', [Validators.required]]
+      code: ['', [Validators.required]],
     });
   }
 
@@ -155,7 +159,7 @@ export class ConfirmComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         this.errorMessage = err.message || 'Confirmation failed';
-      }
+      },
     });
   }
 }

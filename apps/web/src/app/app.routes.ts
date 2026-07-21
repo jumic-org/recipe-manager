@@ -17,5 +17,5 @@ export const appRoutes: Routes = [
   { path: 'recipes', component: RecipeListComponent, canActivate: [authGuard] },
   { path: 'recipes/new', component: RecipeFormComponent, canActivate: [authGuard] },
   { path: 'recipes/:id', component: RecipeDetailComponent, canActivate: [authGuard] },
-  { path: 'recipes/:id/edit', component: RecipeFormComponent, canActivate: [authGuard] }
+  { path: 'recipes/:id/edit', component: RecipeFormComponent, canActivate: [authGuard] },
 ];

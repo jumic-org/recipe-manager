@@ -14,23 +14,23 @@ module.exports = tseslint.config(
         {
           type: 'element',
           prefix: 'rm',
-          style: 'kebab-case'
-        }
+          style: 'kebab-case',
+        },
       ],
       '@angular-eslint/directive-selector': [
         'error',
         {
           type: 'attribute',
           prefix: 'rm',
-          style: 'camelCase'
-        }
+          style: 'camelCase',
+        },
       ],
-      '@angular-eslint/prefer-inject': 'off'
-    }
+      '@angular-eslint/prefer-inject': 'off',
+    },
   },
   {
     files: ['**/*.html'],
     extends: [...angular.configs.templateRecommended],
-    rules: {}
-  }
+    rules: {},
+  },
 );

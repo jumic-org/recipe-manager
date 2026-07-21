@@ -10,7 +10,7 @@ import { AuthService } from './auth/auth.service';
   imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   isAuthenticated$ = this.authService.isAuthenticated();
@@ -20,7 +20,7 @@ export class AppComponent {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly translate: TranslateService
+    private readonly translate: TranslateService,
   ) {
     this.translate.addLangs(['en', 'de']);
     const storedLang = localStorage.getItem(AppComponent.LANG_STORAGE_KEY);

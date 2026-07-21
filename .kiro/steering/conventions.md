@@ -72,7 +72,7 @@ Standard CORS headers are returned on every response:
 const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type,Authorization',
   'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-  'Access-Control-Allow-Origin': '*'
+  'Access-Control-Allow-Origin': '*',
 };
 ```
 
@@ -95,7 +95,7 @@ function response(statusCode: number, body?: unknown): APIGatewayProxyResult {
   return {
     statusCode,
     headers: corsHeaders,
-    body: body === undefined ? '' : JSON.stringify(body)
+    body: body === undefined ? '' : JSON.stringify(body),
   };
 }
 ```

@@ -18,7 +18,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
-      multi: true
+      multi: true,
     },
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(appRoutes),
@@ -26,8 +26,8 @@ export const appConfig: ApplicationConfig = {
       fallbackLang: 'en',
       loader: provideTranslateHttpLoader({
         prefix: './assets/i18n/',
-        suffix: '.json'
-      })
-    })
-  ]
+        suffix: '.json',
+      }),
+    }),
+  ],
 };

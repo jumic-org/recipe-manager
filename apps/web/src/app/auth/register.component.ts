@@ -27,7 +27,9 @@ import { AuthService } from './auth.service';
           />
         </div>
         <div class="form-field">
-          <label for="confirmPassword">{{ 'AUTH.REGISTER.CONFIRM_PASSWORD_LABEL' | translate }}</label>
+          <label for="confirmPassword">{{
+            'AUTH.REGISTER.CONFIRM_PASSWORD_LABEL' | translate
+          }}</label>
           <input
             id="confirmPassword"
             type="password"
@@ -39,10 +41,17 @@ import { AuthService } from './auth.service';
           <p class="error">{{ errorMessage }}</p>
         }
         <button type="submit" [disabled]="form.invalid || loading">
-          {{ loading ? ('AUTH.REGISTER.SUBMITTING' | translate) : ('AUTH.REGISTER.SUBMIT' | translate) }}
+          {{
+            loading
+              ? ('AUTH.REGISTER.SUBMITTING' | translate)
+              : ('AUTH.REGISTER.SUBMIT' | translate)
+          }}
         </button>
       </form>
-      <p class="link">{{ 'AUTH.REGISTER.HAS_ACCOUNT' | translate }} <a routerLink="/login">{{ 'AUTH.REGISTER.SIGN_IN_LINK' | translate }}</a></p>
+      <p class="link">
+        {{ 'AUTH.REGISTER.HAS_ACCOUNT' | translate }}
+        <a routerLink="/login">{{ 'AUTH.REGISTER.SIGN_IN_LINK' | translate }}</a>
+      </p>
     </div>
   `,
   styles: [
@@ -109,9 +118,9 @@ import { AuthService } from './auth.service';
         color: #1c5b55;
         font-weight: 600;
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent {
   form: FormGroup;
@@ -122,12 +131,12 @@ export class RegisterComponent {
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]]
+      confirmPassword: ['', [Validators.required]],
     });
   }
 
@@ -148,7 +157,7 @@ export class RegisterComponent {
       error: (err) => {
         this.loading = false;
         this.errorMessage = err.message || 'Registration failed';
-      }
+      },
     });
   }
 }

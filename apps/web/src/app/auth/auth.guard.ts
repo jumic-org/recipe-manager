@@ -16,6 +16,6 @@ export const authGuard: CanActivateFn = (): Observable<boolean | UrlTree> => {
         return true;
       }
       return router.createUrlTree(['/login']);
-    })
+    }),
   );
 };

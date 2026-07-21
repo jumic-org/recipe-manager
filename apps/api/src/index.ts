@@ -5,5 +5,5 @@ export type {
   Instruction,
   NutritionalInfo,
   CreateRecipeInput,
-  UpdateRecipeInput
+  UpdateRecipeInput,
 } from '@recipe-manager/shared';

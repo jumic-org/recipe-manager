@@ -26,11 +26,11 @@ The GitHub Actions workflow assumes the IAM role `arn:aws:iam::352770552266:role
 
 #### Required IAM Permissions
 
-| Permission | Resource | Purpose |
-|---|---|---|
-| `sts:AssumeRoleWithWebIdentity` | (trust policy) | Allow GitHub Actions to assume the role via OIDC |
-| `cloudformation:*` | `arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*` | CDK deploy and stack management |
-| CDK bootstrap permissions | Various | CDK requires permissions to manage its staging bucket, Lambda functions, API Gateway, IAM roles, S3, CloudFront, etc. |
+| Permission                      | Resource                                                                   | Purpose                                                                                                               |
+| ------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `sts:AssumeRoleWithWebIdentity` | (trust policy)                                                             | Allow GitHub Actions to assume the role via OIDC                                                                      |
+| `cloudformation:*`              | `arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*` | CDK deploy and stack management                                                                                       |
+| CDK bootstrap permissions       | Various                                                                    | CDK requires permissions to manage its staging bucket, Lambda functions, API Gateway, IAM roles, S3, CloudFront, etc. |
 
 > **Note**: The CDK `BucketDeployment` construct handles S3 syncing and CloudFront cache invalidation internally using a custom resource Lambda. The necessary S3 and CloudFront permissions are managed by CDK through the roles it creates for this custom resource, so they do not need to be granted directly to the GitHub Actions role.
 

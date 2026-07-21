@@ -52,21 +52,21 @@ import { handler } from './handler';
 // Mock DynamoDB
 vi.mock('@aws-sdk/lib-dynamodb', () => ({
   DynamoDBDocumentClient: {
-    from: () => mockDocClient
+    from: () => mockDocClient,
   },
   QueryCommand: vi.fn(),
   GetCommand: vi.fn(),
   PutCommand: vi.fn(),
   UpdateCommand: vi.fn(),
-  DeleteCommand: vi.fn()
+  DeleteCommand: vi.fn(),
 }));
 
 vi.mock('@aws-sdk/client-dynamodb', () => ({
-  DynamoDBClient: vi.fn()
+  DynamoDBClient: vi.fn(),
 }));
 
 const mockDocClient = {
-  send: vi.fn()
+  send: vi.fn(),
 };
 
 function createEvent(overrides: Partial<APIGatewayProxyEvent>): APIGatewayProxyEvent {
@@ -79,10 +79,10 @@ function createEvent(overrides: Partial<APIGatewayProxyEvent>): APIGatewayProxyE
     pathParameters: null,
     requestContext: {
       authorizer: {
-        claims: { sub: 'user-123' }
-      }
+        claims: { sub: 'user-123' },
+      },
     },
-    ...overrides
+    ...overrides,
   } as unknown as APIGatewayProxyEvent;
 }
 
@@ -93,7 +93,7 @@ describe('handler', () => {
 
   it('returns 401 when no user claims', async () => {
     const event = createEvent({
-      requestContext: { authorizer: {} } as any
+      requestContext: { authorizer: {} } as any,
     });
     const result = await handler(event, {} as any, () => {});
     expect(result?.statusCode).toBe(401);
@@ -146,12 +146,12 @@ describe('RecipeListComponent', () => {
 
   beforeEach(async () => {
     mockRecipeService = {
-      getRecipes: vi.fn().mockReturnValue(of([]))
+      getRecipes: vi.fn().mockReturnValue(of([])),
     };
 
     await TestBed.configureTestingModule({
       imports: [RecipeListComponent],
-      providers: [{ provide: RecipeService, useValue: mockRecipeService }, provideRouter([])]
+      providers: [{ provide: RecipeService, useValue: mockRecipeService }, provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RecipeListComponent);
@@ -200,8 +200,8 @@ describe('RecipeManagerStack', () => {
     template.hasResourceProperties('AWS::DynamoDB::Table', {
       KeySchema: [
         { AttributeName: 'userId', KeyType: 'HASH' },
-        { AttributeName: 'id', KeyType: 'RANGE' }
-      ]
+        { AttributeName: 'id', KeyType: 'RANGE' },
+      ],
     });
   });
 
@@ -212,13 +212,13 @@ describe('RecipeManagerStack', () => {
   it('creates a Lambda function with Node.js runtime', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
       Runtime: 'nodejs20.x',
-      MemorySize: 256
+      MemorySize: 256,
     });
   });
 
   it('creates a REST API', () => {
     template.hasResourceProperties('AWS::ApiGateway::RestApi', {
-      Name: 'recipe-manager-api'
+      Name: 'recipe-manager-api',
     });
   });
 
@@ -226,8 +226,8 @@ describe('RecipeManagerStack', () => {
     template.hasResourceProperties('AWS::DynamoDB::Table', {
       SSESpecification: {
         SSEEnabled: true,
-        SSEType: 'KMS'
-      }
+        SSEType: 'KMS',
+      },
     });
   });
 });
@@ -279,9 +279,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
-      exclude: ['node_modules/', 'dist/', 'cdk.out/']
-    }
-  }
+      exclude: ['node_modules/', 'dist/', 'cdk.out/'],
+    },
+  },
 });
 ```
 
