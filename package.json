@@ -23,7 +23,7 @@
     "@angular/platform-browser": "21.2.14",
     "@angular/router": "21.2.14",
     "@aws-sdk/client-dynamodb": "^3.1091.0",
-    "@aws-sdk/lib-dynamodb": "^3.700.0",
+    "@aws-sdk/lib-dynamodb": "^3.1091.0",
     "@ngx-translate/core": "^18.0.0",
     "@ngx-translate/http-loader": "^18.0.0",
     "amazon-cognito-identity-js": "^6.3.20",
