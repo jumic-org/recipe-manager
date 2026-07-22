@@ -41,3 +41,6 @@ updates:
       ngx-translate:
         patterns:
           - '@ngx-translate/*'
+    ignore:
+      - dependency-name: 'typescript'
+        versions: ['>=7.0.0']
