@@ -23,6 +23,7 @@ import {
   Table,
   TableEncryption,
 } from 'aws-cdk-lib/aws-dynamodb';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -122,7 +123,7 @@ export class RecipeManagerStack extends Stack {
       handler: 'handler',
       runtime: Runtime.NODEJS_20_X,
       memorySize: 256,
-      timeout: Duration.seconds(10),
+      timeout: Duration.seconds(30),
       environment: {
         TABLE_NAME: recipesTable.tableName,
       },
@@ -134,6 +135,14 @@ export class RecipeManagerStack extends Stack {
     });
 
     recipesTable.grantReadWriteData(apiHandler);
+
+    // Grant Bedrock InvokeModel permission
+    apiHandler.addToRolePolicy(
+      new PolicyStatement({
+        actions: ['bedrock:InvokeModel'],
+        resources: ['arn:aws:bedrock:*::foundation-model/eu.amazon.nova-lite-v1:0'],
+      })
+    );
 
     // API Gateway with Cognito Authorizer
     const cognitoAuthorizer = new CognitoUserPoolsAuthorizer(this, 'CognitoAuthorizer', {
@@ -167,6 +176,10 @@ export class RecipeManagerStack extends Stack {
     const recipes = api.root.addResource('recipes');
     recipes.addMethod('GET', lambdaIntegration, methodOptions);
     recipes.addMethod('POST', lambdaIntegration, methodOptions);
+
+    // /recipes/import resource
+    const importResource = recipes.addResource('import');
+    importResource.addMethod('POST', lambdaIntegration, methodOptions);
 
     // /recipes/{id} resource
     const recipe = recipes.addResource('{id}');
