@@ -1,5 +1,9 @@
 # Deployment
 
+## Deployment Region
+
+The stack is deployed to the **`eu-west-1`** (Ireland) AWS region. All infrastructure resources (DynamoDB, Lambda, API Gateway, Cognito, S3, CloudFront, KMS) are provisioned in this region.
+
 ## Prerequisites
 
 - **Node.js** >= 24.x
@@ -87,9 +91,9 @@ After the first deploy, update the frontend environment files with the actual va
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:3000/api', // or the deployed API URL for remote dev
-  userPoolId: 'us-east-1_XXXXXXXXX',
+  userPoolId: 'eu-west-1_XXXXXXXXX',
   userPoolClientId: 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
-  region: 'us-east-1',
+  region: 'eu-west-1',
 };
 ```
 
@@ -98,10 +102,10 @@ export const environment = {
 ```typescript
 export const environment = {
   production: true,
-  apiUrl: 'https://XXXXXXXXXX.execute-api.us-east-1.amazonaws.com/prod',
-  userPoolId: 'us-east-1_XXXXXXXXX',
+  apiUrl: 'https://XXXXXXXXXX.execute-api.eu-west-1.amazonaws.com/prod',
+  userPoolId: 'eu-west-1_XXXXXXXXX',
   userPoolClientId: 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
-  region: 'us-east-1',
+  region: 'eu-west-1',
 };
 ```
 
