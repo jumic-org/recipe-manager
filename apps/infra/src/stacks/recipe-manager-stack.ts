@@ -31,13 +31,42 @@ import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3'
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
 
+export interface RecipeManagerStackProps extends StackProps {
+  /**
+   * Optional PR number. When provided, the stack operates in PR preview mode.
+   */
+  prNumber?: string;
+
+  /**
+   * The full GitHub PR URL shown in the frontend banner.
+   * e.g. https://github.com/owner/repo/pull/42
+   */
+  prUrl?: string;
+
+  /**
+   * Cognito User Pool ID imported from the main stack.
+   * When provided, the stack reuses an existing User Pool instead of creating one.
+   */
+  mainUserPoolId?: string;
+
+  /**
+   * Cognito User Pool Client ID imported from the main stack.
+   * Used for reference; a new client is created for the PR deployment.
+   */
+  mainUserPoolClientId?: string;
+}
+
 export class RecipeManagerStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props?: RecipeManagerStackProps) {
     super(scope, id, props);
+
+    const isPrDeployment = !!(props?.prNumber && props?.prUrl && props?.mainUserPoolId);
 
     // KMS Key for encryption
     const encryptionKey = new Key(this, 'EncryptionKey', {
-      description: 'KMS key for Recipe Manager encryption',
+      description: isPrDeployment
+        ? `KMS key for Recipe Manager PR #${props.prNumber}`
+        : 'KMS key for Recipe Manager encryption',
       enableKeyRotation: true,
       removalPolicy: RemovalPolicy.DESTROY,
     });
@@ -49,7 +78,7 @@ export class RecipeManagerStack extends Stack {
       billingMode: BillingMode.PAY_PER_REQUEST,
       encryption: TableEncryption.CUSTOMER_MANAGED,
       encryptionKey,
-      pointInTimeRecovery: true,
+      pointInTimeRecovery: !isPrDeployment,
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
@@ -60,28 +89,47 @@ export class RecipeManagerStack extends Stack {
       projectionType: ProjectionType.ALL,
     });
 
-    // Cognito User Pool
-    const userPool = new UserPool(this, 'UserPool', {
-      selfSignUpEnabled: true,
-      signInAliases: { email: true },
-      passwordPolicy: {
-        minLength: 8,
-        requireLowercase: true,
-        requireUppercase: true,
-        requireDigits: true,
-        requireSymbols: true,
-      },
-      accountRecovery: AccountRecovery.EMAIL_ONLY,
-      removalPolicy: RemovalPolicy.DESTROY,
-    });
+    // Cognito User Pool - either create new or import existing
+    let userPool: import('aws-cdk-lib/aws-cognito').IUserPool;
+    let userPoolClient: UserPoolClient;
 
-    const userPoolClient = new UserPoolClient(this, 'UserPoolClient', {
-      userPool,
-      authFlows: {
-        userPassword: true,
-        userSrp: true,
-      },
-    });
+    if (isPrDeployment) {
+      // Import the shared User Pool from the main stack
+      userPool = UserPool.fromUserPoolId(this, 'SharedUserPool', props.mainUserPoolId!);
+
+      // Create a dedicated app client for this PR stack
+      userPoolClient = new UserPoolClient(this, 'UserPoolClient', {
+        userPool,
+        authFlows: {
+          userPassword: true,
+          userSrp: true,
+        },
+      });
+    } else {
+      // Create a new User Pool for production
+      const createdUserPool = new UserPool(this, 'UserPool', {
+        selfSignUpEnabled: true,
+        signInAliases: { email: true },
+        passwordPolicy: {
+          minLength: 8,
+          requireLowercase: true,
+          requireUppercase: true,
+          requireDigits: true,
+          requireSymbols: true,
+        },
+        accountRecovery: AccountRecovery.EMAIL_ONLY,
+        removalPolicy: RemovalPolicy.DESTROY,
+      });
+
+      userPool = createdUserPool;
+      userPoolClient = new UserPoolClient(this, 'UserPoolClient', {
+        userPool: createdUserPool,
+        authFlows: {
+          userPassword: true,
+          userSrp: true,
+        },
+      });
+    }
 
     // S3 Bucket for frontend hosting
     const frontendBucket = new Bucket(this, 'FrontendBucket', {
@@ -155,8 +203,12 @@ export class RecipeManagerStack extends Stack {
     });
 
     const api = new RestApi(this, 'RecipeApi', {
-      restApiName: 'recipe-manager-api',
-      description: 'HTTP API for Recipe Manager',
+      restApiName: isPrDeployment
+        ? `recipe-manager-api-pr-${props.prNumber}`
+        : 'recipe-manager-api',
+      description: isPrDeployment
+        ? `HTTP API for Recipe Manager PR #${props.prNumber}`
+        : 'HTTP API for Recipe Manager',
       defaultCorsPreflightOptions: {
         allowHeaders: Cors.DEFAULT_HEADERS,
         allowMethods: Cors.ALL_METHODS,
@@ -196,15 +248,22 @@ export class RecipeManagerStack extends Stack {
     // config.json is generated with real Cognito/API values resolved at deploy time.
     // Both sources are combined in a single BucketDeployment to ensure config.json
     // is always deployed atomically with the frontend, eliminating any race conditions.
+    const configJson: Record<string, string> = {
+      apiUrl: api.url,
+      userPoolId: userPool.userPoolId,
+      userPoolClientId: userPoolClient.userPoolClientId,
+      region: Stack.of(this).region,
+    };
+
+    if (isPrDeployment) {
+      configJson['prNumber'] = props.prNumber!;
+      configJson['prUrl'] = props.prUrl!;
+    }
+
     new BucketDeployment(this, 'FrontendDeployment', {
       sources: [
         Source.asset(path.join(__dirname, '../../../../dist/apps/web/browser')),
-        Source.jsonData('config.json', {
-          apiUrl: api.url,
-          userPoolId: userPool.userPoolId,
-          userPoolClientId: userPoolClient.userPoolClientId,
-          region: Stack.of(this).region,
-        }),
+        Source.jsonData('config.json', configJson),
       ],
       destinationBucket: frontendBucket,
       distribution,
@@ -214,7 +273,7 @@ export class RecipeManagerStack extends Stack {
     // Outputs
     new CfnOutput(this, 'ApiUrl', {
       value: api.url,
-      description: 'Recipe Manager API URL',
+      description: isPrDeployment ? 'Recipe Manager PR API URL' : 'Recipe Manager API URL',
     });
 
     new CfnOutput(this, 'CloudFrontDomain', {
@@ -224,17 +283,23 @@ export class RecipeManagerStack extends Stack {
 
     new CfnOutput(this, 'UserPoolId', {
       value: userPool.userPoolId,
-      description: 'Cognito User Pool ID',
+      description: isPrDeployment
+        ? 'Cognito User Pool ID (shared from main stack)'
+        : 'Cognito User Pool ID',
     });
 
     new CfnOutput(this, 'UserPoolClientId', {
       value: userPoolClient.userPoolClientId,
-      description: 'Cognito User Pool Client ID',
+      description: isPrDeployment
+        ? 'Cognito User Pool Client ID (PR-specific)'
+        : 'Cognito User Pool Client ID',
     });
 
     new CfnOutput(this, 'FrontendBucketName', {
       value: frontendBucket.bucketName,
-      description: 'S3 bucket name for frontend hosting',
+      description: isPrDeployment
+        ? 'S3 bucket name for PR frontend hosting'
+        : 'S3 bucket name for frontend hosting',
     });
 
     new CfnOutput(this, 'CloudFrontDistributionId', {

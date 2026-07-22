@@ -1,7 +1,6 @@
 import { App } from 'aws-cdk-lib';
 
 import { RecipeManagerStack } from './stacks/recipe-manager-stack';
-import { RecipeManagerPrStack } from './stacks/recipe-manager-pr-stack';
 
 const app = new App();
 
@@ -11,7 +10,7 @@ new RecipeManagerStack(app, 'RecipeManagerStack', {
 });
 
 // ── PR preview stack ──────────────────────────────────────────────────────────
-// Synthesised only when the three context values below are provided, e.g.:
+// Synthesised only when the context values below are provided, e.g.:
 //   cdk deploy RecipeManagerStack_PR_42 \
 //     -c prNumber=42 \
 //     -c prUrl=https://github.com/owner/repo/pull/42 \
@@ -23,7 +22,7 @@ const mainUserPoolId = app.node.tryGetContext('mainUserPoolId') as string | unde
 const mainUserPoolClientId = app.node.tryGetContext('mainUserPoolClientId') as string | undefined;
 
 if (prNumber && prUrl && mainUserPoolId && mainUserPoolClientId) {
-  new RecipeManagerPrStack(app, `RecipeManagerStack_PR_${prNumber}`, {
+  new RecipeManagerStack(app, `RecipeManagerStack_PR_${prNumber}`, {
     description: `Recipe Manager PR #${prNumber} preview deployment`,
     prNumber,
     prUrl,
