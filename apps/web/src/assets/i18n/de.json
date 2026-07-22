@@ -123,7 +123,7 @@
       "CANCEL": "Abbrechen",
       "SUCCESS": "Rezept erfolgreich importiert!",
       "ERROR": "Rezept konnte nicht importiert werden. Bitte URL prüfen und erneut versuchen.",
-      "INVALID_URL": "Bitte geben Sie eine gültige URL ein"
+      "INVALID_URL": "Bitte geben Sie eine gültige HTTPS-URL ein (z.B. https://example.com/rezept)"
     }
   }
 }

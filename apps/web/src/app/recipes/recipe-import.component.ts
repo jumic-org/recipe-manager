@@ -26,6 +26,9 @@ import { RecipeService } from './recipe.service';
             @if (form.get('url')?.touched && form.get('url')?.hasError('required')) {
               <p class="field-error">{{ 'RECIPES.IMPORT.URL_REQUIRED' | translate }}</p>
             }
+            @if (form.get('url')?.touched && form.get('url')?.hasError('pattern')) {
+              <p class="field-error">{{ 'RECIPES.IMPORT.INVALID_URL' | translate }}</p>
+            }
           </div>
         </div>
 
@@ -148,7 +151,7 @@ export class RecipeImportComponent {
     private readonly cdr: ChangeDetectorRef,
   ) {
     this.form = this.fb.group({
-      url: ['', [Validators.required]],
+      url: ['', [Validators.required, Validators.pattern(/^https:\/\/.+/)]],
     });
   }
 

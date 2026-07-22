@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-004",
+  "type": "fix",
+  "description": "Address security and validation issues from code review: (1) SSRF protection - validate URL scheme (https only) and reject private/link-local IP ranges, (2) Validate Bedrock output with validateRecipeInput before saving, (3) Add AbortSignal.timeout(8000) to fetch call, (4) Prompt injection mitigation with delimiters, (5) Client-side URL pattern validation.",
+  "status": "in_progress",
+  "steps": [
+    "In apps/api/src/handler.ts importRecipe function, add URL scheme validation (https only) and private IP range rejection before fetching",
+    "In apps/api/src/handler.ts importRecipe function, add AbortSignal.timeout(8000) to the fetch call",
+    "In apps/api/src/handler.ts importRecipe function, run validateRecipeInput on parsed Bedrock JSON before saving to DynamoDB",
+    "In apps/api/src/handler.ts buildBedrockPrompt function, wrap pageContent in delimiters and instruct model to treat it as data only",
+    "In apps/web/src/app/recipes/recipe-import.component.ts, add Validators.pattern with URL regex to the form control"
+  ],
+  "acceptance_criteria": [
+    "importRecipe rejects non-https URLs with 400 status",
+    "importRecipe rejects URLs pointing to private/link-local IP ranges with 400 status",
+    "fetch call has AbortSignal.timeout(8000)",
+    "Bedrock output is validated with validateRecipeInput before DynamoDB write",
+    "buildBedrockPrompt wraps pageContent in explicit delimiters with data-only instruction",
+    "Angular form has URL pattern validator that requires https:// prefix",
+    "pnpm nx build api succeeds",
+    "pnpm nx build web succeeds"
+  ],
+  "verification": [
+    "Run pnpm nx build api && pnpm nx build web and confirm both compile without errors"
+  ],
+  "blocked_reason": null,
+  "findings": null
+}

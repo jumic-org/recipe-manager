@@ -123,7 +123,7 @@
       "CANCEL": "Cancel",
       "SUCCESS": "Recipe imported successfully!",
       "ERROR": "Failed to import recipe. Please check the URL and try again.",
-      "INVALID_URL": "Please enter a valid URL"
+      "INVALID_URL": "Please enter a valid HTTPS URL (e.g. https://example.com/recipe)"
     }
   }
 }
