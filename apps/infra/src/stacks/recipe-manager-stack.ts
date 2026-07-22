@@ -137,10 +137,15 @@ export class RecipeManagerStack extends Stack {
     recipesTable.grantReadWriteData(apiHandler);
 
     // Grant Bedrock InvokeModel permission
+    // Cross-region inference profiles require permission on both the inference profile
+    // itself and the underlying foundation model that requests are routed to.
     apiHandler.addToRolePolicy(
       new PolicyStatement({
         actions: ['bedrock:InvokeModel'],
-        resources: ['arn:aws:bedrock:*:*:inference-profile/eu.amazon.nova-lite-v1:0'],
+        resources: [
+          'arn:aws:bedrock:*:*:inference-profile/eu.amazon.nova-lite-v1:0',
+          'arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0',
+        ],
       })
     );
 
