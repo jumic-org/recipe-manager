@@ -1,6 +1,8 @@
 {
   "APP": {
     "TITLE": "Rezeptmanager",
+    "THEME_TOGGLE_LIGHT": "Zum hellen Modus wechseln",
+    "THEME_TOGGLE_DARK": "Zum dunklen Modus wechseln",
     "NAV": {
       "MY_RECIPES": "Meine Rezepte",
       "SIGN_IN": "Anmelden",

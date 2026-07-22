@@ -1,3 +1,39 @@
+:root {
+  --rm-bg: #f8f7f2;
+  --rm-surface: #fff;
+  --rm-text: #20201d;
+  --rm-text-secondary: #666;
+  --rm-border: #eee;
+  --rm-primary: #1c5b55;
+  --rm-primary-surface: #e8f5f3;
+  --rm-shadow: rgba(0, 0, 0, 0.06);
+  --rm-input-bg: #fff;
+  --rm-input-border: #ddd;
+  --rm-header-bg: #fff;
+  --rm-header-border: #eee;
+  --rm-danger: #c0392b;
+  --rm-tag-bg: #ece7d9;
+  --rm-tag-text: #5b4536;
+}
+
+:root.dark {
+  --rm-bg: #1a1a1a;
+  --rm-surface: #2a2a2a;
+  --rm-text: #e8e8e3;
+  --rm-text-secondary: #aaa;
+  --rm-border: #3a3a3a;
+  --rm-primary: #3cb5a9;
+  --rm-primary-surface: #1a3a36;
+  --rm-shadow: rgba(0, 0, 0, 0.3);
+  --rm-input-bg: #333;
+  --rm-input-border: #555;
+  --rm-header-bg: #222;
+  --rm-header-border: #333;
+  --rm-danger: #e74c3c;
+  --rm-tag-bg: #3d3526;
+  --rm-tag-text: #d4c4a8;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -17,13 +53,14 @@ html {
 
 body {
   margin: 0;
-  background: #f8f7f2;
-  color: #20201d;
+  background: var(--rm-bg);
+  color: var(--rm-text);
   line-height: 1.5;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 a {
-  color: #1c5b55;
+  color: var(--rm-primary);
 }
 
 h1,

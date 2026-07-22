@@ -1,0 +1,35 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Create a ThemeService and integrate dark mode toggle into the app shell, then update all component styles to use CSS custom properties for theming.",
+  "status": "in_progress",
+  "steps": [
+    "Create a ThemeService at apps/web/src/app/theme/theme.service.ts following the singleton pattern (@Injectable({ providedIn: 'root' })). The service should: (1) manage a 'theme' signal or BehaviorSubject with values 'light' | 'dark', (2) persist the user's choice to localStorage with key 'rm-theme', (3) on init read from localStorage (defaulting to 'light' if not set), (4) apply the theme by adding a 'dark' class to the document.documentElement (html element) when dark mode is active and removing it when light mode is active, (5) expose a toggle() method and a current theme getter/observable.",
+    "Update apps/web/src/styles.scss to define CSS custom properties (variables) on :root for the light theme and on :root.dark for the dark theme. Variables to define: --rm-bg (light: #f8f7f2, dark: #1a1a1a), --rm-surface (light: #fff, dark: #2a2a2a), --rm-text (light: #20201d, dark: #e8e8e3), --rm-text-secondary (light: #666, dark: #aaa), --rm-border (light: #eee, dark: #3a3a3a), --rm-primary (light: #1c5b55, dark: #3cb5a9), --rm-primary-surface (light: #e8f5f3, dark: #1a3a36), --rm-shadow (light: rgba(0,0,0,0.06), dark: rgba(0,0,0,0.3)), --rm-input-bg (light: #fff, dark: #333), --rm-input-border (light: #ddd, dark: #555), --rm-header-bg (light: #fff, dark: #222), --rm-header-border (light: #eee, dark: #333), --rm-danger (light: #c0392b, dark: #e74c3c), --rm-tag-bg (light: #ece7d9, dark: #3d3526), --rm-tag-text (light: #5b4536, dark: #d4c4a8). Then update the body rule to use var(--rm-bg) and var(--rm-text). Update the 'a' color to use var(--rm-primary).",
+    "Update apps/web/src/app/app.component.ts to inject ThemeService and expose a method and property for the template to toggle theme. Add a currentTheme property (or derive from the service). Add a toggleTheme() method.",
+    "Update apps/web/src/app/app.component.html to add a dark mode toggle button in the nav area (next to the language switcher). Use a sun/moon icon or text label. The button should call toggleTheme() on click.",
+    "Update apps/web/src/app/app.component.scss to: (1) replace hardcoded colors with CSS variables (e.g., .app-shell background: var(--rm-bg), color: var(--rm-text); .app-header background: var(--rm-header-bg), border-color: var(--rm-header-border); .nav-link color: var(--rm-text); .btn-logout border-color/color use variables; .btn-lang uses variables), (2) style the new theme toggle button consistently with the lang-switcher buttons.",
+    "Update apps/web/src/app/recipes/recipe-list.component.ts inline styles to replace hardcoded colors with CSS variables: .recipe-card background var(--rm-surface), border var(--rm-border), shadow var(--rm-shadow); .card-link h3 color var(--rm-text); .description/.loading/.empty color var(--rm-text-secondary); .meta color var(--rm-text-secondary); .tag background var(--rm-primary-surface), color var(--rm-primary); .btn-new and .btn-import updated.",
+    "Update apps/web/src/app/recipes/recipe-detail.component.ts inline styles to use CSS variables: .meta-bar background var(--rm-bg); .description color var(--rm-text-secondary); h3 color var(--rm-text); .meta-item strong color var(--rm-text-secondary); .category-tag uses var(--rm-primary-surface) and var(--rm-primary); .recipe-tag uses var(--rm-tag-bg) and var(--rm-tag-text); .btn-edit uses var(--rm-primary); .btn-delete uses var(--rm-danger); .loading color var(--rm-text-secondary); .error color var(--rm-danger).",
+    "Update apps/web/src/app/recipes/recipe-form.component.ts inline styles to use CSS variables: .form-section background var(--rm-surface), border var(--rm-border); input/textarea border var(--rm-input-border), background var(--rm-input-bg), color var(--rm-text); input:focus/textarea:focus border-color var(--rm-primary); .btn-add background var(--rm-primary-surface), color var(--rm-primary); .btn-remove background and color use danger variables; .btn-cancel background var(--rm-border); .btn-submit uses var(--rm-primary); .loading color var(--rm-text-secondary); .error color var(--rm-danger).",
+    "Update apps/web/src/app/recipes/recipe-import.component.ts inline styles similarly: .form-section, input, buttons all use CSS variables.",
+    "Update apps/web/src/app/auth/login.component.ts inline styles: .auth-container background var(--rm-surface), shadow; input uses var(--rm-input-bg), var(--rm-input-border), var(--rm-text); button uses var(--rm-primary); .error uses var(--rm-danger); .link a uses var(--rm-primary).",
+    "Update apps/web/src/app/auth/register.component.ts, apps/web/src/app/auth/confirm.component.ts, and apps/web/src/app/auth/change-password.component.ts inline styles the same way as login.component.ts (they share the same .auth-container pattern).",
+    "Add i18n keys to apps/web/src/assets/i18n/en.json under APP: add 'THEME_TOGGLE_LIGHT' with value 'Switch to light mode' and 'THEME_TOGGLE_DARK' with value 'Switch to dark mode' (or a simpler approach: 'DARK_MODE' / 'LIGHT_MODE'). Add corresponding German translations in apps/web/src/assets/i18n/de.json.",
+    "Add smooth transition for theme switching: in styles.scss add a rule that applies transition on background-color and color to body and common elements (e.g., body { transition: background-color 0.3s, color 0.3s; })."
+  ],
+  "acceptance_criteria": [
+    "A ThemeService exists at apps/web/src/app/theme/theme.service.ts that is injectable, persists theme choice to localStorage, and applies a 'dark' class on document.documentElement",
+    "The app header contains a visible toggle button for switching between light and dark mode",
+    "All component styles use CSS custom properties instead of hardcoded colors for backgrounds, text, borders, inputs, and buttons",
+    "When dark mode is active, the page has a dark background with light text and all UI elements are visually consistent",
+    "Theme preference persists across page reloads via localStorage",
+    "Build passes: 'pnpm nx run-many -t build lint' completes without errors",
+    "Both English and German i18n files contain the new theme-related translation keys"
+  ],
+  "verification": [
+    "Run 'pnpm nx run-many -t build lint' and confirm it passes without errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

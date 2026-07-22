@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from './auth/auth.service';
 import { ConfigService } from './config/config.service';
+import { ThemeService } from './theme/theme.service';
 
 @Component({
   selector: 'rm-root',
@@ -30,6 +31,7 @@ export class AppComponent {
     private readonly authService: AuthService,
     private readonly translate: TranslateService,
     readonly configService: ConfigService,
+    readonly themeService: ThemeService,
   ) {
     this.isPrPreview = configService.isPrPreview;
     this.prNumber = configService.prNumber;
@@ -46,6 +48,10 @@ export class AppComponent {
     this.translate.use(lang);
     this.currentLang = lang;
     localStorage.setItem(AppComponent.LANG_STORAGE_KEY, lang);
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 
   signOut(): void {

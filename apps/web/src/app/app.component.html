@@ -45,6 +45,14 @@
           DE
         </button>
       </span>
+      <button
+        class="btn-theme"
+        (click)="toggleTheme()"
+        [attr.aria-label]="themeService.currentTheme === 'dark' ? ('APP.THEME_TOGGLE_LIGHT' | translate) : ('APP.THEME_TOGGLE_DARK' | translate)"
+        [attr.title]="themeService.currentTheme === 'dark' ? ('APP.THEME_TOGGLE_LIGHT' | translate) : ('APP.THEME_TOGGLE_DARK' | translate)"
+      >
+        {{ themeService.currentTheme === 'dark' ? '☀️' : '🌙' }}
+      </button>
     </nav>
   </header>
   <main class="app-content">

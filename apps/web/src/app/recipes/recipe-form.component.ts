@@ -186,14 +186,14 @@ import { RecipeService } from './recipe.service';
       }
       .loading {
         text-align: center;
-        color: #666;
+        color: var(--rm-text-secondary);
       }
       .form-section {
-        background: #fff;
+        background: var(--rm-surface);
         border-radius: 8px;
         padding: 20px;
         margin-bottom: 20px;
-        border: 1px solid #eee;
+        border: 1px solid var(--rm-border);
       }
       .section-header {
         display: flex;
@@ -222,15 +222,17 @@ import { RecipeService } from './recipe.service';
       textarea {
         width: 100%;
         padding: 10px 12px;
-        border: 1px solid #ddd;
+        border: 1px solid var(--rm-input-border);
         border-radius: 6px;
         font-size: 0.95rem;
         font-family: inherit;
+        background: var(--rm-input-bg);
+        color: var(--rm-text);
       }
       input:focus,
       textarea:focus {
         outline: none;
-        border-color: #1c5b55;
+        border-color: var(--rm-primary);
       }
       .ingredient-row {
         display: flex;
@@ -267,8 +269,8 @@ import { RecipeService } from './recipe.service';
         gap: 4px;
       }
       .btn-add {
-        background: #e8f5f3;
-        color: #1c5b55;
+        background: var(--rm-primary-surface);
+        color: var(--rm-primary);
         border: none;
         padding: 6px 12px;
         border-radius: 4px;
@@ -277,7 +279,7 @@ import { RecipeService } from './recipe.service';
       }
       .btn-remove {
         background: #fdeaea;
-        color: #c0392b;
+        color: var(--rm-danger);
         border: none;
         width: 28px;
         height: 28px;
@@ -286,19 +288,20 @@ import { RecipeService } from './recipe.service';
         font-weight: 700;
       }
       .btn-move {
-        background: #f0f0f0;
+        background: var(--rm-border);
         border: none;
         padding: 4px 8px;
         border-radius: 4px;
         cursor: pointer;
         font-size: 0.75rem;
+        color: var(--rm-text);
       }
       .btn-move:disabled {
         opacity: 0.4;
         cursor: not-allowed;
       }
       .error {
-        color: #c0392b;
+        color: var(--rm-danger);
         font-size: 0.9rem;
       }
       .form-actions {
@@ -307,8 +310,8 @@ import { RecipeService } from './recipe.service';
         justify-content: flex-end;
       }
       .btn-cancel {
-        background: #f0f0f0;
-        color: #333;
+        background: var(--rm-border);
+        color: var(--rm-text);
         border: none;
         padding: 12px 24px;
         border-radius: 6px;
@@ -316,7 +319,7 @@ import { RecipeService } from './recipe.service';
         cursor: pointer;
       }
       .btn-submit {
-        background: #1c5b55;
+        background: var(--rm-primary);
         color: #fff;
         border: none;
         padding: 12px 24px;

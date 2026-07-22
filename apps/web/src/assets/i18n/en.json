@@ -1,6 +1,8 @@
 {
   "APP": {
     "TITLE": "Recipe Manager",
+    "THEME_TOGGLE_LIGHT": "Switch to light mode",
+    "THEME_TOGGLE_DARK": "Switch to dark mode",
     "NAV": {
       "MY_RECIPES": "My Recipes",
       "SIGN_IN": "Sign In",

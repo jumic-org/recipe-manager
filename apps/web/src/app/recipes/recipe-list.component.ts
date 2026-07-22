@@ -83,15 +83,15 @@ import { RecipeService } from './recipe.service';
         align-items: center;
       }
       .btn-import {
-        background: #e8f5f3;
-        color: #1c5b55;
+        background: var(--rm-primary-surface);
+        color: var(--rm-primary);
         text-decoration: none;
         padding: 10px 20px;
         border-radius: 6px;
         font-weight: 600;
       }
       .btn-new {
-        background: #1c5b55;
+        background: var(--rm-primary);
         color: #fff;
         text-decoration: none;
         padding: 10px 20px;
@@ -101,11 +101,11 @@ import { RecipeService } from './recipe.service';
       .loading,
       .empty {
         text-align: center;
-        color: #666;
+        color: var(--rm-text-secondary);
         padding: 40px 0;
       }
       .error {
-        color: #c0392b;
+        color: var(--rm-danger);
         text-align: center;
       }
       .recipe-grid {
@@ -114,15 +114,15 @@ import { RecipeService } from './recipe.service';
         gap: 20px;
       }
       .recipe-card {
-        background: #fff;
+        background: var(--rm-surface);
         border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-        border: 1px solid #eee;
+        box-shadow: 0 2px 12px var(--rm-shadow);
+        border: 1px solid var(--rm-border);
         transition: box-shadow 0.2s;
       }
       .recipe-card:hover {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 20px var(--rm-shadow);
       }
       .card-link {
         display: block;
@@ -132,10 +132,10 @@ import { RecipeService } from './recipe.service';
       }
       .card-link h3 {
         margin: 0 0 8px;
-        color: #20201d;
+        color: var(--rm-text);
       }
       .description {
-        color: #666;
+        color: var(--rm-text-secondary);
         font-size: 0.9rem;
         margin: 0 0 12px;
         line-height: 1.4;
@@ -144,7 +144,7 @@ import { RecipeService } from './recipe.service';
         display: flex;
         gap: 12px;
         font-size: 0.85rem;
-        color: #888;
+        color: var(--rm-text-secondary);
         margin-bottom: 12px;
       }
       .categories {
@@ -153,8 +153,8 @@ import { RecipeService } from './recipe.service';
         gap: 6px;
       }
       .tag {
-        background: #e8f5f3;
-        color: #1c5b55;
+        background: var(--rm-primary-surface);
+        color: var(--rm-primary);
         font-size: 0.78rem;
         padding: 4px 8px;
         border-radius: 4px;
