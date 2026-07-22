@@ -1,0 +1,7 @@
+{
+  "task_id": "task-fix-bedrock-iam-policy",
+  "task_description": "Fix the 'Failed to extract recipe using AI model' error by correcting the IAM policy ARN for Bedrock InvokeModel. The model 'eu.amazon.nova-lite-v1:0' is a cross-region inference profile, not a foundation model, so the ARN resource type and account field must be updated accordingly. Also increase Lambda timeout to 60s.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001"],
+  "blocked_reason": null
+}

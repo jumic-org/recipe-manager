@@ -1,0 +1,19 @@
+{
+  "project_type": "Nx monorepo with Angular frontend, CDK infrastructure, and Lambda API",
+  "language": "TypeScript",
+  "build_system": "pnpm + Nx, CDK for infra",
+  "test_framework": "No test files present in the repo currently",
+  "build_command": "pnpm nx build infra",
+  "test_command": "pnpm nx lint infra",
+  "verification_instructions": "Build the infra app with `pnpm nx build infra` to ensure TypeScript compiles correctly",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "corepack enable && pnpm install",
+  "environment_constraints": "OPEN_INTERNET - full network access available",
+  "contribution_requirements": "Standard Nx monorepo patterns",
+  "key_patterns": "CDK stack in apps/infra/src/stacks/recipe-manager-stack.ts defines all infrastructure. Lambda handler in apps/api/src/handler.ts uses Bedrock InvokeModel with modelId 'eu.amazon.nova-lite-v1:0' which is a cross-region inference profile.",
+  "relevant_files": [
+    "apps/infra/src/stacks/recipe-manager-stack.ts",
+    "apps/api/src/handler.ts"
+  ],
+  "directory_structure": "apps/api - Lambda handler, apps/infra - CDK stack, apps/web - Angular frontend, libs/shared - shared types"
+}
