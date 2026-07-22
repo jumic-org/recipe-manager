@@ -1,0 +1,28 @@
+{
+  "project_type": "Nx monorepo - serverless full-stack (Angular SPA + Lambda API + CDK infra)",
+  "language": "TypeScript",
+  "build_system": "pnpm + Nx 22.7.3. Each project has its own build target. Builds: pnpm nx build api (tsc --noEmit), pnpm nx build web (Angular CLI), pnpm nx build infra (tsc).",
+  "test_framework": "No test framework currently configured (Vitest recommended per steering but not set up).",
+  "build_command": "pnpm nx build api && pnpm nx build web",
+  "test_command": "No test command available - validation via TypeScript compilation (pnpm nx build api && pnpm nx build web)",
+  "verification_instructions": "1. Run pnpm nx build api to verify Lambda handler compiles. 2. Run pnpm nx build web to verify Angular app compiles. 3. Run pnpm nx build infra to verify CDK synthesizes.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "pnpm install --frozen-lockfile",
+  "environment_constraints": "OPEN_INTERNET - full network access available. Node.js 24.x. No Docker daemon needed for verification.",
+  "contribution_requirements": "Strict TypeScript (noPropertyAccessFromIndexSignature - use bracket notation for index sigs). Angular: standalone components, OnPush, SCSS, rm- prefix. Lambda: single handler.ts with path-based routing. CDK: single stack, PascalCase construct IDs.",
+  "key_patterns": "Lambda handler uses path+method matching in a single handler function. RecipeService uses HttpClient with Observable pattern. i18n via @ngx-translate with en.json and de.json. ConfigService loads config.json at runtime for apiUrl. authInterceptor adds Bearer token. CDK grants via high-level methods (table.grantReadWriteData).",
+  "relevant_files": [
+    "apps/api/src/handler.ts",
+    "apps/web/src/app/recipes/recipe.service.ts",
+    "apps/web/src/app/recipes/recipe-form.component.ts",
+    "apps/web/src/app/recipes/recipe-list.component.ts",
+    "apps/web/src/app/app.routes.ts",
+    "apps/web/src/assets/i18n/en.json",
+    "apps/web/src/assets/i18n/de.json",
+    "apps/infra/src/stacks/recipe-manager-stack.ts",
+    "libs/shared/src/index.ts",
+    "package.json",
+    ".kiro/steering/data-model.md"
+  ],
+  "directory_structure": "apps/api/src/handler.ts (single Lambda handler), apps/web/src/app/recipes/ (recipe components + service), apps/web/src/app/auth/ (auth components + service + interceptor), apps/infra/src/stacks/recipe-manager-stack.ts (CDK stack), libs/shared/src/index.ts (shared interfaces)"
+}

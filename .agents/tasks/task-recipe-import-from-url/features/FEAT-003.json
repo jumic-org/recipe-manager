@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Add the Angular frontend 'Import from URL' feature: a new page/component where users can enter a URL, submit it to POST /recipes/import, see a loading state, and get redirected to the imported recipe on success. Add a route and navigation entry.",
+  "status": "pending",
+  "steps": [
+    "Add an importRecipe(url: string): Observable<Recipe> method to apps/web/src/app/recipes/recipe.service.ts that POSTs { url } to ${baseUrl}/import and maps the response to the recipe.",
+    "Create a new standalone component apps/web/src/app/recipes/recipe-import.component.ts with selector 'rm-recipe-import'. Use OnPush change detection. The template should have: a form with a URL input field (required, validated as URL), a submit button, loading/error states. On successful import, navigate to /recipes/{id} to view the imported recipe. Follow the same styling patterns as recipe-form.component.ts.",
+    "Add the route { path: 'recipes/import', component: RecipeImportComponent, canActivate: [authGuard] } to apps/web/src/app/app.routes.ts. Place it BEFORE the 'recipes/:id' route so it is matched correctly.",
+    "Add a navigation link/button to the recipe-list.component.ts to navigate to the import page (alongside the existing 'New Recipe' button).",
+    "Add i18n translation keys for the import feature to both apps/web/src/assets/i18n/en.json and apps/web/src/assets/i18n/de.json under a RECIPES.IMPORT section with keys like TITLE, URL_LABEL, URL_PLACEHOLDER, SUBMIT, SUBMITTING, SUCCESS, ERROR, INVALID_URL."
+  ],
+  "acceptance_criteria": [
+    "RecipeImportComponent exists with selector rm-recipe-import and OnPush change detection",
+    "RecipeService has importRecipe method that calls POST /recipes/import",
+    "Route /recipes/import is defined before /recipes/:id in app.routes.ts",
+    "Import form validates URL input (required)",
+    "Loading state is shown while import is in progress",
+    "Error messages are displayed on failure",
+    "On success, user is redirected to the recipe detail page",
+    "Recipe list has a link/button to navigate to the import page",
+    "i18n keys exist in both en.json and de.json",
+    "pnpm nx build web succeeds without errors"
+  ],
+  "verification": [
+    "Run pnpm nx build web and confirm it compiles without errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

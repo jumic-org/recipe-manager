@@ -1,0 +1,24 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Update the CDK infrastructure stack to: (1) grant the Lambda function permission to invoke Bedrock (bedrock:InvokeModel), (2) increase the Lambda timeout to accommodate Bedrock and web fetch operations, and (3) add the /recipes/import route to API Gateway.",
+  "status": "pending",
+  "steps": [
+    "In apps/infra/src/stacks/recipe-manager-stack.ts, add an IAM policy statement granting the Lambda function bedrock:InvokeModel permission. Use apiHandler.addToRolePolicy() with a PolicyStatement that allows 'bedrock:InvokeModel' on resource 'arn:aws:bedrock:*::foundation-model/eu.amazon.nova-lite-v1:0' (or wildcard for all Bedrock models in the account). Import PolicyStatement from aws-cdk-lib/aws-iam.",
+    "Increase the Lambda timeout from Duration.seconds(10) to Duration.seconds(30) to accommodate the time needed for fetching web pages and invoking Bedrock.",
+    "Add a new API Gateway resource for /recipes/import: create an 'import' sub-resource under the 'recipes' resource, and add a POST method with the Lambda integration and Cognito authorizer. This must be added BEFORE the {id} resource to avoid conflicts.",
+    "Verify the stack synthesizes correctly by running pnpm nx build infra."
+  ],
+  "acceptance_criteria": [
+    "Lambda function has IAM permission to call bedrock:InvokeModel",
+    "Lambda timeout is increased to 30 seconds",
+    "API Gateway has POST /recipes/import route with Cognito authorizer",
+    "The /recipes/import resource is added before /recipes/{id} (or as a sibling - CDK handles this correctly since 'import' is a literal and {id} is a greedy proxy)",
+    "pnpm nx build infra succeeds without errors"
+  ],
+  "verification": [
+    "Run pnpm nx build infra and confirm it compiles without errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
