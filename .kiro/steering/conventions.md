@@ -1,5 +1,38 @@
 # Coding Conventions
 
+## Pull Request Titles
+
+This project enforces the **Semantic PR** title specification via the `.github/workflows/semantic-pr.yml` workflow (uses `amannn/action-semantic-pull-request@v6`). Every PR title must match the format:
+
+```
+type: description
+```
+
+Allowed types:
+
+| Type | Purpose |
+|------|---------|
+| `feat` | A new feature |
+| `fix` | A bug fix |
+| `chore` | Maintenance tasks, dependency updates |
+| `docs` | Documentation-only changes |
+| `refactor` | Code restructuring without behavior change |
+| `perf` | Performance improvements |
+| `test` | Adding or updating tests |
+| `ci` | CI/CD configuration changes |
+| `build` | Build system or tooling changes |
+| `style` | Code style/formatting (no logic change) |
+| `revert` | Reverting a previous commit |
+
+Examples:
+
+- `feat: add recipe search by ingredient`
+- `fix: prevent parallel deploy workflow runs`
+- `docs: update API usage examples`
+- `ci: add Node 24 to test matrix`
+
+When creating a PR, always use one of the allowed types followed by a colon, a space, and a lowercase description. Do not include a scope in parentheses unless explicitly requested.
+
 ## Runtime
 
 - **Node.js** >= 24.x is required for local development and CI/CD.
