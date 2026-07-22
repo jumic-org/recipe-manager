@@ -9,6 +9,40 @@
   color: #20201d;
 }
 
+// ── PR preview banner ─────────────────────────────────────────────────────────
+
+.pr-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 32px;
+  background: #fff3cd;
+  border-bottom: 2px solid #ffc107;
+  font-size: 0.9rem;
+  color: #664d03;
+}
+
+.pr-banner__icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.pr-banner__text {
+  line-height: 1.4;
+}
+
+.pr-banner__link {
+  color: #0a58ca;
+  font-weight: 600;
+  text-decoration: underline;
+
+  &:hover {
+    color: #084298;
+  }
+}
+
+// ── App shell ─────────────────────────────────────────────────────────────────
+
 .app-header {
   display: flex;
   align-items: center;

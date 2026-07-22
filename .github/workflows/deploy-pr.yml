@@ -1,0 +1,150 @@
+name: Deploy PR Preview
+
+# ── Triggers ──────────────────────────────────────────────────────────────────
+# Deploy on every push to a PR branch so reviewers always see the latest code.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  # One deployment per PR at a time; cancel the in-flight run if a new push arrives.
+  group: deploy-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write   # required for OIDC credential exchange
+  contents: read
+  pull-requests: write  # required to post / update the PR comment with the URL
+
+env:
+  AWS_REGION: eu-west-1
+  NODE_VERSION: '24'
+  MAIN_STACK_NAME: RecipeManagerStack
+  PR_STACK_NAME: RecipeManagerStack-PR${{ github.event.pull_request.number }}
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  PR_URL: ${{ github.event.pull_request.html_url }}
+
+jobs:
+  deploy-pr:
+    name: Deploy PR #${{ github.event.pull_request.number }} Preview
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ─────────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Node / pnpm ───────────────────────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable corepack and install pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.14.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── Build ─────────────────────────────────────────────────────────────────
+      - name: Build all applications
+        run: pnpm nx run-many -t build
+
+      - name: Verify web build output
+        run: pnpm verify:web
+
+      # ── AWS credentials ───────────────────────────────────────────────────────
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::352770552266:role/RecipeManagerGitHubDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ── Read Cognito IDs from the main stack outputs ──────────────────────────
+      # These outputs must exist in RecipeManagerStack before PR deployments work.
+      - name: Read main stack Cognito outputs
+        id: main-stack
+        run: |
+          USER_POOL_ID=$(aws cloudformation describe-stacks \
+            --stack-name "$MAIN_STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" \
+            --output text)
+
+          USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks \
+            --stack-name "$MAIN_STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" \
+            --output text)
+
+          if [[ -z "$USER_POOL_ID" || -z "$USER_POOL_CLIENT_ID" ]]; then
+            echo "::error::Could not read Cognito outputs from $MAIN_STACK_NAME. Ensure the main stack is deployed."
+            exit 1
+          fi
+
+          echo "userPoolId=$USER_POOL_ID"   >> "$GITHUB_OUTPUT"
+          echo "userPoolClientId=$USER_POOL_CLIENT_ID" >> "$GITHUB_OUTPUT"
+
+      # ── CDK deploy (PR stack) ─────────────────────────────────────────────────
+      - name: CDK Deploy PR stack
+        run: |
+          pnpm cdk deploy "$PR_STACK_NAME" \
+            --require-approval never \
+            --context prNumber="${PR_NUMBER}" \
+            --context prUrl="${PR_URL}" \
+            --context mainUserPoolId="${{ steps.main-stack.outputs.userPoolId }}" \
+            --context mainUserPoolClientId="${{ steps.main-stack.outputs.userPoolClientId }}"
+
+      # ── Read the CloudFront URL from the new stack ────────────────────────────
+      - name: Read PR stack CloudFront URL
+        id: pr-stack
+        run: |
+          CF_DOMAIN=$(aws cloudformation describe-stacks \
+            --stack-name "$PR_STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDomain'].OutputValue" \
+            --output text)
+          echo "url=https://${CF_DOMAIN}" >> "$GITHUB_OUTPUT"
+
+      # ── Post / update a PR comment with the preview URL ───────────────────────
+      - name: Comment preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const previewUrl = '${{ steps.pr-stack.outputs.url }}';
+            const prNumber   = context.payload.pull_request.number;
+            const marker     = '<!-- recipe-manager-pr-preview -->';
+            const body = [
+              marker,
+              '## 🚀 PR Preview Deployment',
+              '',
+              `| | |`,
+              `|---|---|`,
+              `| **Preview URL** | [${previewUrl}](${previewUrl}) |`,
+              `| **Stack name** | \`${{ env.PR_STACK_NAME }}\` |`,
+              `| **Auto-delete** | 3 days after last deployment |`,
+              '',
+              '_This comment is updated on every push. The stack is deleted automatically when the PR is closed or after 3 days of inactivity._',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner:      context.repo.owner,
+                repo:       context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }

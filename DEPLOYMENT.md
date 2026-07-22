@@ -2,82 +2,110 @@
 
 This document describes the deployment pipeline and its prerequisites for the Recipe Manager application.
 
-## Overview
+---
 
-The deployment is automated via a GitHub Actions workflow (`.github/workflows/deploy.yml`) that triggers on every push to the `main` branch. The workflow performs the following steps:
+## Production Deployment
+
+The production deployment is automated via `.github/workflows/deploy.yml` and triggers on every push to the `main` branch. The workflow performs the following steps:
 
 1. Builds all applications using Nx
 2. Assumes the AWS IAM role `RecipeManagerGitHubDeployRole` via OIDC federation
-3. Deploys the CDK stack (`RecipeManagerStack`) to AWS
+3. Deploys the CDK stack `RecipeManagerStack` to AWS (`eu-west-1`)
 
-The CDK stack uses `BucketDeployment` to handle syncing the Angular frontend build to S3 and invalidating the CloudFront distribution cache automatically as part of the CDK deploy step.
+The CDK stack uses `BucketDeployment` to sync the Angular frontend build to S3 and invalidate the CloudFront distribution cache automatically.
+
+---
+
+## PR Preview Deployments
+
+### Overview
+
+Every push to a pull request triggers `.github/workflows/deploy-pr.yml`, which:
+
+1. Builds the application
+2. Reads the `UserPoolId` and `UserPoolClientId` outputs from the main `RecipeManagerStack` so the preview shares the same Cognito user pool (no new sign-up required)
+3. Deploys an ephemeral CDK stack named `RecipeManagerStack-PR<number>` using the `RecipeManagerPrStack` construct
+4. Posts (or updates) a PR comment with the CloudFront preview URL
+
+The preview frontend displays a **yellow test-deployment banner** linking back to the GitHub PR.
+
+### Cognito sharing
+
+The PR stack imports the Cognito User Pool from the main stack by ID and creates a **new App Client** for the preview.  Users who already have an account on the main stack can sign in to the PR preview immediately.  The preview's DynamoDB table is completely separate, so recipe data is isolated.
+
+### Stack lifetime and cleanup
+
+| Trigger | Action |
+|---|---|
+| PR closed or merged | `.github/workflows/cleanup-pr.yml` deletes the stack immediately |
+| Stack untouched for **3 days** | The daily scheduled cleanup (cron `0 2 * * *`) deletes it |
+| Manual | Run the `Cleanup PR Preview` workflow from the Actions tab with `workflow_dispatch` |
+
+The 3-day safety net means the stack is always cleaned up even if the PR-closed event was missed (e.g. the workflow was disabled).
+
+---
 
 ## Prerequisites
 
-### GitHub Repository Secrets and Variables
-
-The workflow uses GitHub OIDC to authenticate with AWS. The repository must be configured with the following:
-
-- **OIDC trust relationship**: The AWS IAM role must trust the GitHub OIDC provider for this repository.
-
 ### IAM Role: `RecipeManagerGitHubDeployRole`
 
-The GitHub Actions workflow assumes the IAM role `arn:aws:iam::352770552266:role/RecipeManagerGitHubDeployRole` via OIDC. This role must have an identity-based policy that grants the following permissions:
+The workflow assumes `arn:aws:iam::352770552266:role/RecipeManagerGitHubDeployRole` via OIDC.
 
-#### Required IAM Permissions
+For PR deployments the same role is reused.  It additionally needs `cloudformation:*` permissions scoped to `arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack-PR*/*` so it can create, update and delete preview stacks.
 
-| Permission                      | Resource                                                                   | Purpose                                                                                                               |
-| ------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `sts:AssumeRoleWithWebIdentity` | (trust policy)                                                             | Allow GitHub Actions to assume the role via OIDC                                                                      |
-| `cloudformation:*`              | `arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*` | CDK deploy and stack management                                                                                       |
-| CDK bootstrap permissions       | Various                                                                    | CDK requires permissions to manage its staging bucket, Lambda functions, API Gateway, IAM roles, S3, CloudFront, etc. |
-
-> **Note**: The CDK `BucketDeployment` construct handles S3 syncing and CloudFront cache invalidation internally using a custom resource Lambda. The necessary S3 and CloudFront permissions are managed by CDK through the roles it creates for this custom resource, so they do not need to be granted directly to the GitHub Actions role.
-
-#### Minimum Policy Example
+#### Minimum policy addition for PR stacks
 
 ```json
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "CDKDeploy",
-      "Effect": "Allow",
-      "Action": [
-        "cloudformation:CreateStack",
-        "cloudformation:UpdateStack",
-        "cloudformation:DeleteStack",
-        "cloudformation:DescribeStacks",
-        "cloudformation:DescribeStackEvents",
-        "cloudformation:GetTemplate",
-        "cloudformation:CreateChangeSet",
-        "cloudformation:ExecuteChangeSet",
-        "cloudformation:DeleteChangeSet",
-        "cloudformation:DescribeChangeSet"
-      ],
-      "Resource": "arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*"
-    }
+  "Sid": "CDKDeployPRStacks",
+  "Effect": "Allow",
+  "Action": [
+    "cloudformation:CreateStack",
+    "cloudformation:UpdateStack",
+    "cloudformation:DeleteStack",
+    "cloudformation:DescribeStacks",
+    "cloudformation:DescribeStackEvents",
+    "cloudformation:GetTemplate",
+    "cloudformation:CreateChangeSet",
+    "cloudformation:ExecuteChangeSet",
+    "cloudformation:DeleteChangeSet",
+    "cloudformation:DescribeChangeSet",
+    "cloudformation:ListStacks"
+  ],
+  "Resource": [
+    "arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack-PR*/*",
+    "arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*"
   ]
+},
+{
+  "Sid": "ReadMainStackOutputs",
+  "Effect": "Allow",
+  "Action": "cloudformation:DescribeStacks",
+  "Resource": "arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*"
 }
 ```
 
-> **Important**: CDK itself may require additional permissions depending on the resources defined in the stack (e.g., IAM, Lambda, API Gateway, S3, CloudFront, SSM). The `BucketDeployment` construct creates a custom resource Lambda that needs S3 and CloudFront permissions, but these are granted by CDK to the Lambda execution role automatically. Consult the [AWS CDK documentation on IAM permissions](https://docs.aws.amazon.com/cdk/v2/guide/security-iam.html) for a full list.
+> `cloudformation:ListStacks` (without a resource condition) is required by the scheduled cleanup job to enumerate existing PR stacks.
+
+### GitHub repository permissions
+
+The deploy-pr workflow needs `pull-requests: write` to post the preview URL as a PR comment.
+
+---
 
 ## Troubleshooting
 
 ### CDK Deploy Fails
 
-If CDK deploy fails, check the CloudFormation events in the AWS Console for the `RecipeManagerStack` stack. Common issues include:
+Check the CloudFormation events in the AWS Console. Common issues:
 
-- Missing permissions for the GitHub Actions role to create/update CloudFormation resources
-- CDK bootstrap resources not available in the target account/region
+- Missing permissions for the GitHub Actions role
+- CDK bootstrap resources not available
 
 ### CDK Bootstrap
 
-Before the first deployment, ensure the target AWS account and region have been bootstrapped:
+Before the first deployment, bootstrap CDK for the target account/region:
 
 ```bash
 pnpm cdk bootstrap aws://352770552266/eu-west-1
 ```
-
-The role must also have permissions to access the CDK bootstrap resources (staging bucket, ECR repository if applicable).
