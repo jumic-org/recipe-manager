@@ -20,7 +20,7 @@ env:
   AWS_REGION: eu-west-1
   NODE_VERSION: '24'
   MAIN_STACK_NAME: RecipeManagerStack
-  PR_STACK_NAME: RecipeManagerStack_PR_${{ github.event.pull_request.number }}
+  PR_STACK_NAME: RecipeManagerStack-PR${{ github.event.pull_request.number }}
   PR_NUMBER: ${{ github.event.pull_request.number }}
   PR_URL: ${{ github.event.pull_request.html_url }}
 

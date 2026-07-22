@@ -24,7 +24,7 @@ Every push to a pull request triggers `.github/workflows/deploy-pr.yml`, which:
 
 1. Builds the application
 2. Reads the `UserPoolId` and `UserPoolClientId` outputs from the main `RecipeManagerStack` so the preview shares the same Cognito user pool (no new sign-up required)
-3. Deploys an ephemeral CDK stack named `RecipeManagerStack_PR_<number>` using the `RecipeManagerPrStack` construct
+3. Deploys an ephemeral CDK stack named `RecipeManagerStack-PR<number>` using the `RecipeManagerPrStack` construct
 4. Posts (or updates) a PR comment with the CloudFront preview URL
 
 The preview frontend displays a **yellow test-deployment banner** linking back to the GitHub PR.
@@ -51,7 +51,7 @@ The 3-day safety net means the stack is always cleaned up even if the PR-closed 
 
 The workflow assumes `arn:aws:iam::352770552266:role/RecipeManagerGitHubDeployRole` via OIDC.
 
-For PR deployments the same role is reused.  It additionally needs `cloudformation:*` permissions scoped to `arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack_PR_*/*` so it can create, update and delete preview stacks.
+For PR deployments the same role is reused.  It additionally needs `cloudformation:*` permissions scoped to `arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack-PR*/*` so it can create, update and delete preview stacks.
 
 #### Minimum policy addition for PR stacks
 
@@ -73,7 +73,7 @@ For PR deployments the same role is reused.  It additionally needs `cloudformati
     "cloudformation:ListStacks"
   ],
   "Resource": [
-    "arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack_PR_*/*",
+    "arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack-PR*/*",
     "arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*"
   ]
 },

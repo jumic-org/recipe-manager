@@ -23,7 +23,7 @@ permissions:
 
 env:
   AWS_REGION: eu-west-1
-  STACK_PREFIX: RecipeManagerStack_PR_
+  STACK_PREFIX: RecipeManagerStack-PR
   # Stacks older than this many seconds are considered expired (3 days = 259200 s)
   MAX_AGE_SECONDS: 259200
 

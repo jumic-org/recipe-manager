@@ -11,7 +11,7 @@ new RecipeManagerStack(app, 'RecipeManagerStack', {
 
 // ── PR preview stack ──────────────────────────────────────────────────────────
 // Synthesised only when the context values below are provided, e.g.:
-//   cdk deploy RecipeManagerStack_PR_42 \
+//   cdk deploy RecipeManagerStack-PR42 \
 //     -c prNumber=42 \
 //     -c prUrl=https://github.com/owner/repo/pull/42 \
 //     -c mainUserPoolId=eu-west-1_XXXXXXXXX \
@@ -22,7 +22,7 @@ const mainUserPoolId = app.node.tryGetContext('mainUserPoolId') as string | unde
 const mainUserPoolClientId = app.node.tryGetContext('mainUserPoolClientId') as string | undefined;
 
 if (prNumber && prUrl && mainUserPoolId && mainUserPoolClientId) {
-  new RecipeManagerStack(app, `RecipeManagerStack_PR_${prNumber}`, {
+  new RecipeManagerStack(app, `RecipeManagerStack-PR${prNumber}`, {
     description: `Recipe Manager PR #${prNumber} preview deployment`,
     prNumber,
     prUrl,
