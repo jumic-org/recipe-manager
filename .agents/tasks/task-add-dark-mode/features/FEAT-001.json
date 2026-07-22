@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Create a ThemeService and integrate dark mode toggle into the app shell, then update all component styles to use CSS custom properties for theming.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create a ThemeService at apps/web/src/app/theme/theme.service.ts following the singleton pattern (@Injectable({ providedIn: 'root' })). The service should: (1) manage a 'theme' signal or BehaviorSubject with values 'light' | 'dark', (2) persist the user's choice to localStorage with key 'rm-theme', (3) on init read from localStorage (defaulting to 'light' if not set), (4) apply the theme by adding a 'dark' class to the document.documentElement (html element) when dark mode is active and removing it when light mode is active, (5) expose a toggle() method and a current theme getter/observable.",
     "Update apps/web/src/styles.scss to define CSS custom properties (variables) on :root for the light theme and on :root.dark for the dark theme. Variables to define: --rm-bg (light: #f8f7f2, dark: #1a1a1a), --rm-surface (light: #fff, dark: #2a2a2a), --rm-text (light: #20201d, dark: #e8e8e3), --rm-text-secondary (light: #666, dark: #aaa), --rm-border (light: #eee, dark: #3a3a3a), --rm-primary (light: #1c5b55, dark: #3cb5a9), --rm-primary-surface (light: #e8f5f3, dark: #1a3a36), --rm-shadow (light: rgba(0,0,0,0.06), dark: rgba(0,0,0,0.3)), --rm-input-bg (light: #fff, dark: #333), --rm-input-border (light: #ddd, dark: #555), --rm-header-bg (light: #fff, dark: #222), --rm-header-border (light: #eee, dark: #333), --rm-danger (light: #c0392b, dark: #e74c3c), --rm-tag-bg (light: #ece7d9, dark: #3d3526), --rm-tag-text (light: #5b4536, dark: #d4c4a8). Then update the body rule to use var(--rm-bg) and var(--rm-text). Update the 'a' color to use var(--rm-primary).",
@@ -31,5 +31,5 @@
     "Run 'pnpm nx run-many -t build lint' and confirm it passes without errors"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Build passes with only pre-existing budget warning (500.99 kB vs 500 kB limit). Node 24 needed to be installed via mise with MISE_NODE_VERIFY=false due to gpg-agent not being available. All lint checks pass. The dark theme toggle uses emoji sun/moon icons for simplicity."
 }
