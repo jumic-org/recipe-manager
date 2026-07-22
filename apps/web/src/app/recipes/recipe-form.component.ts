@@ -278,7 +278,7 @@ import { RecipeService } from './recipe.service';
         cursor: pointer;
       }
       .btn-remove {
-        background: #fdeaea;
+        background: var(--rm-danger-surface);
         color: var(--rm-danger);
         border: none;
         width: 28px;

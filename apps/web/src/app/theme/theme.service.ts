@@ -10,7 +10,11 @@ export class ThemeService {
 
   constructor() {
     const stored = localStorage.getItem(ThemeService.STORAGE_KEY);
-    this.theme = stored === 'dark' ? 'dark' : 'light';
+    if (stored === 'dark' || stored === 'light') {
+      this.theme = stored;
+    } else {
+      this.theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
     this.applyTheme();
   }
 
