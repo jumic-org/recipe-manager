@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Add POST /recipes/import endpoint to the Lambda handler that: (1) receives a URL in the request body, (2) fetches the page content from that URL, (3) sends it to AWS Bedrock (model eu.amazon.nova-lite-v1:0) with a prompt containing 2-3 example recipes from the data-model.md steering file to convert the content to CreateRecipeInput format, (4) saves the recipe to DynamoDB, and (5) returns the created recipe. Also add @aws-sdk/client-bedrock-runtime to package.json dependencies.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Add @aws-sdk/client-bedrock-runtime to the root package.json dependencies and run pnpm install",
     "In apps/api/src/handler.ts, add a new route match for POST /recipes/import (before the /recipes/{id} match so it doesn't get captured by the regex). The route handler should: extract userId from authorizer claims, parse body to get the url field, validate it.",
@@ -27,5 +27,5 @@
     "Run pnpm nx build api and confirm it compiles without errors"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Build succeeds with pnpm nx build api. Used Node.js built-in fetch (available in Node 24) for URL fetching. Bedrock client uses the Amazon Nova messages API format. HTML stripping removes script/style/nav/header/footer elements and truncates to 10000 chars. Response parsing handles potential markdown code blocks from Bedrock."
 }
