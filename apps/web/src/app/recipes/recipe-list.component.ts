@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -172,6 +172,7 @@ export class RecipeListComponent implements OnInit {
   constructor(
     private readonly recipeService: RecipeService,
     private readonly translateService: TranslateService,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -180,10 +181,12 @@ export class RecipeListComponent implements OnInit {
       next: (recipes) => {
         this.recipes = recipes;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.error = err.message || this.translateService.instant('RECIPES.LIST.LOAD_ERROR');
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
   }

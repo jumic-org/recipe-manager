@@ -1,0 +1,24 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "Fix RecipeListComponent stuck on loading state with OnPush change detection. The component has ChangeDetectionStrategy.OnPush but does not inject ChangeDetectorRef or call markForCheck() after the async subscribe callbacks complete - so Angular never re-renders the component after data loads. The pattern to apply is already present in RecipeDetailComponent (fixed in commit c3296b4). Apply the identical fix to RecipeListComponent.",
+  "status": "completed",
+  "steps": [
+    "In apps/web/src/app/recipes/recipe-list.component.ts, add ChangeDetectorRef to the import from '@angular/core' (it already imports ChangeDetectionStrategy, Component, OnInit)",
+    "Inject ChangeDetectorRef in the constructor: add 'private readonly cdr: ChangeDetectorRef' as a constructor parameter",
+    "In the ngOnInit subscribe 'next' callback, add 'this.cdr.markForCheck();' after 'this.loading = false;'",
+    "In the ngOnInit subscribe 'error' callback, add 'this.cdr.markForCheck();' after 'this.loading = false;'"
+  ],
+  "acceptance_criteria": [
+    "RecipeListComponent constructor injects ChangeDetectorRef as 'private readonly cdr'",
+    "ngOnInit subscribe 'next' callback calls this.cdr.markForCheck() after updating state",
+    "ngOnInit subscribe 'error' callback calls this.cdr.markForCheck() after updating state",
+    "Pattern matches exactly what RecipeDetailComponent does (reference: apps/web/src/app/recipes/recipe-detail.component.ts)"
+  ],
+  "verification": [
+    "Run: cd /projects/sandbox/recipe-manager && pnpm nx lint web -- --no-cache",
+    "Review diff: git diff to confirm ChangeDetectorRef import, constructor injection, and markForCheck() calls in both callbacks"
+  ],
+  "blocked_reason": null,
+  "findings": "Applied identical ChangeDetectorRef injection and markForCheck() pattern from RecipeDetailComponent. Added ChangeDetectorRef to @angular/core import, injected as 'private readonly cdr' in constructor, and called this.cdr.markForCheck() after this.loading = false in both next and error callbacks. Lint passes (pnpm nx lint web -- --no-cache). Note: pnpm/node required sourcing ~/.nvm/nvm.sh to be available in PATH."
+}
