@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Add POST /recipes/import endpoint to the Lambda handler that: (1) receives a URL in the request body, (2) fetches the page content from that URL, (3) sends it to AWS Bedrock (model eu.amazon.nova-lite-v1:0) with a prompt containing 2-3 example recipes from the data-model.md steering file to convert the content to CreateRecipeInput format, (4) saves the recipe to DynamoDB, and (5) returns the created recipe. Also add @aws-sdk/client-bedrock-runtime to package.json dependencies.",
+  "status": "completed",
+  "steps": [
+    "Add @aws-sdk/client-bedrock-runtime to the root package.json dependencies and run pnpm install",
+    "In apps/api/src/handler.ts, add a new route match for POST /recipes/import (before the /recipes/{id} match so it doesn't get captured by the regex). The route handler should: extract userId from authorizer claims, parse body to get the url field, validate it.",
+    "Implement a function that fetches the web page content from the given URL using Node.js built-in fetch (available in Node 24). Strip HTML tags to extract text content for the Bedrock prompt. Keep only meaningful text (strip scripts, styles, nav elements).",
+    "Implement the Bedrock invocation using BedrockRuntimeClient and InvokeModelCommand from @aws-sdk/client-bedrock-runtime. Use model ID 'eu.amazon.nova-lite-v1:0'. The prompt must include 2-3 of the example recipes from the data-model.md steering file (Bienenstich, One-Pot Pasta, Baby Pizza) in CreateRecipeInput format (without id, userId, createdAt, updatedAt) as few-shot examples. The prompt should instruct the model to extract the recipe from the page content and return a single JSON object matching the CreateRecipeInput structure.",
+    "Parse the Bedrock response JSON into CreateRecipeInput format. Add error handling for malformed responses.",
+    "Save the parsed recipe to DynamoDB (same as createRecipe logic - generate id, set userId, add timestamps) and return the created recipe with 201 status.",
+    "Add BEDROCK_REGION environment variable support (default to process.env['AWS_REGION'] or 'eu-central-1') for the BedrockRuntimeClient configuration."
+  ],
+  "acceptance_criteria": [
+    "POST /recipes/import route is handled in handler.ts before /recipes/{id} route matching",
+    "Request body with { url: string } is validated - returns 400 if url is missing",
+    "Page content is fetched from the provided URL",
+    "Bedrock is called with model eu.amazon.nova-lite-v1:0 and a prompt containing 2-3 example recipes in CreateRecipeInput format",
+    "Bedrock response is parsed as JSON into CreateRecipeInput structure",
+    "Recipe is saved to DynamoDB with generated id, userId, and timestamps",
+    "Response is 201 with the created recipe",
+    "Error cases return appropriate status codes (400 for bad input, 502 for Bedrock/fetch failures)",
+    "pnpm nx build api succeeds without type errors"
+  ],
+  "verification": [
+    "Run pnpm nx build api and confirm it compiles without errors"
+  ],
+  "blocked_reason": null,
+  "findings": "Build succeeds with pnpm nx build api. Used Node.js built-in fetch (available in Node 24) for URL fetching. Bedrock client uses the Amazon Nova messages API format. HTML stripping removes script/style/nav/header/footer elements and truncates to 10000 chars. Response parsing handles potential markdown code blocks from Bedrock."
+}

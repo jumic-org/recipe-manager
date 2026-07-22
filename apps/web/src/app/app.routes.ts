@@ -7,6 +7,7 @@ import { ChangePasswordComponent } from './auth/change-password.component';
 import { RecipeListComponent } from './recipes/recipe-list.component';
 import { RecipeDetailComponent } from './recipes/recipe-detail.component';
 import { RecipeFormComponent } from './recipes/recipe-form.component';
+import { RecipeImportComponent } from './recipes/recipe-import.component';
 
 export const appRoutes: Routes = [
   { path: '', redirectTo: 'recipes', pathMatch: 'full' },
@@ -16,6 +17,7 @@ export const appRoutes: Routes = [
   { path: 'change-password', component: ChangePasswordComponent, canActivate: [authGuard] },
   { path: 'recipes', component: RecipeListComponent, canActivate: [authGuard] },
   { path: 'recipes/new', component: RecipeFormComponent, canActivate: [authGuard] },
+  { path: 'recipes/import', component: RecipeImportComponent, canActivate: [authGuard] },
   { path: 'recipes/:id', component: RecipeDetailComponent, canActivate: [authGuard] },
   { path: 'recipes/:id/edit', component: RecipeFormComponent, canActivate: [authGuard] },
 ];

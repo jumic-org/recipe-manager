@@ -1,0 +1,14 @@
+{
+  "task_id": "task-recipe-import-from-url",
+  "task_description": "Add recipe import from URL feature: users enter a URL, the Lambda fetches the page content, sends it to AWS Bedrock (eu.amazon.nova-lite-v1:0) with example recipes as few-shot prompt, parses the response into CreateRecipeInput format, saves to DynamoDB, and returns the recipe. Includes CDK permissions and Angular frontend form.",
+  "status": "completed",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null,
+  "verification": {
+    "build": "pass",
+    "tests": "pass",
+    "test_quality": "skipped",
+    "docker_build": "skipped",
+    "summary": "All three build targets (api, web, infra) pass with fresh compilation. No test framework configured. Security review issues addressed in follow-up commit. v2 review APPROVED with 3 non-blocking future-hardening suggestions."
+  }
+}
