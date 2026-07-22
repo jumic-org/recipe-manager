@@ -29,9 +29,11 @@ updates:
       aws-sdk:
         patterns:
           - '@aws-sdk/*'
-      typescript-eslint:
+      typescript:
         patterns:
           - 'typescript'
+      typescript-eslint:
+        patterns:
           - '@typescript-eslint/*'
           - 'typescript-eslint'
           - 'eslint'
