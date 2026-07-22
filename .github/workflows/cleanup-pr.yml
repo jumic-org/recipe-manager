@@ -1,0 +1,131 @@
+name: Cleanup PR Preview
+
+# ── Triggers ──────────────────────────────────────────────────────────────────
+# 1. Explicit cleanup: fires when a PR is closed (merged or abandoned).
+# 2. Scheduled cleanup: fires daily and removes any PR stack whose
+#    last-updated timestamp is older than 3 days, acting as a safety net
+#    in case the PR-closed event didn't trigger (e.g. the workflow was
+#    disabled, the runner was unavailable, etc.).
+on:
+  pull_request:
+    types: [closed]
+
+  schedule:
+    # Every day at 02:00 UTC
+    - cron: '0 2 * * *'
+
+  # Allow manual runs from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # required for OIDC credential exchange
+  contents: read
+
+env:
+  AWS_REGION: eu-west-1
+  STACK_PREFIX: RecipeManagerStack_PR_
+  # Stacks older than this many seconds are considered expired (3 days = 259200 s)
+  MAX_AGE_SECONDS: 259200
+
+jobs:
+  # ── Job 1: delete the stack for the PR that was just closed ──────────────────
+  cleanup-on-close:
+    name: Delete stack for closed PR #${{ github.event.pull_request.number }}
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::352770552266:role/RecipeManagerGitHubDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Delete PR stack
+        run: |
+          STACK_NAME="${STACK_PREFIX}${{ github.event.pull_request.number }}"
+          echo "Checking for stack: $STACK_NAME"
+
+          STATUS=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query "Stacks[0].StackStatus" \
+            --output text 2>/dev/null || echo "DOES_NOT_EXIST")
+
+          if [[ "$STATUS" == "DOES_NOT_EXIST" ]]; then
+            echo "Stack $STACK_NAME does not exist – nothing to delete."
+            exit 0
+          fi
+
+          echo "Stack exists with status $STATUS. Deleting…"
+          aws cloudformation delete-stack --stack-name "$STACK_NAME"
+
+          echo "Waiting for deletion to complete…"
+          aws cloudformation wait stack-delete-complete --stack-name "$STACK_NAME"
+          echo "Stack $STACK_NAME deleted successfully."
+
+  # ── Job 2: scheduled sweep – delete any PR stack older than MAX_AGE_SECONDS ──
+  cleanup-expired:
+    name: Delete expired PR stacks (scheduled)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::352770552266:role/RecipeManagerGitHubDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: List and delete expired PR stacks
+        run: |
+          NOW=$(date +%s)
+          THRESHOLD=$((NOW - MAX_AGE_SECONDS))
+
+          echo "Current time (epoch): $NOW"
+          echo "Delete stacks last updated before epoch: $THRESHOLD  ($(date -d @$THRESHOLD --utc '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -r $THRESHOLD '+%Y-%m-%dT%H:%M:%SZ'))"
+
+          # Retrieve all stacks whose name starts with the PR prefix.
+          # CloudFormation list-stacks returns deleted stacks too; filter those out.
+          STACKS=$(aws cloudformation list-stacks \
+            --stack-status-filter \
+              CREATE_COMPLETE \
+              UPDATE_COMPLETE \
+              UPDATE_ROLLBACK_COMPLETE \
+              ROLLBACK_COMPLETE \
+            --query "StackSummaries[?starts_with(StackName, '${STACK_PREFIX}')].[StackName,LastUpdatedTime,CreationTime]" \
+            --output text)
+
+          if [[ -z "$STACKS" ]]; then
+            echo "No active PR stacks found."
+            exit 0
+          fi
+
+          DELETED=0
+
+          while IFS=$'\t' read -r STACK_NAME LAST_UPDATED CREATION_TIME; do
+            # Use LastUpdatedTime if present, otherwise fall back to CreationTime
+            REFERENCE_TIME="${LAST_UPDATED:-$CREATION_TIME}"
+            # Convert ISO-8601 to epoch (GNU date or BSD date)
+            if date --version >/dev/null 2>&1; then
+              # GNU date (Linux)
+              STACK_EPOCH=$(date -d "$REFERENCE_TIME" +%s 2>/dev/null || echo 0)
+            else
+              # BSD date (macOS runners)
+              STACK_EPOCH=$(date -j -f "%Y-%m-%dT%H:%M:%S+00:00" "$REFERENCE_TIME" +%s 2>/dev/null || echo 0)
+            fi
+
+            echo "  $STACK_NAME  last-updated=$REFERENCE_TIME  epoch=$STACK_EPOCH"
+
+            if [[ "$STACK_EPOCH" -lt "$THRESHOLD" ]]; then
+              echo "  → Stack is older than 3 days. Deleting $STACK_NAME…"
+              aws cloudformation delete-stack --stack-name "$STACK_NAME"
+              aws cloudformation wait stack-delete-complete --stack-name "$STACK_NAME"
+              echo "  ✓ Deleted $STACK_NAME"
+              DELETED=$((DELETED + 1))
+            else
+              echo "  → Stack is within retention window. Skipping."
+            fi
+          done <<< "$STACKS"
+
+          echo ""
+          echo "Cleanup complete. Stacks deleted: $DELETED"

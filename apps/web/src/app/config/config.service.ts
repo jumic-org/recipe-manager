@@ -5,6 +5,10 @@ export interface AppConfig {
   userPoolId: string;
   userPoolClientId: string;
   region: string;
+  /** Present only in PR preview deployments. */
+  prNumber?: string;
+  /** Full GitHub PR URL, present only in PR preview deployments. */
+  prUrl?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -25,6 +29,22 @@ export class ConfigService {
 
   get region(): string {
     return this.getConfig().region;
+  }
+
+  /** The PR number if this is a preview deployment, otherwise undefined. */
+  get prNumber(): string | undefined {
+    return this.getConfig().prNumber;
+  }
+
+  /** The GitHub PR URL if this is a preview deployment, otherwise undefined. */
+  get prUrl(): string | undefined {
+    return this.getConfig().prUrl;
+  }
+
+  /** True when the app is running as a PR preview deployment. */
+  get isPrPreview(): boolean {
+    const cfg = this.getConfig();
+    return typeof cfg.prNumber === 'string' && cfg.prNumber.length > 0;
   }
 
   get isLoaded(): boolean {
@@ -53,7 +73,7 @@ export class ConfigService {
     }
     const obj = json as Record<string, unknown>;
     for (const key of requiredKeys) {
-      if (typeof obj[key] !== 'string' || obj[key].length === 0) {
+      if (typeof obj[key] !== 'string' || (obj[key] as string).length === 0) {
         throw new Error(`config.json: "${key}" must be a non-empty string`);
       }
     }

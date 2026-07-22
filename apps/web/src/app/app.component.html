@@ -1,4 +1,24 @@
 <div class="app-shell">
+  @if (isPrPreview) {
+    <div class="pr-banner" role="banner" aria-label="Test deployment banner">
+      <span class="pr-banner__icon">🧪</span>
+      <span class="pr-banner__text">
+        <strong>Test Deployment</strong> — this is a preview build for
+        @if (prUrl && prNumber) {
+          <a
+            class="pr-banner__link"
+            [href]="prUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Pull Request #{{ prNumber }}</a>
+        } @else {
+          a pull request
+        }
+        . Data is isolated from production.
+      </span>
+    </div>
+  }
+
   <header class="app-header">
     <a routerLink="/" class="app-title">{{ 'APP.TITLE' | translate }}</a>
     <nav>
