@@ -1,0 +1,22 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "Fix the IAM policy ARN for Bedrock InvokeModel permission and increase Lambda timeout. The model ID 'eu.amazon.nova-lite-v1:0' uses the 'eu.' prefix indicating it is a cross-region inference profile, NOT a foundation model. The ARN must use 'inference-profile' resource type with account field populated (use '*'). Also increase Lambda timeout from 30s to 60s to accommodate URL fetch (8s timeout) + Bedrock inference time.",
+  "status": "completed",
+  "steps": [
+    "In apps/infra/src/stacks/recipe-manager-stack.ts, change the Bedrock IAM policy resource from 'arn:aws:bedrock:*::foundation-model/eu.amazon.nova-lite-v1:0' to 'arn:aws:bedrock:*:*:inference-profile/eu.amazon.nova-lite-v1:0'. The key differences: resource type changes from 'foundation-model' to 'inference-profile', and the account field changes from empty (::) to wildcard (*:*:).",
+    "In the same file, increase the Lambda function timeout from Duration.seconds(30) to Duration.seconds(60) to give the import flow enough headroom for URL fetch plus Bedrock inference."
+  ],
+  "acceptance_criteria": [
+    "The IAM policy resource ARN uses 'inference-profile' resource type instead of 'foundation-model'",
+    "The IAM policy resource ARN has '*' in the account field (arn:aws:bedrock:*:*:inference-profile/...)",
+    "The Lambda timeout is set to 60 seconds",
+    "The infra project builds successfully with `pnpm nx build infra`"
+  ],
+  "verification": [
+    "Run `pnpm nx build infra` to confirm the TypeScript compiles without errors",
+    "Run `pnpm nx lint infra` to confirm no linting issues"
+  ],
+  "blocked_reason": null,
+  "findings": "Both changes applied cleanly. Build and lint pass without issues. No tests exist in the project currently."
+}

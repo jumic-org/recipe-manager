@@ -123,7 +123,7 @@ export class RecipeManagerStack extends Stack {
       handler: 'handler',
       runtime: Runtime.NODEJS_20_X,
       memorySize: 256,
-      timeout: Duration.seconds(30),
+      timeout: Duration.seconds(60),
       environment: {
         TABLE_NAME: recipesTable.tableName,
       },
@@ -140,7 +140,7 @@ export class RecipeManagerStack extends Stack {
     apiHandler.addToRolePolicy(
       new PolicyStatement({
         actions: ['bedrock:InvokeModel'],
-        resources: ['arn:aws:bedrock:*::foundation-model/eu.amazon.nova-lite-v1:0'],
+        resources: ['arn:aws:bedrock:*:*:inference-profile/eu.amazon.nova-lite-v1:0'],
       })
     );
 
