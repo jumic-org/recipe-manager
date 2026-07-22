@@ -13,7 +13,10 @@ import { RecipeService } from './recipe.service';
     <div class="recipe-list-container">
       <div class="list-header">
         <h2>{{ 'RECIPES.LIST.TITLE' | translate }}</h2>
-        <a routerLink="/recipes/new" class="btn-new">{{ 'RECIPES.LIST.NEW_RECIPE' | translate }}</a>
+        <div class="header-actions">
+          <a routerLink="/recipes/import" class="btn-import">{{ 'RECIPES.LIST.IMPORT_RECIPE' | translate }}</a>
+          <a routerLink="/recipes/new" class="btn-new">{{ 'RECIPES.LIST.NEW_RECIPE' | translate }}</a>
+        </div>
       </div>
       @if (loading) {
         <p class="loading">{{ 'RECIPES.LIST.LOADING' | translate }}</p>
@@ -73,6 +76,19 @@ import { RecipeService } from './recipe.service';
       }
       .list-header h2 {
         margin: 0;
+      }
+      .header-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .btn-import {
+        background: #e8f5f3;
+        color: #1c5b55;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 600;
       }
       .btn-new {
         background: #1c5b55;

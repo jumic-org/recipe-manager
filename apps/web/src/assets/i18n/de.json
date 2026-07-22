@@ -55,6 +55,7 @@
     "LIST": {
       "TITLE": "Meine Rezepte",
       "NEW_RECIPE": "Neues Rezept",
+      "IMPORT_RECIPE": "Von URL importieren",
       "LOADING": "Rezepte werden geladen...",
       "EMPTY": "Noch keine Rezepte. Erstellen Sie Ihr erstes Rezept!",
       "PREP": "Vorbereitung",
@@ -110,6 +111,19 @@
       "SAVING": "Speichern...",
       "LOAD_ERROR": "Rezept konnte nicht geladen werden",
       "SAVE_ERROR": "Rezept konnte nicht gespeichert werden"
+    },
+    "IMPORT": {
+      "TITLE": "Rezept von URL importieren",
+      "DESCRIPTION": "Geben Sie die URL einer Rezeptseite ein und wir extrahieren das Rezept automatisch.",
+      "URL_LABEL": "Rezept-URL",
+      "URL_PLACEHOLDER": "https://beispiel.de/rezept/...",
+      "URL_REQUIRED": "URL ist erforderlich",
+      "SUBMIT": "Rezept importieren",
+      "SUBMITTING": "Rezept wird importiert...",
+      "CANCEL": "Abbrechen",
+      "SUCCESS": "Rezept erfolgreich importiert!",
+      "ERROR": "Rezept konnte nicht importiert werden. Bitte URL prüfen und erneut versuchen.",
+      "INVALID_URL": "Bitte geben Sie eine gültige URL ein"
     }
   }
 }

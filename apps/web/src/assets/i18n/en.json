@@ -55,6 +55,7 @@
     "LIST": {
       "TITLE": "My Recipes",
       "NEW_RECIPE": "New Recipe",
+      "IMPORT_RECIPE": "Import from URL",
       "LOADING": "Loading recipes...",
       "EMPTY": "No recipes yet. Create your first recipe!",
       "PREP": "Prep",
@@ -110,6 +111,19 @@
       "SAVING": "Saving...",
       "LOAD_ERROR": "Failed to load recipe",
       "SAVE_ERROR": "Failed to save recipe"
+    },
+    "IMPORT": {
+      "TITLE": "Import Recipe from URL",
+      "DESCRIPTION": "Paste a URL to a recipe page and we will automatically extract the recipe for you.",
+      "URL_LABEL": "Recipe URL",
+      "URL_PLACEHOLDER": "https://example.com/recipe/...",
+      "URL_REQUIRED": "URL is required",
+      "SUBMIT": "Import Recipe",
+      "SUBMITTING": "Importing recipe...",
+      "CANCEL": "Cancel",
+      "SUCCESS": "Recipe imported successfully!",
+      "ERROR": "Failed to import recipe. Please check the URL and try again.",
+      "INVALID_URL": "Please enter a valid URL"
     }
   }
 }

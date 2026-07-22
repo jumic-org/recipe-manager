@@ -37,4 +37,10 @@ export class RecipeService {
   deleteRecipe(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  importRecipe(url: string): Observable<Recipe> {
+    return this.http
+      .post<{ recipe: Recipe }>(`${this.baseUrl}/import`, { url })
+      .pipe(map((res) => res.recipe));
+  }
 }
