@@ -64,6 +64,11 @@ export const handler: APIGatewayProxyHandler = async (
       return await importRecipe(userId, event);
     }
 
+    // POST /recipes/import-text - import recipe from pasted text
+    if (path === '/recipes/import-text' && method === 'POST') {
+      return await importRecipeFromText(userId, event);
+    }
+
     // Match /recipes/{id}
     const recipeIdMatch = path.match(/^\/recipes\/([^/]+)$/);
     if (recipeIdMatch) {
@@ -592,6 +597,100 @@ async function importRecipe(
     id: crypto.randomUUID(),
     userId,
     sourceUrl: url,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TABLE_NAME,
+      Item: recipe,
+    }),
+  );
+
+  return response(201, { recipe });
+}
+
+async function importRecipeFromText(
+  userId: string,
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  const text = parsed['text'];
+  if (!text || typeof text !== 'string') {
+    return response(400, { message: 'text is required and must be a non-empty string' });
+  }
+
+  if (text.trim().length === 0) {
+    return response(400, { message: 'text must not be empty' });
+  }
+
+  if (text.length > 10000) {
+    return response(400, { message: 'text must not exceed 10000 characters' });
+  }
+
+  // Call Bedrock to extract recipe directly from the pasted text
+  const prompt = buildBedrockPrompt(text);
+
+  let recipeInput: CreateRecipeInput;
+  try {
+    const bedrockResponse = await bedrockClient.send(
+      new InvokeModelCommand({
+        modelId: 'eu.amazon.nova-lite-v1:0',
+        contentType: 'application/json',
+        accept: 'application/json',
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: [{ text: prompt }] }],
+          inferenceConfig: { maxTokens: 4096, temperature: 0.2 },
+        }),
+      }),
+    );
+
+    const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
+    const outputText = responseBody['output']?.['message']?.['content']?.[0]?.['text'];
+
+    if (!outputText) {
+      console.error('Unexpected Bedrock response structure:', JSON.stringify(responseBody));
+      return response(502, { message: 'Failed to get a valid response from AI model' });
+    }
+
+    // Parse the JSON from the model output (handle potential markdown code blocks)
+    let jsonText = outputText.trim();
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+    }
+
+    recipeInput = JSON.parse(jsonText) as CreateRecipeInput;
+  } catch (error) {
+    console.error('Error calling Bedrock or parsing response:', error);
+    return response(502, { message: 'Failed to extract recipe using AI model' });
+  }
+
+  // Validate the Bedrock output before saving
+  const validationErrors = validateRecipeInput(recipeInput);
+  if (validationErrors.length > 0) {
+    console.error('Bedrock output validation failed:', validationErrors);
+    return response(502, { message: 'AI model returned an invalid recipe structure', errors: validationErrors });
+  }
+
+  // Save the recipe to DynamoDB
+  const now = new Date().toISOString();
+
+  const recipe: Recipe = {
+    ...recipeInput,
+    id: crypto.randomUUID(),
+    userId,
+    sourceUrl: null,
     createdAt: now,
     updatedAt: now,
   };

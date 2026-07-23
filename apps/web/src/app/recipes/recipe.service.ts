@@ -43,4 +43,10 @@ export class RecipeService {
       .post<{ recipe: Recipe }>(`${this.baseUrl}/import`, { url })
       .pipe(map((res) => res.recipe));
   }
+
+  importRecipeFromText(text: string): Observable<Recipe> {
+    return this.http
+      .post<{ recipe: Recipe }>(`${this.baseUrl}/import-text`, { text })
+      .pipe(map((res) => res.recipe));
+  }
 }

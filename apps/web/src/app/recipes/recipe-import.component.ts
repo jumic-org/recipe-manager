@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { RecipeService } from './recipe.service';
 
+type ImportMode = 'url' | 'text';
+
 @Component({
   selector: 'rm-recipe-import',
   standalone: true,
@@ -12,24 +14,64 @@ import { RecipeService } from './recipe.service';
   template: `
     <div class="import-container">
       <h2>{{ 'RECIPES.IMPORT.TITLE' | translate }}</h2>
-      <p class="description">{{ 'RECIPES.IMPORT.DESCRIPTION' | translate }}</p>
+
+      <div class="tab-toggle">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="mode === 'url'"
+          (click)="switchMode('url')"
+        >
+          {{ 'RECIPES.IMPORT.TAB_URL' | translate }}
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="mode === 'text'"
+          (click)="switchMode('text')"
+        >
+          {{ 'RECIPES.IMPORT.TAB_TEXT' | translate }}
+        </button>
+      </div>
+
+      @if (mode === 'url') {
+        <p class="description">{{ 'RECIPES.IMPORT.DESCRIPTION' | translate }}</p>
+      } @else {
+        <p class="description">{{ 'RECIPES.IMPORT.TEXT_DESCRIPTION' | translate }}</p>
+      }
+
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-section">
-          <div class="form-field">
-            <label for="url">{{ 'RECIPES.IMPORT.URL_LABEL' | translate }}</label>
-            <input
-              id="url"
-              type="url"
-              formControlName="url"
-              [placeholder]="'RECIPES.IMPORT.URL_PLACEHOLDER' | translate"
-            />
-            @if (form.get('url')?.touched && form.get('url')?.hasError('required')) {
-              <p class="field-error">{{ 'RECIPES.IMPORT.URL_REQUIRED' | translate }}</p>
-            }
-            @if (form.get('url')?.touched && form.get('url')?.hasError('pattern')) {
-              <p class="field-error">{{ 'RECIPES.IMPORT.INVALID_URL' | translate }}</p>
-            }
-          </div>
+          @if (mode === 'url') {
+            <div class="form-field">
+              <label for="url">{{ 'RECIPES.IMPORT.URL_LABEL' | translate }}</label>
+              <input
+                id="url"
+                type="url"
+                formControlName="url"
+                [placeholder]="'RECIPES.IMPORT.URL_PLACEHOLDER' | translate"
+              />
+              @if (form.get('url')?.touched && form.get('url')?.hasError('required')) {
+                <p class="field-error">{{ 'RECIPES.IMPORT.URL_REQUIRED' | translate }}</p>
+              }
+              @if (form.get('url')?.touched && form.get('url')?.hasError('pattern')) {
+                <p class="field-error">{{ 'RECIPES.IMPORT.INVALID_URL' | translate }}</p>
+              }
+            </div>
+          } @else {
+            <div class="form-field">
+              <label for="text">{{ 'RECIPES.IMPORT.TEXT_LABEL' | translate }}</label>
+              <textarea
+                id="text"
+                formControlName="text"
+                [placeholder]="'RECIPES.IMPORT.TEXT_PLACEHOLDER' | translate"
+                rows="10"
+              ></textarea>
+              @if (form.get('text')?.touched && form.get('text')?.hasError('required')) {
+                <p class="field-error">{{ 'RECIPES.IMPORT.TEXT_REQUIRED' | translate }}</p>
+              }
+            </div>
+          }
         </div>
 
         @if (errorMessage) {
@@ -61,6 +103,31 @@ import { RecipeService } from './recipe.service';
       h2 {
         margin: 0 0 8px;
       }
+      .tab-toggle {
+        display: flex;
+        gap: 0;
+        margin-bottom: 16px;
+        border: 1px solid var(--rm-border);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .tab-btn {
+        flex: 1;
+        padding: 10px 16px;
+        border: none;
+        background: var(--rm-surface);
+        color: var(--rm-text-secondary);
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .tab-btn.active {
+        background: var(--rm-primary);
+        color: #fff;
+      }
       .description {
         color: var(--rm-text-secondary);
         margin: 0 0 24px;
@@ -85,7 +152,8 @@ import { RecipeService } from './recipe.service';
         font-weight: 600;
         font-size: 0.9rem;
       }
-      input {
+      input,
+      textarea {
         width: 100%;
         padding: 10px 12px;
         border: 1px solid var(--rm-input-border);
@@ -95,9 +163,14 @@ import { RecipeService } from './recipe.service';
         background: var(--rm-input-bg);
         color: var(--rm-text);
       }
-      input:focus {
+      input:focus,
+      textarea:focus {
         outline: none;
         border-color: var(--rm-primary);
+      }
+      textarea {
+        resize: vertical;
+        min-height: 150px;
       }
       .field-error {
         color: var(--rm-danger);
@@ -141,6 +214,7 @@ import { RecipeService } from './recipe.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecipeImportComponent {
+  mode: ImportMode = 'url';
   form: FormGroup;
   submitting = false;
   errorMessage = '';
@@ -154,7 +228,25 @@ export class RecipeImportComponent {
   ) {
     this.form = this.fb.group({
       url: ['', [Validators.required, Validators.pattern(/^https:\/\/.+/)]],
+      text: [''],
     });
+  }
+
+  switchMode(mode: ImportMode): void {
+    this.mode = mode;
+    this.errorMessage = '';
+
+    if (mode === 'url') {
+      this.form.get('url')?.setValidators([Validators.required, Validators.pattern(/^https:\/\/.+/)]);
+      this.form.get('text')?.clearValidators();
+    } else {
+      this.form.get('url')?.clearValidators();
+      this.form.get('text')?.setValidators([Validators.required]);
+    }
+
+    this.form.get('url')?.updateValueAndValidity();
+    this.form.get('text')?.updateValueAndValidity();
+    this.cdr.markForCheck();
   }
 
   cancel(): void {
@@ -167,9 +259,12 @@ export class RecipeImportComponent {
     this.errorMessage = '';
     this.cdr.markForCheck();
 
-    const url = this.form.get('url')?.value;
+    const request$ =
+      this.mode === 'url'
+        ? this.recipeService.importRecipe(this.form.get('url')?.value)
+        : this.recipeService.importRecipeFromText(this.form.get('text')?.value);
 
-    this.recipeService.importRecipe(url).subscribe({
+    request$.subscribe({
       next: (recipe) => {
         this.submitting = false;
         this.router.navigate(['/recipes', recipe.id]);
