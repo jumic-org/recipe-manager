@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { RecipeService } from './recipe.service';
 
@@ -213,7 +213,7 @@ type ImportMode = 'url' | 'text';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RecipeImportComponent {
+export class RecipeImportComponent implements OnInit {
   mode: ImportMode = 'url';
   form: FormGroup;
   submitting = false;
@@ -223,13 +223,22 @@ export class RecipeImportComponent {
     private readonly fb: FormBuilder,
     private readonly recipeService: RecipeService,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
     private readonly translateService: TranslateService,
     private readonly cdr: ChangeDetectorRef,
   ) {
     this.form = this.fb.group({
-      url: ['', [Validators.required, Validators.pattern(/^https:\/\/.+/)]],
+      url: [''],
       text: [''],
     });
+    this.switchMode('url');
+  }
+
+  ngOnInit(): void {
+    const modeParam = this.route.snapshot.queryParamMap.get('mode');
+    if (modeParam === 'text' || modeParam === 'url') {
+      this.switchMode(modeParam);
+    }
   }
 
   switchMode(mode: ImportMode): void {
