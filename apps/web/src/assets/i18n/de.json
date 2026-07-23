@@ -80,7 +80,8 @@
       "NOT_FOUND": "Rezept nicht gefunden",
       "MIN": "Min",
       "LOAD_ERROR": "Rezept konnte nicht geladen werden",
-      "DELETE_ERROR": "Rezept konnte nicht gelöscht werden"
+      "DELETE_ERROR": "Rezept konnte nicht gelöscht werden",
+      "SOURCE_URL": "Originalrezept anzeigen"
     },
     "FORM": {
       "TITLE_NEW": "Neues Rezept",

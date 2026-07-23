@@ -80,7 +80,8 @@
       "NOT_FOUND": "Recipe not found",
       "MIN": "min",
       "LOAD_ERROR": "Failed to load recipe",
-      "DELETE_ERROR": "Failed to delete recipe"
+      "DELETE_ERROR": "Failed to delete recipe",
+      "SOURCE_URL": "View original recipe"
     },
     "FORM": {
       "TITLE_NEW": "New Recipe",

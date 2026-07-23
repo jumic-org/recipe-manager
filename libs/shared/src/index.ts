@@ -32,6 +32,7 @@ export interface Recipe {
   tags: string[];
   imageKeys: string[];
   nutritionalInfo: NutritionalInfo | null;
+  sourceUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }

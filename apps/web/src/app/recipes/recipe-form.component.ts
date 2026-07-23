@@ -494,6 +494,7 @@ export class RecipeFormComponent implements OnInit {
       tags: this.splitCommaSeparated(formValue.tags),
       imageKeys: [],
       nutritionalInfo: null,
+      sourceUrl: null,
     };
 
     const request$ = this.isEdit

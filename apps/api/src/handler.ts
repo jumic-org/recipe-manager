@@ -179,6 +179,7 @@ async function createRecipe(
     ...input,
     id: crypto.randomUUID(),
     userId,
+    sourceUrl: null,
     createdAt: now,
     updatedAt: now,
   };
@@ -590,6 +591,7 @@ async function importRecipe(
     ...recipeInput,
     id: crypto.randomUUID(),
     userId,
+    sourceUrl: url,
     createdAt: now,
     updatedAt: now,
   };
