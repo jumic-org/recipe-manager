@@ -1,0 +1,33 @@
+{
+  "project_type": "Nx monorepo with Angular 21 SPA (apps/web), Lambda API (apps/api), CDK infra (apps/infra)",
+  "language": "TypeScript",
+  "build_system": "Nx 23.1.0 with pnpm 10.14.0. Angular CLI 22.0.7 as build executor.",
+  "test_framework": "No test runner configured (unitTestRunner: none in Nx generators). Vitest is recommended but not installed.",
+  "build_command": "pnpm nx run-many -t build lint",
+  "test_command": "No test command configured",
+  "verification_instructions": "Run 'pnpm nx run-many -t build lint' to verify build and lint pass. This mirrors the CI workflow.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "corepack enable && pnpm install",
+  "environment_constraints": "OPEN_INTERNET - full network access. Node.js >= 24 required.",
+  "contribution_requirements": "PR title must follow semantic format: 'feat: description'. Standalone Angular components only, ChangeDetectionStrategy.OnPush, selector prefix 'rm-'. SCSS co-located with components. TypeScript strict mode with noPropertyAccessFromIndexSignature.",
+  "key_patterns": "Components use inline templates/styles (single file). Services use providedIn: 'root'. Language switcher in AppComponent stores preference in localStorage with key 'rm-lang'. ConfigService loaded via APP_INITIALIZER. @ngx-translate for i18n with en.json and de.json. Colors: primary=#1c5b55, bg=#f8f7f2, text=#20201d, card-bg=#fff, border=#eee.",
+  "relevant_files": [
+    "apps/web/src/styles.scss",
+    "apps/web/src/index.html",
+    "apps/web/src/app/app.component.ts",
+    "apps/web/src/app/app.component.html",
+    "apps/web/src/app/app.component.scss",
+    "apps/web/src/app/app.config.ts",
+    "apps/web/src/app/recipes/recipe-list.component.ts",
+    "apps/web/src/app/recipes/recipe-detail.component.ts",
+    "apps/web/src/app/recipes/recipe-form.component.ts",
+    "apps/web/src/app/recipes/recipe-import.component.ts",
+    "apps/web/src/app/auth/login.component.ts",
+    "apps/web/src/app/auth/register.component.ts",
+    "apps/web/src/app/auth/confirm.component.ts",
+    "apps/web/src/app/auth/change-password.component.ts",
+    "apps/web/src/assets/i18n/en.json",
+    "apps/web/src/assets/i18n/de.json"
+  ],
+  "directory_structure": "apps/web/src/app/ contains: app.component.* (root shell with header/nav), app.config.ts (providers), app.routes.ts (routing), auth/ (login, register, confirm, change-password, guard, interceptor, service), config/ (ConfigService), recipes/ (list, detail, form, import components + service). assets/i18n/ has en.json and de.json translation files."
+}

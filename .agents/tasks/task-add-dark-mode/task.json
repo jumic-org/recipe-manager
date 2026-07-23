@@ -1,0 +1,18 @@
+{
+  "task_id": "task-add-dark-mode",
+  "task_description": "Add dark mode toggle to the Angular frontend (apps/web). Create a ThemeService, add a toggle button to the app header, define CSS custom properties for light/dark themes, and update all component styles to use the variables.",
+  "status": "completed",
+  "feature_order": ["FEAT-001"],
+  "blocked_reason": null,
+  "verification": {
+    "build": "pass",
+    "tests": "skipped",
+    "test_quality": "skipped",
+    "docker_build": "skipped",
+    "summary": "Build and lint pass after review fixes. No test runner is configured in this project (unitTestRunner: none). No Dockerfile for the web app."
+  },
+  "review_fixes": {
+    "applied": true,
+    "details": "1. Added --rm-danger-surface CSS variable (light: #fdeaea, dark: #3d2626) to :root and :root.dark in styles.scss. Updated .btn-remove in recipe-form.component.ts to use var(--rm-danger-surface). 2. Updated ThemeService to check window.matchMedia('(prefers-color-scheme: dark)') when localStorage has no stored value."
+  }
+}

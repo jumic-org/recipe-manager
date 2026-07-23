@@ -60,9 +60,9 @@ import { AuthService } from './auth.service';
         max-width: 400px;
         margin: 60px auto;
         padding: 32px;
-        background: #fff;
+        background: var(--rm-surface);
         border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 20px var(--rm-shadow);
       }
       h2 {
         margin: 0 0 24px;
@@ -80,18 +80,20 @@ import { AuthService } from './auth.service';
       input {
         width: 100%;
         padding: 10px 12px;
-        border: 1px solid #ddd;
+        border: 1px solid var(--rm-input-border);
         border-radius: 6px;
         font-size: 1rem;
+        background: var(--rm-input-bg);
+        color: var(--rm-text);
       }
       input:focus {
         outline: none;
-        border-color: #1c5b55;
+        border-color: var(--rm-primary);
       }
       button {
         width: 100%;
         padding: 12px;
-        background: #1c5b55;
+        background: var(--rm-primary);
         color: #fff;
         border: none;
         border-radius: 6px;
@@ -105,7 +107,7 @@ import { AuthService } from './auth.service';
         cursor: not-allowed;
       }
       .error {
-        color: #c0392b;
+        color: var(--rm-danger);
         font-size: 0.9rem;
         margin: 8px 0;
       }
@@ -115,7 +117,7 @@ import { AuthService } from './auth.service';
         font-size: 0.9rem;
       }
       .link a {
-        color: #1c5b55;
+        color: var(--rm-primary);
         font-weight: 600;
       }
     `,

@@ -5,11 +5,12 @@
 
 .app-shell {
   min-height: 100vh;
-  background: #f8f7f2;
-  color: #20201d;
+  background: var(--rm-bg);
+  color: var(--rm-text);
+  transition: background-color 0.3s, color 0.3s;
 }
 
-// ── PR preview banner ─────────────────────────────────────────────────────────
+// -- PR preview banner --
 
 .pr-banner {
   display: flex;
@@ -41,22 +42,23 @@
   }
 }
 
-// ── App shell ─────────────────────────────────────────────────────────────────
+// -- App shell --
 
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 32px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  background: var(--rm-header-bg);
+  border-bottom: 1px solid var(--rm-header-border);
+  box-shadow: 0 1px 4px var(--rm-shadow);
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .app-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1c5b55;
+  color: var(--rm-primary);
   text-decoration: none;
 }
 
@@ -67,58 +69,73 @@ nav {
 }
 
 .nav-link {
-  color: #20201d;
+  color: var(--rm-text);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .nav-link:hover {
-  color: #1c5b55;
+  color: var(--rm-primary);
 }
 
 .btn-logout {
   background: transparent;
-  border: 1px solid #ddd;
+  border: 1px solid var(--rm-border);
   border-radius: 6px;
   padding: 8px 16px;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  color: #20201d;
+  color: var(--rm-text);
 }
 
 .btn-logout:hover {
-  background: #f0f0f0;
+  background: var(--rm-surface);
 }
 
 .lang-switcher {
   display: flex;
   gap: 4px;
   margin-left: 8px;
-  border-left: 1px solid #ddd;
+  border-left: 1px solid var(--rm-border);
   padding-left: 16px;
 }
 
 .btn-lang {
   background: transparent;
-  border: 1px solid #ddd;
+  border: 1px solid var(--rm-border);
   border-radius: 4px;
   padding: 4px 8px;
   font-weight: 600;
   font-size: 0.8rem;
   cursor: pointer;
-  color: #666;
+  color: var(--rm-text-secondary);
 }
 
 .btn-lang:hover {
-  background: #f0f0f0;
+  background: var(--rm-surface);
 }
 
 .btn-lang.active {
-  background: #1c5b55;
+  background: var(--rm-primary);
   color: #fff;
-  border-color: #1c5b55;
+  border-color: var(--rm-primary);
+}
+
+.btn-theme {
+  background: transparent;
+  border: 1px solid var(--rm-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  margin-left: 4px;
+}
+
+.btn-theme:hover {
+  background: var(--rm-surface);
 }
 
 .app-content {

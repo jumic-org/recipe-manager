@@ -62,16 +62,16 @@ import { RecipeService } from './recipe.service';
         margin: 0 0 8px;
       }
       .description {
-        color: #666;
+        color: var(--rm-text-secondary);
         margin: 0 0 24px;
         font-size: 0.95rem;
       }
       .form-section {
-        background: #fff;
+        background: var(--rm-surface);
         border-radius: 8px;
         padding: 20px;
         margin-bottom: 20px;
-        border: 1px solid #eee;
+        border: 1px solid var(--rm-border);
       }
       .form-field {
         margin-bottom: 16px;
@@ -88,22 +88,24 @@ import { RecipeService } from './recipe.service';
       input {
         width: 100%;
         padding: 10px 12px;
-        border: 1px solid #ddd;
+        border: 1px solid var(--rm-input-border);
         border-radius: 6px;
         font-size: 0.95rem;
         font-family: inherit;
+        background: var(--rm-input-bg);
+        color: var(--rm-text);
       }
       input:focus {
         outline: none;
-        border-color: #1c5b55;
+        border-color: var(--rm-primary);
       }
       .field-error {
-        color: #c0392b;
+        color: var(--rm-danger);
         font-size: 0.85rem;
         margin: 4px 0 0;
       }
       .error {
-        color: #c0392b;
+        color: var(--rm-danger);
         font-size: 0.9rem;
         margin-bottom: 16px;
       }
@@ -113,8 +115,8 @@ import { RecipeService } from './recipe.service';
         justify-content: flex-end;
       }
       .btn-cancel {
-        background: #f0f0f0;
-        color: #333;
+        background: var(--rm-border);
+        color: var(--rm-text);
         border: none;
         padding: 12px 24px;
         border-radius: 6px;
@@ -122,7 +124,7 @@ import { RecipeService } from './recipe.service';
         cursor: pointer;
       }
       .btn-submit {
-        background: #1c5b55;
+        background: var(--rm-primary);
         color: #fff;
         border: none;
         padding: 12px 24px;
