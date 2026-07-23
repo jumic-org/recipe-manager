@@ -22,6 +22,11 @@ import { RecipeService } from './recipe.service';
           <div>
             <h2>{{ recipe.title }}</h2>
             <p class="description">{{ recipe.description }}</p>
+            @if (recipe.sourceUrl) {
+              <a [href]="recipe.sourceUrl" target="_blank" rel="noopener noreferrer" class="source-url-link">
+                {{ 'RECIPES.DETAIL.SOURCE_URL' | translate }}
+              </a>
+            }
           </div>
           <div class="actions">
             <a [routerLink]="['/recipes', recipe.id, 'edit']" class="btn-edit">{{
@@ -127,6 +132,17 @@ import { RecipeService } from './recipe.service';
         color: #666;
         margin: 0;
         line-height: 1.5;
+      }
+      .source-url-link {
+        display: inline-block;
+        margin-top: 8px;
+        color: #1c5b55;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .source-url-link:hover {
+        text-decoration: underline;
       }
       .actions {
         display: flex;
