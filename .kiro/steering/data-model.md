@@ -334,3 +334,11 @@ Below are three complete JSON examples that conform to the `Recipe` interface. T
 3. Add a new query function in `apps/api/src/handler.ts` using the `IndexName` parameter in `QueryCommand`.
 4. Run `pnpm cdk synth` to verify the CloudFormation template.
 5. Note: Adding a GSI on an existing table is an online operation but may take time to backfill.
+
+## DynamoDB Query Best Practices
+
+- **Never use `FilterExpression` on key attributes** (partition key or sort key). DynamoDB will reject the query with a `ValidationException`.
+- **Avoid `FilterExpression` in general** for production queries. Filter expressions still consume read capacity for all scanned items, making them inefficient and costly at scale.
+- **Use GSI or LSI** to support different access patterns efficiently. If you need to query items by a non-key attribute, add an appropriate index.
+- **Use `KeyConditionExpression`** with `begins_with` on the sort key when items share a prefix pattern (e.g., `begins_with(id, 'ioh_')` for ingredients-on-hand).
+- **Prefer application-level filtering** over `FilterExpression` when the result set is small and predictable.

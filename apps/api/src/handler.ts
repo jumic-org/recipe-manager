@@ -160,19 +160,16 @@ async function listRecipes(
     new QueryCommand({
       TableName: TABLE_NAME,
       KeyConditionExpression: 'userId = :userId',
-      FilterExpression: 'NOT begins_with(#id, :iohPrefix) AND NOT begins_with(#id, :smPrefix)',
-      ExpressionAttributeNames: {
-        '#id': 'id',
-      },
       ExpressionAttributeValues: {
         ':userId': userId,
-        ':iohPrefix': 'ioh_',
-        ':smPrefix': 'sm_',
       },
     }),
   );
 
-  let recipes = (result.Items ?? []) as Recipe[];
+  let recipes = (result.Items ?? []).filter((item) => {
+    const id = (item as Record<string, unknown>)['id'] as string;
+    return !id.startsWith('ioh_') && !id.startsWith('sm_');
+  }) as Recipe[];
 
   if (category) {
     recipes = recipes.filter((r) => r.categories.includes(category));
@@ -1026,7 +1023,9 @@ Return a JSON object with a single key "groups" that is an array. Each element h
 
 Rules:
 - Every ingredient index (0 to ${ingredients.length - 1}) must appear exactly once across all groups.
-- Preserve the aisle order from the AISLES list. Put "Unknown" last if used.
+- The output groups array MUST follow the exact same order as the AISLES list above. The first group must correspond to the first aisle, the second group to the second aisle, etc.
+- Only include aisles that have at least one ingredient assigned. Skip empty aisles but maintain relative order.
+- Put "Unknown" as the very last group if any ingredients don't fit into the defined aisles.
 - Use your knowledge of grocery stores to make intelligent assignments.
 - Return ONLY the JSON object, no explanation.`;
 
