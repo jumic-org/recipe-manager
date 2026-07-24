@@ -1,0 +1,22 @@
+{
+  "id": "FEAT-005",
+  "type": "fix",
+  "description": "Add CloudWatch logging to sortIngredients function to debug Bedrock prompt and response data",
+  "status": "in_progress",
+  "steps": [
+    "Add console.log statements before the Bedrock call in sortIngredients to log the request metadata, system prompt, and user prompt",
+    "Add console.log statement after Bedrock response to log the raw AI output text"
+  ],
+  "acceptance_criteria": [
+    "Before Bedrock call: logs request metadata (language, aisles, ingredientCount)",
+    "Before Bedrock call: logs full system prompt",
+    "Before Bedrock call: logs full user prompt",
+    "After Bedrock response: logs raw outputText from Bedrock",
+    "npx nx run-many -t build lint passes cleanly"
+  ],
+  "verification": [
+    "Run: eval \"$(mise activate bash)\" && npx nx build api && npx nx lint api"
+  ],
+  "blocked_reason": null,
+  "findings": null
+}

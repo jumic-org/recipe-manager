@@ -1061,6 +1061,10 @@ Rules:
 - Return ONLY the JSON object, no explanation.`;
   }
 
+  console.log('sort-ingredients request:', JSON.stringify({ language, aisles, ingredientCount: ingredients.length }));
+  console.log('sort-ingredients system prompt:', system);
+  console.log('sort-ingredients user prompt:', prompt);
+
   try {
     const bedrockResponse = await bedrockClient.send(
       new InvokeModelCommand({
@@ -1077,6 +1081,8 @@ Rules:
 
     const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
     const outputText = responseBody['output']?.['message']?.['content']?.[0]?.['text'];
+
+    console.log('sort-ingredients Bedrock response:', outputText);
 
     if (!outputText) {
       console.error('Unexpected Bedrock response structure:', JSON.stringify(responseBody));
