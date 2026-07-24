@@ -238,6 +238,10 @@ export class RecipeManagerStack extends Stack {
     const importResource = recipes.addResource('import');
     importResource.addMethod('POST', lambdaIntegration, methodOptions);
 
+    // /recipes/import-text resource
+    const importTextResource = recipes.addResource('import-text');
+    importTextResource.addMethod('POST', lambdaIntegration, methodOptions);
+
     // /recipes/{id} resource
     const recipe = recipes.addResource('{id}');
     recipe.addMethod('GET', lambdaIntegration, methodOptions);

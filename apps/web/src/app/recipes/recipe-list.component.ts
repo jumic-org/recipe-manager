@@ -15,6 +15,7 @@ import { RecipeService } from './recipe.service';
         <h2>{{ 'RECIPES.LIST.TITLE' | translate }}</h2>
         <div class="header-actions">
           <a routerLink="/recipes/import" class="btn-import">{{ 'RECIPES.LIST.IMPORT_RECIPE' | translate }}</a>
+          <a routerLink="/recipes/import" [queryParams]="{mode: 'text'}" class="btn-import">{{ 'RECIPES.LIST.IMPORT_TEXT_RECIPE' | translate }}</a>
           <a routerLink="/recipes/new" class="btn-new">{{ 'RECIPES.LIST.NEW_RECIPE' | translate }}</a>
         </div>
       </div>
