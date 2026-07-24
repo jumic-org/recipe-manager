@@ -2,7 +2,7 @@
   "id": "FEAT-006",
   "type": "feat",
   "description": "Add optional comment field to aisles and add few-shot example to Bedrock sort prompt to improve sorting quality",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Update libs/shared/src/index.ts: add Aisle interface with name (string) and comment (optional string), change Supermarket.aisles to Aisle[]",
     "Update apps/api/src/handler.ts: update createSupermarket and updateSupermarket validation to accept Aisle objects, update sortIngredients to pass comments in prompt and add few-shot example",
@@ -26,5 +26,5 @@
     "Run: eval \"$(mise activate bash)\" && npx nx run-many -t build lint"
   ],
   "blocked_reason": null,
-  "findings": null
+  "findings": "All builds and lints pass cleanly. Changed aisles from string[] to Aisle[] (with name and optional comment). The API sortIngredients function now normalizes both legacy string[] and new Aisle[] formats. Added few-shot example in both English and German prompts. Frontend form now shows a comment input when editing an aisle. Pre-existing bundle size warnings remain unchanged."
 }
