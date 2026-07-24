@@ -160,7 +160,10 @@ async function listRecipes(
     new QueryCommand({
       TableName: TABLE_NAME,
       KeyConditionExpression: 'userId = :userId',
-      FilterExpression: 'NOT begins_with(id, :iohPrefix) AND NOT begins_with(id, :smPrefix)',
+      FilterExpression: 'NOT begins_with(#id, :iohPrefix) AND NOT begins_with(#id, :smPrefix)',
+      ExpressionAttributeNames: {
+        '#id': 'id',
+      },
       ExpressionAttributeValues: {
         ':userId': userId,
         ':iohPrefix': 'ioh_',
