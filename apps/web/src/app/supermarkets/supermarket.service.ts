@@ -16,26 +16,34 @@ export class SupermarketService {
 
   getSupermarkets(): Observable<Supermarket[]> {
     return this.http
-      .get<{ items: Supermarket[] }>(this.baseUrl)
-      .pipe(map((res) => res.items));
+      .get<{ supermarkets: Supermarket[] }>(this.baseUrl)
+      .pipe(map((res) => res.supermarkets));
   }
 
   getSupermarket(id: string): Observable<Supermarket> {
     return this.http
-      .get<{ items: Supermarket[] }>(this.baseUrl)
-      .pipe(map((res) => res.items.find((s) => s.id === id) as Supermarket));
+      .get<{ supermarkets: Supermarket[] }>(this.baseUrl)
+      .pipe(
+        map((res) => {
+          const found = res.supermarkets.find((s) => s.id === id);
+          if (!found) {
+            throw new Error(`Supermarket with id "${id}" not found`);
+          }
+          return found;
+        }),
+      );
   }
 
   createSupermarket(input: CreateSupermarketInput): Observable<Supermarket> {
     return this.http
-      .post<{ item: Supermarket }>(this.baseUrl, input)
-      .pipe(map((res) => res.item));
+      .post<{ supermarket: Supermarket }>(this.baseUrl, input)
+      .pipe(map((res) => res.supermarket));
   }
 
   updateSupermarket(id: string, input: UpdateSupermarketInput): Observable<Supermarket> {
     return this.http
-      .put<{ item: Supermarket }>(`${this.baseUrl}/${id}`, input)
-      .pipe(map((res) => res.item));
+      .put<{ supermarket: Supermarket }>(`${this.baseUrl}/${id}`, input)
+      .pipe(map((res) => res.supermarket));
   }
 
   deleteSupermarket(id: string): Observable<void> {

@@ -16,14 +16,14 @@ export class PantryService {
 
   getIngredientsOnHand(): Observable<IngredientOnHand[]> {
     return this.http
-      .get<{ items: IngredientOnHand[] }>(this.baseUrl)
-      .pipe(map((res) => res.items));
+      .get<{ ingredientsOnHand: IngredientOnHand[] }>(this.baseUrl)
+      .pipe(map((res) => res.ingredientsOnHand));
   }
 
   addIngredient(name: string): Observable<IngredientOnHand> {
     return this.http
-      .post<{ item: IngredientOnHand }>(this.baseUrl, { name })
-      .pipe(map((res) => res.item));
+      .post<{ ingredientOnHand: IngredientOnHand }>(this.baseUrl, { name })
+      .pipe(map((res) => res.ingredientOnHand));
   }
 
   deleteIngredient(id: string): Observable<void> {

@@ -255,14 +255,20 @@ export class SupermarketViewComponent implements OnInit {
       lines.push('');
     }
     const text = lines.join('\n').trim();
-    navigator.clipboard.writeText(text).then(() => {
-      this.copied = true;
-      this.cdr.markForCheck();
-      setTimeout(() => {
-        this.copied = false;
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        this.copied = true;
         this.cdr.markForCheck();
-      }, 2000);
-    });
+        setTimeout(() => {
+          this.copied = false;
+          this.cdr.markForCheck();
+        }, 2000);
+      })
+      .catch(() => {
+        // Clipboard API may fail on non-HTTPS or when permission is denied
+        console.warn('Failed to copy to clipboard');
+      });
   }
 
   private computeLists(): void {

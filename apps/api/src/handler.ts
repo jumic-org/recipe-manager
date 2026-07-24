@@ -1013,6 +1013,13 @@ async function createSupermarket(
     return response(400, { message: 'aisles is required and must be an array' });
   }
 
+  const aislesValid = (parsed['aisles'] as unknown[]).every(
+    (el) => typeof el === 'string' && el.trim().length > 0,
+  );
+  if (!aislesValid) {
+    return response(400, { message: 'Every aisle must be a non-empty string' });
+  }
+
   const input: CreateSupermarketInput = {
     name: parsed['name'] as string,
     aisles: parsed['aisles'] as string[],
@@ -1060,6 +1067,13 @@ async function updateSupermarket(
 
   if (!Array.isArray(parsed['aisles'])) {
     return response(400, { message: 'aisles is required and must be an array' });
+  }
+
+  const aislesValid = (parsed['aisles'] as unknown[]).every(
+    (el) => typeof el === 'string' && el.trim().length > 0,
+  );
+  if (!aislesValid) {
+    return response(400, { message: 'Every aisle must be a non-empty string' });
   }
 
   const input: UpdateSupermarketInput = {
