@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { Supermarket, CreateSupermarketInput, UpdateSupermarketInput, Ingredient } from '@recipe-manager/shared';
+import type { Supermarket, CreateSupermarketInput, UpdateSupermarketInput, Ingredient, Aisle } from '@recipe-manager/shared';
 import { ConfigService } from '../config/config.service';
 
 export interface AisleGroup {
@@ -55,7 +55,7 @@ export class SupermarketService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  sortIngredients(ingredients: Ingredient[], aisles: string[], language: string): Observable<AisleGroup[]> {
+  sortIngredients(ingredients: Ingredient[], aisles: Aisle[], language: string): Observable<AisleGroup[]> {
     const url = `${this.configService.apiUrl}/sort-ingredients`;
     return this.http
       .post<{ groups: AisleGroup[] }>(url, { ingredients, aisles, language })

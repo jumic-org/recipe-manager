@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import type { Aisle } from '@recipe-manager/shared';
 import { SupermarketService } from './supermarket.service';
 
 @Component({
@@ -58,8 +59,19 @@ import { SupermarketService } from './supermarket.service';
                   [ngModelOptions]="{ standalone: true }"
                   (keyup.enter)="saveAisle(i)"
                 />
+                <input
+                  type="text"
+                  class="aisle-comment-input"
+                  [(ngModel)]="editingComment"
+                  [ngModelOptions]="{ standalone: true }"
+                  [placeholder]="'SUPERMARKETS.FORM.COMMENT_PLACEHOLDER' | translate"
+                  (keyup.enter)="saveAisle(i)"
+                />
               } @else {
-                <span class="aisle-name">{{ aisle }}</span>
+                <span class="aisle-name">{{ aisle.name }}</span>
+                @if (aisle.comment) {
+                  <span class="aisle-comment">({{ aisle.comment }})</span>
+                }
               }
               <div class="aisle-actions">
                 @if (editingIndex === i) {
@@ -199,6 +211,19 @@ import { SupermarketService } from './supermarket.service';
         background: var(--rm-input-bg);
         color: var(--rm-text);
       }
+      .aisle-comment-input {
+        flex: 1;
+        padding: 6px 10px;
+        border: 1px solid var(--rm-input-border);
+        border-radius: 4px;
+        font-size: 0.85rem;
+        background: var(--rm-input-bg);
+        color: var(--rm-text);
+      }
+      .aisle-comment {
+        color: var(--rm-text-secondary);
+        font-size: 0.85rem;
+      }
       .aisle-actions {
         display: flex;
         gap: 4px;
@@ -273,7 +298,7 @@ import { SupermarketService } from './supermarket.service';
 })
 export class SupermarketFormComponent implements OnInit {
   name = '';
-  aisles: string[] = [];
+  aisles: Aisle[] = [];
   newAisle = '';
   isEdit = false;
   loading = false;
@@ -281,6 +306,7 @@ export class SupermarketFormComponent implements OnInit {
   errorMessage = '';
   editingIndex = -1;
   editingValue = '';
+  editingComment = '';
   private supermarketId = '';
 
   constructor(
@@ -317,7 +343,7 @@ export class SupermarketFormComponent implements OnInit {
   addAisle(): void {
     const aisle = this.newAisle.trim();
     if (!aisle) return;
-    this.aisles.push(aisle);
+    this.aisles.push({ name: aisle });
     this.newAisle = '';
   }
 
@@ -334,16 +360,19 @@ export class SupermarketFormComponent implements OnInit {
 
   editAisle(index: number): void {
     this.editingIndex = index;
-    this.editingValue = this.aisles[index];
+    this.editingValue = this.aisles[index].name;
+    this.editingComment = this.aisles[index].comment || '';
   }
 
   saveAisle(index: number): void {
     const trimmed = this.editingValue.trim();
     if (trimmed) {
-      this.aisles[index] = trimmed;
+      const comment = this.editingComment.trim();
+      this.aisles[index] = { name: trimmed, ...(comment ? { comment } : {}) };
     }
     this.editingIndex = -1;
     this.editingValue = '';
+    this.editingComment = '';
   }
 
   cancel(): void {

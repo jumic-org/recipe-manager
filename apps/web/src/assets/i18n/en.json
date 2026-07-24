@@ -172,6 +172,7 @@
       "NAME_PLACEHOLDER": "Supermarket name",
       "AISLES_TITLE": "Aisles",
       "AISLE_PLACEHOLDER": "Aisle name",
+      "COMMENT_PLACEHOLDER": "Product examples (optional)",
       "ADD_AISLE": "+ Add Aisle",
       "UP": "Up",
       "DOWN": "Down",

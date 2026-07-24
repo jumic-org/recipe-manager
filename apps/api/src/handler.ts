@@ -17,7 +17,7 @@ import {
   BedrockRuntimeClient,
   InvokeModelCommand,
 } from '@aws-sdk/client-bedrock-runtime';
-import type { Recipe, CreateRecipeInput, UpdateRecipeInput, Ingredient, IngredientOnHand, CreateIngredientOnHandInput, Supermarket, CreateSupermarketInput, UpdateSupermarketInput } from '@recipe-manager/shared';
+import type { Recipe, CreateRecipeInput, UpdateRecipeInput, Ingredient, IngredientOnHand, CreateIngredientOnHandInput, Supermarket, CreateSupermarketInput, UpdateSupermarketInput, Aisle } from '@recipe-manager/shared';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -1009,8 +1009,24 @@ async function sortIngredients(
   }
 
   const ingredients = parsed['ingredients'] as Ingredient[];
-  const aisles = parsed['aisles'] as string[];
+  const rawAisles = parsed['aisles'] as (string | { name: string; comment?: string })[];
   const language = (parsed['language'] as string) || 'en';
+
+  // Normalize aisles: support both string[] (legacy) and Aisle[] formats
+  const aisles: Aisle[] = rawAisles.map((a) => {
+    if (typeof a === 'string') {
+      return { name: a };
+    }
+    return { name: a.name, comment: a.comment };
+  });
+
+  // Format aisles for the prompt, including comments as product examples
+  const formatAisle = (aisle: Aisle, index: number): string => {
+    if (aisle.comment) {
+      return `${index + 1}. ${aisle.name} (${aisle.comment})`;
+    }
+    return `${index + 1}. ${aisle.name}`;
+  };
 
   let system: string;
   let prompt: string;
@@ -1021,10 +1037,15 @@ async function sortIngredients(
     prompt = `Sortiere die folgenden Zutaten in die angegebenen Supermarktgänge. Jede Zutat muss genau einem Gang zugeordnet werden. Wenn eine Zutat nicht eindeutig in einen Gang passt, ordne sie der Gruppe "Unknown" zu.
 
 GÄNGE (in Reihenfolge):
-${aisles.map((a, i) => `${i + 1}. ${a}`).join('\n')}
+${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
 
 ZUTATEN:
 ${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
+
+Beispiel:
+GÄNGE: 1. Obst  2. Fleisch und Wurst  3. Nudeln (passierte Tomaten)  4. Milch und Käse  5. Getränke
+ZUTATEN: 1. passierte Tomaten  2. Käse  3. Apfel  4. Hackfleisch
+Erwartete Gruppen: Obst -> Apfel, Fleisch und Wurst -> Hackfleisch, Nudeln -> passierte Tomaten, Milch und Käse -> Käse
 
 Gib ein JSON-Objekt mit einem einzigen Schlüssel "groups" zurück, der ein Array ist. Jedes Element hat:
 - "aisle": der Gangname (muss exakt einer der oben aufgelisteten Gänge sein, oder "Unknown")
@@ -1036,6 +1057,7 @@ Regeln:
 - Nur Gänge einschließen, denen mindestens eine Zutat zugeordnet ist. Leere Gänge überspringen, aber die relative Reihenfolge beibehalten.
 - "Unknown" als allerletzte Gruppe setzen, falls Zutaten nicht in die definierten Gänge passen.
 - Nutze dein Wissen über Supermärkte, um intelligente Zuordnungen zu treffen.
+- Die Kommentare in Klammern hinter den Gangnamen sind Produktbeispiele - nutze sie als Hilfe bei der Zuordnung.
 - Gib NUR das JSON-Objekt zurück, keine Erklärung.`;
   } else {
     system = `You are a grocery shopping assistant. Your task is to sort a list of recipe ingredients into the correct supermarket aisles. You must output valid JSON only, with no extra text or markdown.`;
@@ -1043,10 +1065,15 @@ Regeln:
     prompt = `Sort the following ingredients into the provided supermarket aisles. Each ingredient must be placed in exactly one aisle. If an ingredient does not clearly fit into any aisle, place it in the "Unknown" group.
 
 AISLES (in order):
-${aisles.map((a, i) => `${i + 1}. ${a}`).join('\n')}
+${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
 
 INGREDIENTS:
 ${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
+
+Example:
+AISLES: 1. Fruits  2. Meat and sausage  3. Noodles (sieved tomatoes)  4. Milk and cheese  5. Drinks
+INGREDIENTS: 1. sieved tomatoes  2. Cheese  3. apple  4. mince
+Expected output groups order: Fruits -> apple, Meat and sausage -> mince, Noodles -> sieved tomatoes, Milk and cheese -> Cheese
 
 Return a JSON object with a single key "groups" that is an array. Each element has:
 - "aisle": the aisle name (must be exactly one of the aisles listed above, or "Unknown")
@@ -1058,10 +1085,11 @@ Rules:
 - Only include aisles that have at least one ingredient assigned. Skip empty aisles but maintain relative order.
 - Put "Unknown" as the very last group if any ingredients don't fit into the defined aisles.
 - Use your knowledge of grocery stores to make intelligent assignments.
+- The comments in parentheses after aisle names are product examples - use them as hints for assignment.
 - Return ONLY the JSON object, no explanation.`;
   }
 
-  console.log('sort-ingredients request:', JSON.stringify({ language, aisles, ingredientCount: ingredients.length }));
+  console.log('sort-ingredients request:', JSON.stringify({ language, aisles: aisles.map((a) => a.name), ingredientCount: ingredients.length }));
   console.log('sort-ingredients system prompt:', system);
   console.log('sort-ingredients user prompt:', prompt);
 
@@ -1159,15 +1187,29 @@ async function createSupermarket(
   }
 
   const aislesValid = (parsed['aisles'] as unknown[]).every(
-    (el) => typeof el === 'string' && el.trim().length > 0,
+    (el) =>
+      typeof el === 'object' &&
+      el !== null &&
+      typeof (el as Record<string, unknown>)['name'] === 'string' &&
+      ((el as Record<string, unknown>)['name'] as string).trim().length > 0 &&
+      ((el as Record<string, unknown>)['comment'] === undefined ||
+        typeof (el as Record<string, unknown>)['comment'] === 'string'),
   );
   if (!aislesValid) {
-    return response(400, { message: 'Every aisle must be a non-empty string' });
+    return response(400, { message: 'Every aisle must be an object with a non-empty name and an optional comment string' });
   }
+
+  const aisles: Aisle[] = (parsed['aisles'] as Record<string, unknown>[]).map((el) => {
+    const aisle: Aisle = { name: (el['name'] as string).trim() };
+    if (el['comment'] && typeof el['comment'] === 'string' && el['comment'].trim().length > 0) {
+      aisle.comment = el['comment'].trim();
+    }
+    return aisle;
+  });
 
   const input: CreateSupermarketInput = {
     name: parsed['name'] as string,
-    aisles: parsed['aisles'] as string[],
+    aisles,
   };
   const now = new Date().toISOString();
 
@@ -1216,15 +1258,29 @@ async function updateSupermarket(
   }
 
   const aislesValid = (parsed['aisles'] as unknown[]).every(
-    (el) => typeof el === 'string' && el.trim().length > 0,
+    (el) =>
+      typeof el === 'object' &&
+      el !== null &&
+      typeof (el as Record<string, unknown>)['name'] === 'string' &&
+      ((el as Record<string, unknown>)['name'] as string).trim().length > 0 &&
+      ((el as Record<string, unknown>)['comment'] === undefined ||
+        typeof (el as Record<string, unknown>)['comment'] === 'string'),
   );
   if (!aislesValid) {
-    return response(400, { message: 'Every aisle must be a non-empty string' });
+    return response(400, { message: 'Every aisle must be an object with a non-empty name and an optional comment string' });
   }
+
+  const aisles: Aisle[] = (parsed['aisles'] as Record<string, unknown>[]).map((el) => {
+    const aisle: Aisle = { name: (el['name'] as string).trim() };
+    if (el['comment'] && typeof el['comment'] === 'string' && el['comment'].trim().length > 0) {
+      aisle.comment = el['comment'].trim();
+    }
+    return aisle;
+  });
 
   const input: UpdateSupermarketInput = {
     name: parsed['name'] as string,
-    aisles: parsed['aisles'] as string[],
+    aisles,
   };
   const now = new Date().toISOString();
 

@@ -52,12 +52,17 @@ export interface IngredientOnHand {
 
 export type CreateIngredientOnHandInput = Omit<IngredientOnHand, 'id' | 'userId' | 'entityType' | 'createdAt'>;
 
+export interface Aisle {
+  name: string;
+  comment?: string;
+}
+
 export interface Supermarket {
   id: string;
   userId: string;
   entityType: 'supermarket';
   name: string;
-  aisles: string[];
+  aisles: Aisle[];
   createdAt: string;
   updatedAt: string;
 }

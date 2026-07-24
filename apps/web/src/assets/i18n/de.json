@@ -172,6 +172,7 @@
       "NAME_PLACEHOLDER": "Supermarktname",
       "AISLES_TITLE": "Gänge",
       "AISLE_PLACEHOLDER": "Gangname",
+      "COMMENT_PLACEHOLDER": "Produktbeispiele (optional)",
       "ADD_AISLE": "+ Gang hinzufügen",
       "UP": "Hoch",
       "DOWN": "Runter",
