@@ -89,6 +89,13 @@ export class RecipeManagerStack extends Stack {
       projectionType: ProjectionType.ALL,
     });
 
+    recipesTable.addGlobalSecondaryIndex({
+      indexName: 'byEntityType',
+      partitionKey: { name: 'userId', type: AttributeType.STRING },
+      sortKey: { name: 'entityType', type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
+    });
+
     // Cognito User Pool - either create new or import existing
     let userPool: import('aws-cdk-lib/aws-cognito').IUserPool;
     let userPoolClient: UserPoolClient;

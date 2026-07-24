@@ -159,17 +159,16 @@ async function listRecipes(
   const result = await docClient.send(
     new QueryCommand({
       TableName: TABLE_NAME,
-      KeyConditionExpression: 'userId = :userId',
+      IndexName: 'byEntityType',
+      KeyConditionExpression: 'userId = :userId AND entityType = :entityType',
       ExpressionAttributeValues: {
         ':userId': userId,
+        ':entityType': 'recipe',
       },
     }),
   );
 
-  let recipes = (result.Items ?? []).filter((item) => {
-    const id = (item as Record<string, unknown>)['id'] as string;
-    return !id.startsWith('ioh_') && !id.startsWith('sm_');
-  }) as Recipe[];
+  let recipes = (result.Items ?? []) as Recipe[];
 
   if (category) {
     recipes = recipes.filter((r) => r.categories.includes(category));
@@ -239,6 +238,7 @@ async function createRecipe(
     ...input,
     id: crypto.randomUUID(),
     userId,
+    entityType: 'recipe',
     sourceUrl: null,
     createdAt: now,
     updatedAt: now,
@@ -794,6 +794,7 @@ async function importRecipe(
     ...recipeInput,
     id: crypto.randomUUID(),
     userId,
+    entityType: 'recipe',
     sourceUrl: url,
     createdAt: now,
     updatedAt: now,
@@ -890,6 +891,7 @@ async function importRecipeFromText(
     ...recipeInput,
     id: crypto.randomUUID(),
     userId,
+    entityType: 'recipe',
     sourceUrl: null,
     createdAt: now,
     updatedAt: now,
@@ -909,10 +911,11 @@ async function listIngredientsOnHand(userId: string): Promise<APIGatewayProxyRes
   const result = await docClient.send(
     new QueryCommand({
       TableName: TABLE_NAME,
-      KeyConditionExpression: 'userId = :userId AND begins_with(id, :prefix)',
+      IndexName: 'byEntityType',
+      KeyConditionExpression: 'userId = :userId AND entityType = :entityType',
       ExpressionAttributeValues: {
         ':userId': userId,
-        ':prefix': 'ioh_',
+        ':entityType': 'ingredientOnHand',
       },
     }),
   );
@@ -946,6 +949,7 @@ async function createIngredientOnHand(
   const item: IngredientOnHand = {
     id: `ioh_${crypto.randomUUID()}`,
     userId,
+    entityType: 'ingredientOnHand',
     name: input.name,
     createdAt: now,
   };
@@ -1084,10 +1088,11 @@ async function listSupermarkets(userId: string): Promise<APIGatewayProxyResult> 
   const result = await docClient.send(
     new QueryCommand({
       TableName: TABLE_NAME,
-      KeyConditionExpression: 'userId = :userId AND begins_with(id, :prefix)',
+      IndexName: 'byEntityType',
+      KeyConditionExpression: 'userId = :userId AND entityType = :entityType',
       ExpressionAttributeValues: {
         ':userId': userId,
-        ':prefix': 'sm_',
+        ':entityType': 'supermarket',
       },
     }),
   );
@@ -1135,6 +1140,7 @@ async function createSupermarket(
   const item: Supermarket = {
     id: `sm_${crypto.randomUUID()}`,
     userId,
+    entityType: 'supermarket',
     name: input.name,
     aisles: input.aisles,
     createdAt: now,

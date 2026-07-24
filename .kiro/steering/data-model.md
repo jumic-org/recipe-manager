@@ -13,11 +13,14 @@
 
 ### Global Secondary Indexes
 
-| Index Name   | Partition Key     | Sort Key             | Projection |
-| ------------ | ----------------- | -------------------- | ---------- |
-| `byCategory` | `userId` (String) | `createdAt` (String) | ALL        |
+| Index Name     | Partition Key     | Sort Key               | Projection |
+| -------------- | ----------------- | ---------------------- | ---------- |
+| `byCategory`   | `userId` (String) | `createdAt` (String)   | ALL        |
+| `byEntityType` | `userId` (String) | `entityType` (String)  | ALL        |
 
 The `byCategory` GSI allows querying a user's recipes sorted by creation date. Despite the name, category filtering is done application-side after the query.
+
+The `byEntityType` GSI enables efficient queries for a specific entity type (recipe, ingredientOnHand, supermarket) without reading all items for a user. Each item stores an `entityType` attribute that identifies the entity kind.
 
 ### Billing and Configuration
 
@@ -36,6 +39,7 @@ All interfaces are defined in `libs/shared/src/index.ts`.
 interface Recipe {
   id: string; // UUID v4, sort key
   userId: string; // Cognito sub, partition key
+  entityType: 'recipe'; // Discriminator for byEntityType GSI
   title: string;
   description: string;
   servings: number;
@@ -308,16 +312,18 @@ Below are three complete JSON examples that conform to the `Recipe` interface. T
 
 ## Access Patterns
 
-| Pattern                       | Implementation                                            |
-| ----------------------------- | --------------------------------------------------------- |
-| List all recipes for a user   | `Query` on PK `userId`                                    |
-| Get a single recipe           | `GetItem` with PK `userId` + SK `id`                      |
-| List recipes by creation date | `Query` on GSI `byCategory` (PK `userId`, SK `createdAt`) |
-| Filter by category            | Application-side filter on `categories` array after query |
-| Filter by tag                 | Application-side filter on `tags` array after query       |
-| Create recipe                 | `PutItem` with full Recipe object                         |
-| Update recipe                 | `UpdateCommand` with condition check for existence        |
-| Delete recipe                 | `DeleteCommand` with condition check for existence        |
+| Pattern                             | Implementation                                                         |
+| ----------------------------------- | ---------------------------------------------------------------------- |
+| List all recipes for a user         | `Query` on GSI `byEntityType` (PK `userId`, SK `entityType = recipe`)  |
+| Get a single recipe                 | `GetItem` with PK `userId` + SK `id`                                   |
+| List recipes by creation date       | `Query` on GSI `byCategory` (PK `userId`, SK `createdAt`)              |
+| Filter by category                  | Application-side filter on `categories` array after query              |
+| Filter by tag                       | Application-side filter on `tags` array after query                    |
+| Create recipe                       | `PutItem` with full Recipe object (includes `entityType: 'recipe'`)    |
+| Update recipe                       | `UpdateCommand` with condition check for existence                     |
+| Delete recipe                       | `DeleteCommand` with condition check for existence                     |
+| List ingredients on hand for a user | `Query` on GSI `byEntityType` (PK `userId`, SK `entityType = ingredientOnHand`) |
+| List supermarkets for a user        | `Query` on GSI `byEntityType` (PK `userId`, SK `entityType = supermarket`)      |
 
 ## Adding New Fields
 
@@ -340,5 +346,7 @@ Below are three complete JSON examples that conform to the `Recipe` interface. T
 - **Never use `FilterExpression` on key attributes** (partition key or sort key). DynamoDB will reject the query with a `ValidationException`.
 - **Avoid `FilterExpression` in general** for production queries. Filter expressions still consume read capacity for all scanned items, making them inefficient and costly at scale.
 - **Use GSI or LSI** to support different access patterns efficiently. If you need to query items by a non-key attribute, add an appropriate index.
-- **Use `KeyConditionExpression`** with `begins_with` on the sort key when items share a prefix pattern (e.g., `begins_with(id, 'ioh_')` for ingredients-on-hand).
-- **Prefer application-level filtering** over `FilterExpression` when the result set is small and predictable.
+- **Use the `byEntityType` GSI** to list items of a specific type for a user. Query with `userId = :userId AND entityType = :entityType` where entityType is one of `'recipe'`, `'ingredientOnHand'`, or `'supermarket'`.
+- **Use `KeyConditionExpression`** with `begins_with` on the sort key when items share a prefix pattern (e.g., `begins_with(id, 'ioh_')` for ingredients-on-hand) only if a GSI is not available.
+- **Prefer GSI queries over application-level filtering** to avoid reading unnecessary items from the table.
+- **Always set `entityType`** when creating new items so they are queryable via the `byEntityType` GSI.
