@@ -186,6 +186,7 @@
   "SUPERMARKET_VIEW": {
     "TITLE": "Einkaufsliste: {{recipeName}}",
     "LOADING": "Laden...",
+    "SORTING": "Artikel werden in Gange sortiert...",
     "SELECT_SUPERMARKET": "Supermarkt",
     "NO_SUPERMARKET": "-- Supermarkt auswaehlen --",
     "TO_PURCHASE": "Zu kaufen",

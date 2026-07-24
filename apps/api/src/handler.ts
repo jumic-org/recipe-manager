@@ -17,7 +17,7 @@ import {
   BedrockRuntimeClient,
   InvokeModelCommand,
 } from '@aws-sdk/client-bedrock-runtime';
-import type { Recipe, CreateRecipeInput, UpdateRecipeInput, IngredientOnHand, CreateIngredientOnHandInput, Supermarket, CreateSupermarketInput, UpdateSupermarketInput } from '@recipe-manager/shared';
+import type { Recipe, CreateRecipeInput, UpdateRecipeInput, Ingredient, IngredientOnHand, CreateIngredientOnHandInput, Supermarket, CreateSupermarketInput, UpdateSupermarketInput } from '@recipe-manager/shared';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -109,6 +109,11 @@ export const handler: APIGatewayProxyHandler = async (
       if (method === 'DELETE') {
         return await deleteIngredientOnHand(userId, iohId);
       }
+    }
+
+    // POST /sort-ingredients - sort ingredients into supermarket aisles using AI
+    if (path === '/sort-ingredients' && method === 'POST') {
+      return await sortIngredients(event);
     }
 
     // GET /supermarkets - list for user
@@ -971,6 +976,102 @@ async function deleteIngredientOnHand(
       return response(404, { message: 'Ingredient on hand not found' });
     }
     throw error;
+  }
+}
+
+async function sortIngredients(
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!Array.isArray(parsed['ingredients']) || parsed['ingredients'].length === 0) {
+    return response(400, { message: 'ingredients is required and must be a non-empty array' });
+  }
+
+  if (!Array.isArray(parsed['aisles']) || parsed['aisles'].length === 0) {
+    return response(400, { message: 'aisles is required and must be a non-empty array' });
+  }
+
+  const ingredients = parsed['ingredients'] as Ingredient[];
+  const aisles = parsed['aisles'] as string[];
+
+  const system = `You are a grocery shopping assistant. Your task is to sort a list of recipe ingredients into the correct supermarket aisles. You must output valid JSON only, with no extra text or markdown.`;
+
+  const prompt = `Sort the following ingredients into the provided supermarket aisles. Each ingredient must be placed in exactly one aisle. If an ingredient does not clearly fit into any aisle, place it in the "Other" group.
+
+AISLES (in order):
+${aisles.map((a, i) => `${i + 1}. ${a}`).join('\n')}
+
+INGREDIENTS:
+${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
+
+Return a JSON object with a single key "groups" that is an array. Each element has:
+- "aisle": the aisle name (must be exactly one of the aisles listed above, or "Other")
+- "ingredientIndices": an array of 0-based indices referencing the INGREDIENTS list above
+
+Rules:
+- Every ingredient index (0 to ${ingredients.length - 1}) must appear exactly once across all groups.
+- Preserve the aisle order from the AISLES list. Put "Other" last if used.
+- Use your knowledge of grocery stores to make intelligent assignments.
+- Return ONLY the JSON object, no explanation.`;
+
+  try {
+    const bedrockResponse = await bedrockClient.send(
+      new InvokeModelCommand({
+        modelId: 'eu.amazon.nova-lite-v1:0',
+        contentType: 'application/json',
+        accept: 'application/json',
+        body: JSON.stringify({
+          system: [{ text: system }],
+          messages: [{ role: 'user', content: [{ text: prompt }] }],
+          inferenceConfig: { maxTokens: 4096, temperature: 0.2 },
+        }),
+      }),
+    );
+
+    const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
+    const outputText = responseBody['output']?.['message']?.['content']?.[0]?.['text'];
+
+    if (!outputText) {
+      console.error('Unexpected Bedrock response structure:', JSON.stringify(responseBody));
+      return response(502, { message: 'Failed to get a valid response from AI model' });
+    }
+
+    // Parse the JSON from the model output (handle potential markdown code blocks)
+    let jsonText = outputText.trim();
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+    }
+
+    const parsed2 = JSON.parse(jsonText) as { groups: { aisle: string; ingredientIndices: number[] }[] };
+
+    // Map indices back to actual ingredients
+    const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
+    for (const group of parsed2.groups) {
+      const groupIngredients: Ingredient[] = [];
+      for (const idx of group.ingredientIndices) {
+        if (idx >= 0 && idx < ingredients.length) {
+          groupIngredients.push(ingredients[idx]);
+        }
+      }
+      if (groupIngredients.length > 0) {
+        groups.push({ aisle: group.aisle, ingredients: groupIngredients });
+      }
+    }
+
+    return response(200, { groups });
+  } catch (error) {
+    console.error('Error calling Bedrock for sort-ingredients:', error);
+    return response(502, { message: 'Failed to sort ingredients using AI model' });
   }
 }
 

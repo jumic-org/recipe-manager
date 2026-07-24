@@ -7,12 +7,8 @@ import type { Recipe, Supermarket, IngredientOnHand, Ingredient } from '@recipe-
 import { RecipeService } from '../recipes/recipe.service';
 import { PantryService } from '../pantry/pantry.service';
 import { SupermarketService } from './supermarket.service';
+import type { AisleGroup } from './supermarket.service';
 import { forkJoin } from 'rxjs';
-
-export interface AisleGroup {
-  aisle: string;
-  ingredients: Ingredient[];
-}
 
 @Component({
   selector: 'rm-supermarket-view',
@@ -47,18 +43,23 @@ export interface AisleGroup {
                 {{ copied ? ('SUPERMARKET_VIEW.COPIED' | translate) : ('SUPERMARKET_VIEW.COPY' | translate) }}
               </button>
             </div>
-            @if (aisleGroups.length === 0) {
+            @if (sorting) {
+              <p class="loading">{{ 'SUPERMARKET_VIEW.SORTING' | translate }}</p>
+            }
+            @if (!sorting && aisleGroups.length === 0) {
               <p class="empty">{{ 'SUPERMARKET_VIEW.NOTHING_TO_BUY' | translate }}</p>
             }
-            @for (group of aisleGroups; track group.aisle) {
-              <div class="aisle-group">
-                <h4 class="aisle-name">{{ group.aisle }}</h4>
-                <ul>
-                  @for (ing of group.ingredients; track $index) {
-                    <li>{{ ing.amount }} {{ ing.unit }} {{ ing.name }}</li>
-                  }
-                </ul>
-              </div>
+            @if (!sorting) {
+              @for (group of aisleGroups; track group.aisle) {
+                <div class="aisle-group">
+                  <h4 class="aisle-name">{{ group.aisle }}</h4>
+                  <ul>
+                    @for (ing of group.ingredients; track $index) {
+                      <li>{{ ing.amount }} {{ ing.unit }} {{ ing.name }}</li>
+                    }
+                  </ul>
+                </div>
+              }
             }
           </section>
 
@@ -183,6 +184,7 @@ export class SupermarketViewComponent implements OnInit {
   aisleGroups: AisleGroup[] = [];
   onHandIngredients: Ingredient[] = [];
   loading = false;
+  sorting = false;
   error = '';
   copied = false;
 
@@ -225,8 +227,8 @@ export class SupermarketViewComponent implements OnInit {
           this.selectedSupermarketId = '';
         }
 
-        this.computeLists();
         this.loading = false;
+        this.computeLists();
         this.cdr.markForCheck();
       },
       error: (err) => {
@@ -292,54 +294,40 @@ export class SupermarketViewComponent implements OnInit {
     }
 
     this.onHandIngredients = onHand;
-    this.aisleGroups = this.groupByAisle(toPurchase);
+    this.sortIntoAisles(toPurchase);
   }
 
-  private groupByAisle(ingredients: Ingredient[]): AisleGroup[] {
+  private sortIntoAisles(ingredients: Ingredient[]): void {
     const selectedSupermarket = this.supermarkets.find(
       (s) => s.id === this.selectedSupermarketId,
     );
-    const aisles = selectedSupermarket ? selectedSupermarket.aisles : [];
-    const otherLabel = this.translateService.instant('SUPERMARKET_VIEW.OTHER_AISLE');
 
-    const groups = new Map<string, Ingredient[]>();
-
-    // Initialize groups in aisle order
-    for (const aisle of aisles) {
-      groups.set(aisle, []);
-    }
-    groups.set(otherLabel, []);
-
-    for (const ing of ingredients) {
-      const ingNameLower = ing.name.toLowerCase();
-      let matched = false;
-      for (const aisle of aisles) {
-        if (ingNameLower.includes(aisle.toLowerCase()) || aisle.toLowerCase().includes(ingNameLower)) {
-          const list = groups.get(aisle)!;
-          list.push(ing);
-          matched = true;
-          break;
-        }
-      }
-      if (!matched) {
-        groups.get(otherLabel)!.push(ing);
-      }
+    if (!selectedSupermarket || ingredients.length === 0) {
+      // No supermarket selected or no items to sort - put everything in a single "Other" group
+      const otherLabel = this.translateService.instant('SUPERMARKET_VIEW.OTHER_AISLE');
+      this.aisleGroups = ingredients.length > 0 ? [{ aisle: otherLabel, ingredients }] : [];
+      this.cdr.markForCheck();
+      return;
     }
 
-    // Build result preserving aisle order, filtering empty groups
-    const result: AisleGroup[] = [];
-    for (const aisle of aisles) {
-      const items = groups.get(aisle)!;
-      if (items.length > 0) {
-        result.push({ aisle, ingredients: items });
-      }
-    }
-    const otherItems = groups.get(otherLabel)!;
-    if (otherItems.length > 0) {
-      result.push({ aisle: otherLabel, ingredients: otherItems });
-    }
+    this.sorting = true;
+    this.aisleGroups = [];
+    this.cdr.markForCheck();
 
-    return result;
+    this.supermarketService.sortIngredients(ingredients, selectedSupermarket.aisles).subscribe({
+      next: (groups) => {
+        this.aisleGroups = groups;
+        this.sorting = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        // Fallback: put all ingredients in "Other" group if AI sorting fails
+        const otherLabel = this.translateService.instant('SUPERMARKET_VIEW.OTHER_AISLE');
+        this.aisleGroups = [{ aisle: otherLabel, ingredients }];
+        this.sorting = false;
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   private readCookie(): string {
