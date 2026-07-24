@@ -248,6 +248,25 @@ export class RecipeManagerStack extends Stack {
     recipe.addMethod('PUT', lambdaIntegration, methodOptions);
     recipe.addMethod('DELETE', lambdaIntegration, methodOptions);
 
+    // /ingredients-on-hand resource
+    const ingredientsOnHand = api.root.addResource('ingredients-on-hand');
+    ingredientsOnHand.addMethod('GET', lambdaIntegration, methodOptions);
+    ingredientsOnHand.addMethod('POST', lambdaIntegration, methodOptions);
+
+    // /ingredients-on-hand/{id} resource
+    const ingredientOnHand = ingredientsOnHand.addResource('{id}');
+    ingredientOnHand.addMethod('DELETE', lambdaIntegration, methodOptions);
+
+    // /supermarkets resource
+    const supermarkets = api.root.addResource('supermarkets');
+    supermarkets.addMethod('GET', lambdaIntegration, methodOptions);
+    supermarkets.addMethod('POST', lambdaIntegration, methodOptions);
+
+    // /supermarkets/{id} resource
+    const supermarket = supermarkets.addResource('{id}');
+    supermarket.addMethod('PUT', lambdaIntegration, methodOptions);
+    supermarket.addMethod('DELETE', lambdaIntegration, methodOptions);
+
     // Frontend Deployment - deploys Angular build files AND runtime config.json
     // config.json is generated with real Cognito/API values resolved at deploy time.
     // Both sources are combined in a single BucketDeployment to ensure config.json

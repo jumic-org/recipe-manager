@@ -17,7 +17,7 @@ import {
   BedrockRuntimeClient,
   InvokeModelCommand,
 } from '@aws-sdk/client-bedrock-runtime';
-import type { Recipe, CreateRecipeInput, UpdateRecipeInput } from '@recipe-manager/shared';
+import type { Recipe, CreateRecipeInput, UpdateRecipeInput, IngredientOnHand, CreateIngredientOnHandInput, Supermarket, CreateSupermarketInput, UpdateSupermarketInput } from '@recipe-manager/shared';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -87,6 +87,53 @@ export const handler: APIGatewayProxyHandler = async (
       // DELETE /recipes/{id}
       if (method === 'DELETE') {
         return await deleteRecipe(userId, recipeId);
+      }
+    }
+
+    // GET /ingredients-on-hand - list for user
+    if (path === '/ingredients-on-hand' && method === 'GET') {
+      return await listIngredientsOnHand(userId);
+    }
+
+    // POST /ingredients-on-hand - create
+    if (path === '/ingredients-on-hand' && method === 'POST') {
+      return await createIngredientOnHand(userId, event);
+    }
+
+    // Match /ingredients-on-hand/{id}
+    const iohIdMatch = path.match(/^\/ingredients-on-hand\/([^/]+)$/);
+    if (iohIdMatch) {
+      const iohId = iohIdMatch[1];
+
+      // DELETE /ingredients-on-hand/{id}
+      if (method === 'DELETE') {
+        return await deleteIngredientOnHand(userId, iohId);
+      }
+    }
+
+    // GET /supermarkets - list for user
+    if (path === '/supermarkets' && method === 'GET') {
+      return await listSupermarkets(userId);
+    }
+
+    // POST /supermarkets - create
+    if (path === '/supermarkets' && method === 'POST') {
+      return await createSupermarket(userId, event);
+    }
+
+    // Match /supermarkets/{id}
+    const smIdMatch = path.match(/^\/supermarkets\/([^/]+)$/);
+    if (smIdMatch) {
+      const smId = smIdMatch[1];
+
+      // PUT /supermarkets/{id}
+      if (method === 'PUT') {
+        return await updateSupermarket(userId, smId, event);
+      }
+
+      // DELETE /supermarkets/{id}
+      if (method === 'DELETE') {
+        return await deleteSupermarket(userId, smId);
       }
     }
 
@@ -848,6 +895,231 @@ async function importRecipeFromText(
   );
 
   return response(201, { recipe });
+}
+
+async function listIngredientsOnHand(userId: string): Promise<APIGatewayProxyResult> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TABLE_NAME,
+      KeyConditionExpression: 'userId = :userId AND begins_with(id, :prefix)',
+      ExpressionAttributeValues: {
+        ':userId': userId,
+        ':prefix': 'ioh_',
+      },
+    }),
+  );
+
+  const ingredientsOnHand = (result.Items ?? []) as IngredientOnHand[];
+  return response(200, { ingredientsOnHand });
+}
+
+async function createIngredientOnHand(
+  userId: string,
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!parsed['name'] || typeof parsed['name'] !== 'string') {
+    return response(400, { message: 'name is required and must be a string' });
+  }
+
+  const input: CreateIngredientOnHandInput = { name: parsed['name'] as string };
+  const now = new Date().toISOString();
+
+  const item: IngredientOnHand = {
+    id: `ioh_${crypto.randomUUID()}`,
+    userId,
+    name: input.name,
+    createdAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TABLE_NAME,
+      Item: item,
+    }),
+  );
+
+  return response(201, { ingredientOnHand: item });
+}
+
+async function deleteIngredientOnHand(
+  userId: string,
+  iohId: string,
+): Promise<APIGatewayProxyResult> {
+  try {
+    await docClient.send(
+      new DeleteCommand({
+        TableName: TABLE_NAME,
+        Key: { userId, id: iohId },
+        ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)',
+      }),
+    );
+
+    return response(204);
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      return response(404, { message: 'Ingredient on hand not found' });
+    }
+    throw error;
+  }
+}
+
+async function listSupermarkets(userId: string): Promise<APIGatewayProxyResult> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TABLE_NAME,
+      KeyConditionExpression: 'userId = :userId AND begins_with(id, :prefix)',
+      ExpressionAttributeValues: {
+        ':userId': userId,
+        ':prefix': 'sm_',
+      },
+    }),
+  );
+
+  const supermarkets = (result.Items ?? []) as Supermarket[];
+  return response(200, { supermarkets });
+}
+
+async function createSupermarket(
+  userId: string,
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!parsed['name'] || typeof parsed['name'] !== 'string') {
+    return response(400, { message: 'name is required and must be a string' });
+  }
+
+  if (!Array.isArray(parsed['aisles'])) {
+    return response(400, { message: 'aisles is required and must be an array' });
+  }
+
+  const input: CreateSupermarketInput = {
+    name: parsed['name'] as string,
+    aisles: parsed['aisles'] as string[],
+  };
+  const now = new Date().toISOString();
+
+  const item: Supermarket = {
+    id: `sm_${crypto.randomUUID()}`,
+    userId,
+    name: input.name,
+    aisles: input.aisles,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TABLE_NAME,
+      Item: item,
+    }),
+  );
+
+  return response(201, { supermarket: item });
+}
+
+async function updateSupermarket(
+  userId: string,
+  smId: string,
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!parsed['name'] || typeof parsed['name'] !== 'string') {
+    return response(400, { message: 'name is required and must be a string' });
+  }
+
+  if (!Array.isArray(parsed['aisles'])) {
+    return response(400, { message: 'aisles is required and must be an array' });
+  }
+
+  const input: UpdateSupermarketInput = {
+    name: parsed['name'] as string,
+    aisles: parsed['aisles'] as string[],
+  };
+  const now = new Date().toISOString();
+
+  try {
+    const result = await docClient.send(
+      new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { userId, id: smId },
+        UpdateExpression: 'SET #n = :name, aisles = :aisles, updatedAt = :updatedAt',
+        ExpressionAttributeNames: {
+          '#n': 'name',
+        },
+        ExpressionAttributeValues: {
+          ':name': input.name,
+          ':aisles': input.aisles,
+          ':updatedAt': now,
+        },
+        ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)',
+        ReturnValues: 'ALL_NEW',
+      }),
+    );
+
+    if (!result.Attributes) {
+      return response(404, { message: 'Supermarket not found' });
+    }
+
+    return response(200, { supermarket: result.Attributes as Supermarket });
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      return response(404, { message: 'Supermarket not found' });
+    }
+    throw error;
+  }
+}
+
+async function deleteSupermarket(
+  userId: string,
+  smId: string,
+): Promise<APIGatewayProxyResult> {
+  try {
+    await docClient.send(
+      new DeleteCommand({
+        TableName: TABLE_NAME,
+        Key: { userId, id: smId },
+        ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)',
+      }),
+    );
+
+    return response(204);
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      return response(404, { message: 'Supermarket not found' });
+    }
+    throw error;
+  }
 }
 
 function response(statusCode: number, body?: unknown): APIGatewayProxyResult {

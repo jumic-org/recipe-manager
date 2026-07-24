@@ -40,3 +40,25 @@ export interface Recipe {
 export type CreateRecipeInput = Omit<Recipe, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
 
 export type UpdateRecipeInput = Omit<Recipe, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
+
+export interface IngredientOnHand {
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: string;
+}
+
+export type CreateIngredientOnHandInput = Omit<IngredientOnHand, 'id' | 'userId' | 'createdAt'>;
+
+export interface Supermarket {
+  id: string;
+  userId: string;
+  name: string;
+  aisles: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateSupermarketInput = Omit<Supermarket, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
+
+export type UpdateSupermarketInput = Omit<Supermarket, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
