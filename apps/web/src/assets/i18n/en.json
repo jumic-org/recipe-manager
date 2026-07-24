@@ -175,6 +175,7 @@
       "ADD_AISLE": "+ Add Aisle",
       "UP": "Up",
       "DOWN": "Down",
+      "EDIT": "Edit",
       "CANCEL": "Cancel",
       "CREATE": "Create Supermarket",
       "UPDATE": "Update Supermarket",
@@ -195,7 +196,7 @@
     "COPIED": "Copied!",
     "NOTHING_TO_BUY": "Nothing to purchase - you have everything!",
     "NOTHING_ON_HAND": "No matching ingredients on hand.",
-    "OTHER_AISLE": "Other",
+    "OTHER_AISLE": "Unknown",
     "RECIPE_NOT_FOUND": "Recipe not found",
     "LOAD_ERROR": "Failed to load shopping view"
   }

@@ -50,8 +50,27 @@ import { SupermarketService } from './supermarket.service';
           @for (aisle of aisles; track $index; let i = $index) {
             <div class="aisle-row">
               <span class="aisle-number">{{ i + 1 }}.</span>
-              <span class="aisle-name">{{ aisle }}</span>
+              @if (editingIndex === i) {
+                <input
+                  type="text"
+                  class="aisle-edit-input"
+                  [(ngModel)]="editingValue"
+                  [ngModelOptions]="{ standalone: true }"
+                  (keyup.enter)="saveAisle(i)"
+                />
+              } @else {
+                <span class="aisle-name">{{ aisle }}</span>
+              }
               <div class="aisle-actions">
+                @if (editingIndex === i) {
+                  <button type="button" class="btn-move" (click)="saveAisle(i)">
+                    {{ 'SUPERMARKETS.FORM.UPDATE' | translate }}
+                  </button>
+                } @else {
+                  <button type="button" class="btn-move" (click)="editAisle(i)">
+                    {{ 'SUPERMARKETS.FORM.EDIT' | translate }}
+                  </button>
+                }
                 <button
                   type="button"
                   class="btn-move"
@@ -171,6 +190,15 @@ import { SupermarketService } from './supermarket.service';
       .aisle-name {
         flex: 1;
       }
+      .aisle-edit-input {
+        flex: 1;
+        padding: 6px 10px;
+        border: 1px solid var(--rm-primary);
+        border-radius: 4px;
+        font-size: 0.95rem;
+        background: var(--rm-input-bg);
+        color: var(--rm-text);
+      }
       .aisle-actions {
         display: flex;
         gap: 4px;
@@ -251,6 +279,8 @@ export class SupermarketFormComponent implements OnInit {
   loading = false;
   submitting = false;
   errorMessage = '';
+  editingIndex = -1;
+  editingValue = '';
   private supermarketId = '';
 
   constructor(
@@ -300,6 +330,20 @@ export class SupermarketFormComponent implements OnInit {
     if (newIndex < 0 || newIndex >= this.aisles.length) return;
     const item = this.aisles.splice(index, 1)[0];
     this.aisles.splice(newIndex, 0, item);
+  }
+
+  editAisle(index: number): void {
+    this.editingIndex = index;
+    this.editingValue = this.aisles[index];
+  }
+
+  saveAisle(index: number): void {
+    const trimmed = this.editingValue.trim();
+    if (trimmed) {
+      this.aisles[index] = trimmed;
+    }
+    this.editingIndex = -1;
+    this.editingValue = '';
   }
 
   cancel(): void {

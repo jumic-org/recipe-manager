@@ -160,8 +160,11 @@ async function listRecipes(
     new QueryCommand({
       TableName: TABLE_NAME,
       KeyConditionExpression: 'userId = :userId',
+      FilterExpression: 'NOT begins_with(id, :iohPrefix) AND NOT begins_with(id, :smPrefix)',
       ExpressionAttributeValues: {
         ':userId': userId,
+        ':iohPrefix': 'ioh_',
+        ':smPrefix': 'sm_',
       },
     }),
   );
@@ -1006,7 +1009,7 @@ async function sortIngredients(
 
   const system = `You are a grocery shopping assistant. Your task is to sort a list of recipe ingredients into the correct supermarket aisles. You must output valid JSON only, with no extra text or markdown.`;
 
-  const prompt = `Sort the following ingredients into the provided supermarket aisles. Each ingredient must be placed in exactly one aisle. If an ingredient does not clearly fit into any aisle, place it in the "Other" group.
+  const prompt = `Sort the following ingredients into the provided supermarket aisles. Each ingredient must be placed in exactly one aisle. If an ingredient does not clearly fit into any aisle, place it in the "Unknown" group.
 
 AISLES (in order):
 ${aisles.map((a, i) => `${i + 1}. ${a}`).join('\n')}
@@ -1015,12 +1018,12 @@ INGREDIENTS:
 ${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
 
 Return a JSON object with a single key "groups" that is an array. Each element has:
-- "aisle": the aisle name (must be exactly one of the aisles listed above, or "Other")
+- "aisle": the aisle name (must be exactly one of the aisles listed above, or "Unknown")
 - "ingredientIndices": an array of 0-based indices referencing the INGREDIENTS list above
 
 Rules:
 - Every ingredient index (0 to ${ingredients.length - 1}) must appear exactly once across all groups.
-- Preserve the aisle order from the AISLES list. Put "Other" last if used.
+- Preserve the aisle order from the AISLES list. Put "Unknown" last if used.
 - Use your knowledge of grocery stores to make intelligent assignments.
 - Return ONLY the JSON object, no explanation.`;
 
