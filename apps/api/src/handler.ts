@@ -1032,61 +1032,77 @@ async function sortIngredients(
   let prompt: string;
 
   if (language === 'de') {
-    system = `Du bist ein Einkaufsassistent. Deine Aufgabe ist es, eine Liste von Rezeptzutaten in die richtigen Supermarktgänge einzusortieren. Du musst nur gültiges JSON ausgeben, ohne zusätzlichen Text oder Markdown.`;
+    system = `Du bist ein JSON-Generator fuer Supermarkt-Einkaufslisten. Du ordnest Zutaten den nummerierten Gaengen zu und gibst die Gruppen STRIKT in aufsteigender Gang-Nummer zurueck. Die Reihenfolge der Gaenge in deiner Ausgabe ist die WICHTIGSTE Anforderung. Antworte NUR mit validem JSON.`;
 
-    prompt = `Sortiere die folgenden Zutaten in die angegebenen Supermarktgänge. Jede Zutat muss genau einem Gang zugeordnet werden. Wenn eine Zutat nicht eindeutig in einen Gang passt, ordne sie der Gruppe "Unknown" zu.
+    prompt = `AUFGABE: Ordne jede Zutat einem Gang zu. Die Gruppen in deiner Antwort MUESSEN in aufsteigender Reihenfolge der Gang-Nummern sortiert sein.
 
-GÄNGE (in Reihenfolge):
+SCHRITT 1 - Ordne jede Zutat einer Gang-Nummer zu:
+Fuer jede Zutat, bestimme welcher nummerierte Gang am besten passt.
+
+SCHRITT 2 - Sortiere die Gruppen nach Gang-Nummer:
+Gib die Gruppen in AUFSTEIGENDER Reihenfolge der Gang-Nummern aus (kleinste Nummer zuerst).
+
+NUMMERIERTE GAENGE:
 ${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
 
 ZUTATEN:
 ${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
 
-Beispiel:
-GÄNGE: 1. Obst  2. Fleisch und Wurst  3. Nudeln (passierte Tomaten)  4. Milch und Käse  5. Getränke
-ZUTATEN: 1. passierte Tomaten  2. Käse  3. Apfel  4. Hackfleisch
-Erwartete Gruppen: Obst -> Apfel, Fleisch und Wurst -> Hackfleisch, Nudeln -> passierte Tomaten, Milch und Käse -> Käse
+BEISPIEL:
+Gaenge: 1. Obst und Gemuese  2. Milchprodukte  3. Kaese  4. Mehl  5. Gewuerze
+Zutaten: 0=Magerquark, 1=Dinkelmehl, 2=Pizzakraeuter, 3=Mozzarella
+Zuordnung: Magerquark->Gang 2, Dinkelmehl->Gang 4, Pizzakraeuter->Gang 5, Mozzarella->Gang 3
+Sortiert nach Gang-Nummer (2,3,4,5):
+{"groups":[{"aisle":"Milchprodukte","ingredientIndices":[0]},{"aisle":"Kaese","ingredientIndices":[3]},{"aisle":"Mehl","ingredientIndices":[1]},{"aisle":"Gewuerze","ingredientIndices":[2]}]}
 
-Gib ein JSON-Objekt mit einem einzigen Schlüssel "groups" zurück, der ein Array ist. Jedes Element hat:
-- "aisle": der Gangname (muss exakt einer der oben aufgelisteten Gänge sein, oder "Unknown")
-- "ingredientIndices": ein Array von 0-basierten Indizes, die auf die ZUTATEN-Liste oben verweisen
+AUSGABEFORMAT - JSON-Objekt mit einem Schluessel "groups" (Array). Jedes Element:
+- "aisle": exakter Gangname aus der Liste oben (oder "Unknown")
+- "ingredientIndices": Array von 0-basierten Indizes der ZUTATEN-Liste
 
-Regeln:
-- Jeder Zutaten-Index (0 bis ${ingredients.length - 1}) muss genau einmal in allen Gruppen vorkommen.
-- Die Ausgabe-Gruppen MÜSSEN exakt die gleiche Reihenfolge wie die GÄNGE-Liste oben haben. Die erste Gruppe muss dem ersten Gang entsprechen, die zweite Gruppe dem zweiten Gang, usw.
-- Nur Gänge einschließen, denen mindestens eine Zutat zugeordnet ist. Leere Gänge überspringen, aber die relative Reihenfolge beibehalten.
-- "Unknown" als allerletzte Gruppe setzen, falls Zutaten nicht in die definierten Gänge passen.
-- Nutze dein Wissen über Supermärkte, um intelligente Zuordnungen zu treffen.
-- Die Kommentare in Klammern hinter den Gangnamen sind Produktbeispiele - nutze sie als Hilfe bei der Zuordnung.
-- Gib NUR das JSON-Objekt zurück, keine Erklärung.`;
+REGELN (nach Prioritaet):
+1. REIHENFOLGE: Die Gruppen im Array MUESSEN in aufsteigender Gang-Nummer sortiert sein. Gang 1 vor Gang 2, Gang 2 vor Gang 3, usw. Dies ist die wichtigste Regel.
+2. VOLLSTAENDIGKEIT: Jeder Index von 0 bis ${ingredients.length - 1} muss genau einmal vorkommen.
+3. ZUORDNUNG: Nutze dein Wissen ueber Supermaerkte und die Kommentare in Klammern als Hilfe.
+4. UNBEKANNT: "Unknown" nur als allerletzte Gruppe, falls eine Zutat in keinen Gang passt.
+5. LEERE GAENGE: Ueberspringe Gaenge ohne Zutaten, aber behalte die aufsteigende Reihenfolge bei.
+
+Antworte NUR mit dem JSON-Objekt.`;
   } else {
-    system = `You are a grocery shopping assistant. Your task is to sort a list of recipe ingredients into the correct supermarket aisles. You must output valid JSON only, with no extra text or markdown.`;
+    system = `You are a JSON generator for supermarket shopping lists. You assign ingredients to numbered aisles and return groups STRICTLY in ascending aisle number order. The ordering of aisles in your output is the MOST IMPORTANT requirement. Respond ONLY with valid JSON.`;
 
-    prompt = `Sort the following ingredients into the provided supermarket aisles. Each ingredient must be placed in exactly one aisle. If an ingredient does not clearly fit into any aisle, place it in the "Unknown" group.
+    prompt = `TASK: Assign each ingredient to an aisle. The groups in your response MUST be sorted in ascending aisle number order.
 
-AISLES (in order):
+STEP 1 - Assign each ingredient to an aisle number:
+For each ingredient, determine which numbered aisle is the best fit.
+
+STEP 2 - Sort groups by aisle number:
+Output the groups in ASCENDING order of aisle numbers (lowest number first).
+
+NUMBERED AISLES:
 ${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
 
 INGREDIENTS:
 ${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
 
-Example:
-AISLES: 1. Fruits  2. Meat and sausage  3. Noodles (sieved tomatoes)  4. Milk and cheese  5. Drinks
-INGREDIENTS: 1. sieved tomatoes  2. Cheese  3. apple  4. mince
-Expected output groups order: Fruits -> apple, Meat and sausage -> mince, Noodles -> sieved tomatoes, Milk and cheese -> Cheese
+EXAMPLE:
+Aisles: 1. Fruits and vegetables  2. Dairy  3. Cheese  4. Flour  5. Spices
+Ingredients: 0=low-fat quark, 1=spelt flour, 2=pizza herbs, 3=mozzarella
+Assignment: low-fat quark->aisle 2, spelt flour->aisle 4, pizza herbs->aisle 5, mozzarella->aisle 3
+Sorted by aisle number (2,3,4,5):
+{"groups":[{"aisle":"Dairy","ingredientIndices":[0]},{"aisle":"Cheese","ingredientIndices":[3]},{"aisle":"Flour","ingredientIndices":[1]},{"aisle":"Spices","ingredientIndices":[2]}]}
 
-Return a JSON object with a single key "groups" that is an array. Each element has:
-- "aisle": the aisle name (must be exactly one of the aisles listed above, or "Unknown")
-- "ingredientIndices": an array of 0-based indices referencing the INGREDIENTS list above
+OUTPUT FORMAT - JSON object with a single key "groups" (array). Each element:
+- "aisle": exact aisle name from the list above (or "Unknown")
+- "ingredientIndices": array of 0-based indices referencing the INGREDIENTS list
 
-Rules:
-- Every ingredient index (0 to ${ingredients.length - 1}) must appear exactly once across all groups.
-- The output groups array MUST follow the exact same order as the AISLES list above. The first group must correspond to the first aisle, the second group to the second aisle, etc.
-- Only include aisles that have at least one ingredient assigned. Skip empty aisles but maintain relative order.
-- Put "Unknown" as the very last group if any ingredients don't fit into the defined aisles.
-- Use your knowledge of grocery stores to make intelligent assignments.
-- The comments in parentheses after aisle names are product examples - use them as hints for assignment.
-- Return ONLY the JSON object, no explanation.`;
+RULES (by priority):
+1. ORDER: The groups array MUST be sorted in ascending aisle number order. Aisle 1 before aisle 2, aisle 2 before aisle 3, etc. This is the most important rule.
+2. COMPLETENESS: Every index from 0 to ${ingredients.length - 1} must appear exactly once.
+3. ASSIGNMENT: Use your grocery knowledge and the comments in parentheses as hints.
+4. UNKNOWN: "Unknown" only as the very last group, if an ingredient fits no aisle.
+5. EMPTY AISLES: Skip aisles with no ingredients, but maintain ascending order.
+
+Respond ONLY with the JSON object.`;
   }
 
   console.log('sort-ingredients request:', JSON.stringify({ language, aisles: aisles.map((a) => a.name), ingredientCount: ingredients.length }));
@@ -1102,7 +1118,7 @@ Rules:
         body: JSON.stringify({
           system: [{ text: system }],
           messages: [{ role: 'user', content: [{ text: prompt }] }],
-          inferenceConfig: { maxTokens: 4096, temperature: 0.2 },
+          inferenceConfig: { maxTokens: 4096, temperature: 0.1 },
         }),
       }),
     );
