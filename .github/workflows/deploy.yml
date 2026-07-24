@@ -15,7 +15,7 @@ permissions:
 
 env:
   AWS_REGION: eu-west-1
-  NODE_VERSION: '24'
+  NODE_VERSION: '26'
   STACK_NAME: RecipeManagerStack
 
 jobs:

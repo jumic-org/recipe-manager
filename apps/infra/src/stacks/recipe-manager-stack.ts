@@ -169,7 +169,7 @@ export class RecipeManagerStack extends Stack {
     const apiHandler = new NodejsFunction(this, 'RecipeApiHandler', {
       entry: path.join(__dirname, '../../../api/src/handler.ts'),
       handler: 'handler',
-      runtime: Runtime.NODEJS_20_X,
+      runtime: Runtime.NODEJS_24_X,
       memorySize: 256,
       timeout: Duration.seconds(60),
       environment: {

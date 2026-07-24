@@ -27,7 +27,7 @@ Recipe Manager is an Nx monorepo implementing a serverless full-stack applicatio
                                      |
                             +--------v--------+
                             | Lambda Function |
-                            | (Node.js 20.x) |
+                            | (Node.js 24.x) |
                             +--------+--------+
                                      |
                             +--------v--------+
