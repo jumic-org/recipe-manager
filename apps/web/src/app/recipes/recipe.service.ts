@@ -38,15 +38,15 @@ export class RecipeService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  importRecipe(url: string): Observable<Recipe> {
+  importRecipe(url: string, language: string = 'en'): Observable<Recipe> {
     return this.http
-      .post<{ recipe: Recipe }>(`${this.baseUrl}/import`, { url })
+      .post<{ recipe: Recipe }>(`${this.baseUrl}/import`, { url, language })
       .pipe(map((res) => res.recipe));
   }
 
-  importRecipeFromText(text: string): Observable<Recipe> {
+  importRecipeFromText(text: string, language: string = 'en'): Observable<Recipe> {
     return this.http
-      .post<{ recipe: Recipe }>(`${this.baseUrl}/import-text`, { text })
+      .post<{ recipe: Recipe }>(`${this.baseUrl}/import-text`, { text, language })
       .pipe(map((res) => res.recipe));
   }
 }

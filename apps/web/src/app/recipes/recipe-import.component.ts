@@ -268,10 +268,11 @@ export class RecipeImportComponent implements OnInit {
     this.errorMessage = '';
     this.cdr.markForCheck();
 
+    const language = this.translateService.getCurrentLang() || 'en';
     const request$ =
       this.mode === 'url'
-        ? this.recipeService.importRecipe(this.form.get('url')?.value)
-        : this.recipeService.importRecipeFromText(this.form.get('text')?.value);
+        ? this.recipeService.importRecipe(this.form.get('url')?.value, language)
+        : this.recipeService.importRecipeFromText(this.form.get('text')?.value, language);
 
     request$.subscribe({
       next: (recipe) => {

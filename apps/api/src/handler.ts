@@ -316,8 +316,8 @@ function stripHtmlToText(html: string): string {
   return text.trim().substring(0, 10000);
 }
 
-function buildBedrockPrompt(pageContent: string, source: 'web' | 'text' = 'web'): { system: string; prompt: string } {
-  const example1 = JSON.stringify({
+function buildBedrockPrompt(pageContent: string, source: 'web' | 'text' = 'web', language: string = 'en'): { system: string; prompt: string } {
+  const example1En = JSON.stringify({
     title: "Bienenstich (Bee Sting Cake)",
     description: "A classic German yeast cake with a caramelized almond topping and vanilla custard filling. Perfect for afternoon coffee.",
     servings: 12,
@@ -355,7 +355,7 @@ function buildBedrockPrompt(pageContent: string, source: 'web' | 'text' = 'web')
     nutritionalInfo: { calories: 385, protein: "8g", carbohydrates: "45g", fat: "19g" }
   }, null, 2);
 
-  const example2 = JSON.stringify({
+  const example2En = JSON.stringify({
     title: "One-Pot Pasta with Pumpkin and Sage",
     description: "A creamy autumn pasta dish made entirely in one pot. Butternut pumpkin melts into a silky sauce with crispy sage leaves.",
     servings: 4,
@@ -390,7 +390,7 @@ function buildBedrockPrompt(pageContent: string, source: 'web' | 'text' = 'web')
     nutritionalInfo: { calories: 520, protein: "16g", carbohydrates: "68g", fat: "21g" }
   }, null, 2);
 
-  const example3 = JSON.stringify({
+  const example3En = JSON.stringify({
     title: "Baby Pizza (Mini Pizzas for Kids)",
     description: "Soft mini pizzas with a mild tomato sauce and fun toppings. Perfect for little hands and picky eaters. Kids love shaping their own dough!",
     servings: 8,
@@ -431,6 +431,130 @@ function buildBedrockPrompt(pageContent: string, source: 'web' | 'text' = 'web')
   const sourceLabel = isWeb ? 'web page content' : 'recipe text';
   const contentTag = isWeb ? 'PAGE_CONTENT' : 'RECIPE_TEXT';
   const dataDescription = isWeb ? 'raw web page data' : 'user-provided recipe text';
+
+  const example1De = JSON.stringify({
+    title: "Bienenstich",
+    description: "Ein klassischer deutscher Hefekuchen mit karamellisiertem Mandelbelag und Vanillecreme-Füllung. Perfekt zum Nachmittagskaffee.",
+    servings: 12,
+    prepTimeMinutes: 45,
+    cookTimeMinutes: 30,
+    totalTimeMinutes: 75,
+    ingredients: [
+      { amount: 500, unit: "g", name: "Weizenmehl", group: "Teig" },
+      { amount: 80, unit: "g", name: "Zucker", group: "Teig" },
+      { amount: 7, unit: "g", name: "Trockenhefe", group: "Teig" },
+      { amount: 200, unit: "ml", name: "Vollmilch", group: "Teig" },
+      { amount: 80, unit: "g", name: "Butter", group: "Teig" },
+      { amount: 1, unit: "Stück", name: "Ei", group: "Teig" },
+      { amount: 200, unit: "g", name: "Mandelblättchen", group: "Belag" },
+      { amount: 100, unit: "g", name: "Butter", group: "Belag" },
+      { amount: 100, unit: "g", name: "Zucker", group: "Belag" },
+      { amount: 3, unit: "EL", name: "Sahne", group: "Belag" },
+      { amount: 500, unit: "ml", name: "Vollmilch", group: "Füllung" },
+      { amount: 1, unit: "Päckchen", name: "Vanillepuddingpulver", group: "Füllung" },
+      { amount: 200, unit: "ml", name: "Sahne", group: "Füllung" }
+    ],
+    instructions: [
+      { stepNumber: 1, text: "Die Milch lauwarm erwärmen und die Hefe mit einer Prise Zucker darin auflösen. 10 Minuten gehen lassen." },
+      { stepNumber: 2, text: "Mehl, Zucker, geschmolzene Butter, Ei und Hefemischung vermengen. 8 Minuten kneten, bis der Teig glatt und elastisch ist." },
+      { stepNumber: 3, text: "Den Teig abdecken und an einem warmen Ort 45 Minuten gehen lassen, bis er sich verdoppelt hat." },
+      { stepNumber: 4, text: "Für den Belag Butter in einem Topf schmelzen, Zucker, Sahne und Mandeln hinzufügen. Rühren, bis alles leicht karamellisiert ist." },
+      { stepNumber: 5, text: "Den Teig auf ein gefettetes Backblech ausrollen und den Mandelbelag gleichmäßig darauf verteilen." },
+      { stepNumber: 6, text: "Bei 180°C 25-30 Minuten goldbraun backen. Vollständig auskühlen lassen." },
+      { stepNumber: 7, text: "Vanillepudding nach Packungsanleitung zubereiten. Abkühlen lassen, dann die geschlagene Sahne unterheben." },
+      { stepNumber: 8, text: "Den Kuchen waagerecht durchschneiden, die Puddingcreme auf die untere Hälfte streichen und die obere Hälfte wieder aufsetzen." }
+    ],
+    categories: ["Backen", "Deutsch"],
+    tags: ["Kuchen", "Klassisch", "Nachmittagskaffee", "Hefeteig"],
+    imageKeys: [],
+    nutritionalInfo: { calories: 385, protein: "8g", carbohydrates: "45g", fat: "19g" }
+  }, null, 2);
+
+  const example2De = JSON.stringify({
+    title: "One-Pot Pasta mit Kürbis und Salbei",
+    description: "Ein cremiges Herbst-Nudelgericht, das komplett in einem Topf zubereitet wird. Butternut-Kürbis schmilzt zu einer seidigen Soße mit knusprigen Salbeiblättern.",
+    servings: 4,
+    prepTimeMinutes: 10,
+    cookTimeMinutes: 20,
+    totalTimeMinutes: 30,
+    ingredients: [
+      { amount: 400, unit: "g", name: "Penne", group: null },
+      { amount: 500, unit: "g", name: "Butternut-Kürbis, gewürfelt", group: null },
+      { amount: 1, unit: "Stück", name: "Zwiebel, fein gehackt", group: null },
+      { amount: 2, unit: "Zehen", name: "Knoblauch, gehackt", group: null },
+      { amount: 800, unit: "ml", name: "Gemüsebrühe", group: null },
+      { amount: 200, unit: "ml", name: "Sahne", group: null },
+      { amount: 15, unit: "Blätter", name: "frischer Salbei", group: null },
+      { amount: 50, unit: "g", name: "Parmesan, gerieben", group: null },
+      { amount: 2, unit: "EL", name: "Olivenöl", group: null },
+      { amount: 0.5, unit: "TL", name: "Muskatnuss", group: null },
+      { amount: 1, unit: "Prise", name: "Salz und Pfeffer", group: null }
+    ],
+    instructions: [
+      { stepNumber: 1, text: "Olivenöl in einem großen Topf bei mittlerer Hitze erhitzen. Zwiebel und Knoblauch 2 Minuten anbraten, bis sie duften." },
+      { stepNumber: 2, text: "Den gewürfelten Kürbis hinzufügen und 3 Minuten unter gelegentlichem Rühren anbraten." },
+      { stepNumber: 3, text: "Nudeln, Gemüsebrühe und Sahne hinzufügen. Aufkochen lassen, dann auf niedrige Hitze reduzieren." },
+      { stepNumber: 4, text: "15 Minuten kochen, alle paar Minuten umrühren, bis die Nudeln al dente und der Kürbis weich ist." },
+      { stepNumber: 5, text: "In der Zwischenzeit die Salbeiblätter in einer kleinen Pfanne mit etwas Butter knusprig braten. Auf Küchenpapier beiseitelegen." },
+      { stepNumber: 6, text: "Parmesan und Muskatnuss einrühren. Mit Salz und Pfeffer abschmecken. Die Soße sollte cremig sein und die Nudeln umhüllen." },
+      { stepNumber: 7, text: "Mit knusprigen Salbeiblättern und extra Parmesan servieren." }
+    ],
+    categories: ["Abendessen", "Italienisch"],
+    tags: ["Schnell", "Vegetarisch", "One-Pot", "Herbst"],
+    imageKeys: [],
+    nutritionalInfo: { calories: 520, protein: "16g", carbohydrates: "68g", fat: "21g" }
+  }, null, 2);
+
+  const example3De = JSON.stringify({
+    title: "Babypizza (Mini-Pizzen für Kinder)",
+    description: "Weiche Mini-Pizzen mit milder Tomatensoße und lustigen Belägen. Perfekt für kleine Hände und wählerische Esser. Kinder lieben es, ihren eigenen Teig zu formen!",
+    servings: 8,
+    prepTimeMinutes: 20,
+    cookTimeMinutes: 12,
+    totalTimeMinutes: 32,
+    ingredients: [
+      { amount: 300, unit: "g", name: "Weizenmehl", group: "Teig" },
+      { amount: 5, unit: "g", name: "Trockenhefe", group: "Teig" },
+      { amount: 1, unit: "TL", name: "Zucker", group: "Teig" },
+      { amount: 180, unit: "ml", name: "warmes Wasser", group: "Teig" },
+      { amount: 2, unit: "EL", name: "Olivenöl", group: "Teig" },
+      { amount: 0.5, unit: "TL", name: "Salz", group: "Teig" },
+      { amount: 200, unit: "g", name: "Passata (passierte Tomaten)", group: "Soße" },
+      { amount: 1, unit: "TL", name: "getrockneter Oregano", group: "Soße" },
+      { amount: 1, unit: "Prise", name: "Zucker", group: "Soße" },
+      { amount: 200, unit: "g", name: "Mozzarella, gerieben", group: "Belag" },
+      { amount: 100, unit: "g", name: "Schinken, gewürfelt", group: "Belag" },
+      { amount: 50, unit: "g", name: "Mais", group: "Belag" },
+      { amount: 1, unit: "Stück", name: "Paprika, klein gewürfelt", group: "Belag" }
+    ],
+    instructions: [
+      { stepNumber: 1, text: "Mehl, Hefe, Zucker und Salz in einer Schüssel mischen. Warmes Wasser und Olivenöl hinzufügen, dann 5 Minuten kneten, bis der Teig glatt ist." },
+      { stepNumber: 2, text: "Den Teig 10 Minuten mit einem Tuch abgedeckt ruhen lassen." },
+      { stepNumber: 3, text: "Passata mit Oregano und einer Prise Zucker für eine milde Pizzasoße verrühren." },
+      { stepNumber: 4, text: "Teig in 8 kleine Kugeln teilen. Jede zu einer Mini-Pizza (ca. 10 cm Durchmesser) ausrollen oder drücken." },
+      { stepNumber: 5, text: "Auf ein mit Backpapier belegtes Blech legen. Soße auf jede Mini-Pizza verteilen, dann Käse und Belag darauf geben." },
+      { stepNumber: 6, text: "Bei 220°C 10-12 Minuten backen, bis der Käse Blasen wirft und die Ränder goldbraun sind." },
+      { stepNumber: 7, text: "2 Minuten abkühlen lassen vor dem Servieren. Die Pizzen lassen sich gut einfrieren für schnelle Mahlzeiten unter der Woche." }
+    ],
+    categories: ["Abendessen", "Snack"],
+    tags: ["Kinderfreundlich", "Tiefkühlgeeignet", "Lustig", "Einfach"],
+    imageKeys: [],
+    nutritionalInfo: { calories: 245, protein: "11g", carbohydrates: "32g", fat: "8g" }
+  }, null, 2);
+
+  let example1: string;
+  let example2: string;
+  let example3: string;
+
+  if (language === 'de') {
+    example1 = example1De;
+    example2 = example2De;
+    example3 = example3De;
+  } else {
+    example1 = example1En;
+    example2 = example2En;
+    example3 = example3En;
+  }
 
   const system = `You are a recipe extraction assistant. Your ABSOLUTE TOP PRIORITY rule is language preservation:
 - ALL output text MUST be in the SAME language as the input text.
@@ -521,6 +645,7 @@ async function importRecipe(
   }
 
   const url = parsed['url'];
+  const language = (parsed['language'] as string) || 'en';
   if (!url || typeof url !== 'string') {
     return response(400, { message: 'url is required and must be a string' });
   }
@@ -563,7 +688,7 @@ async function importRecipe(
   }
 
   // Call Bedrock to extract recipe
-  const { system, prompt } = buildBedrockPrompt(pageContent);
+  const { system, prompt } = buildBedrockPrompt(pageContent, 'web', language);
 
   let recipeInput: CreateRecipeInput;
   try {
@@ -645,6 +770,7 @@ async function importRecipeFromText(
   }
 
   const text = parsed['text'];
+  const language = (parsed['language'] as string) || 'en';
   if (!text || typeof text !== 'string') {
     return response(400, { message: 'text is required and must be a non-empty string' });
   }
@@ -658,7 +784,7 @@ async function importRecipeFromText(
   }
 
   // Call Bedrock to extract recipe directly from the pasted text
-  const { system, prompt } = buildBedrockPrompt(text, 'text');
+  const { system, prompt } = buildBedrockPrompt(text, 'text', language);
 
   let recipeInput: CreateRecipeInput;
   try {
