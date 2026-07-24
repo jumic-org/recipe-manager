@@ -2,7 +2,7 @@
   "id": "FEAT-005",
   "type": "fix",
   "description": "Add CloudWatch logging to sortIngredients function to debug Bedrock prompt and response data",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Add console.log statements before the Bedrock call in sortIngredients to log the request metadata, system prompt, and user prompt",
     "Add console.log statement after Bedrock response to log the raw AI output text"
@@ -18,5 +18,5 @@
     "Run: eval \"$(mise activate bash)\" && npx nx build api && npx nx lint api"
   ],
   "blocked_reason": null,
-  "findings": null
+  "findings": "Build and lint pass cleanly. Added 4 console.log statements to sortIngredients: 3 before the Bedrock call (request metadata, system prompt, user prompt) and 1 after the response (raw outputText). These will automatically appear in CloudWatch Logs when the Lambda executes."
 }
