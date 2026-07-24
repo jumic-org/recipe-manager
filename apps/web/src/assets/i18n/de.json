@@ -58,6 +58,7 @@
       "TITLE": "Meine Rezepte",
       "NEW_RECIPE": "Neues Rezept",
       "IMPORT_RECIPE": "Von URL importieren",
+      "IMPORT_TEXT_RECIPE": "Von Text importieren",
       "LOADING": "Rezepte werden geladen...",
       "EMPTY": "Noch keine Rezepte. Erstellen Sie Ihr erstes Rezept!",
       "PREP": "Vorbereitung",
@@ -116,17 +117,23 @@
       "SAVE_ERROR": "Rezept konnte nicht gespeichert werden"
     },
     "IMPORT": {
-      "TITLE": "Rezept von URL importieren",
+      "TITLE": "Rezept importieren",
       "DESCRIPTION": "Geben Sie die URL einer Rezeptseite ein und wir extrahieren das Rezept automatisch.",
+      "TAB_URL": "Von URL",
+      "TAB_TEXT": "Von Text",
       "URL_LABEL": "Rezept-URL",
       "URL_PLACEHOLDER": "https://beispiel.de/rezept/...",
       "URL_REQUIRED": "URL ist erforderlich",
+      "TEXT_LABEL": "Rezepttext",
+      "TEXT_PLACEHOLDER": "Rezepttext hier einfuegen...",
+      "TEXT_REQUIRED": "Rezepttext ist erforderlich",
+      "TEXT_DESCRIPTION": "Rezepttext unten einfuegen und wir konvertieren ihn automatisch in ein strukturiertes Rezept.",
       "SUBMIT": "Rezept importieren",
       "SUBMITTING": "Rezept wird importiert...",
       "CANCEL": "Abbrechen",
       "SUCCESS": "Rezept erfolgreich importiert!",
-      "ERROR": "Rezept konnte nicht importiert werden. Bitte URL prüfen und erneut versuchen.",
-      "INVALID_URL": "Bitte geben Sie eine gültige HTTPS-URL ein (z.B. https://example.com/rezept)"
+      "ERROR": "Rezept konnte nicht importiert werden. Bitte URL pruefen und erneut versuchen.",
+      "INVALID_URL": "Bitte geben Sie eine gueltige HTTPS-URL ein (z.B. https://example.com/rezept)"
     }
   }
 }

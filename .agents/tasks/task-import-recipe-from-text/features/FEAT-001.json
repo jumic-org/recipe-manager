@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Add text-based recipe import: backend API endpoint + frontend UI with tab toggle between URL and text import",
+  "status": "completed",
+  "steps": [
+    "Step 1 - Backend: Add a new route `POST /recipes/import-text` in apps/api/src/handler.ts. It accepts `{ text: string }` in the body, validates the text is non-empty and under 10000 chars, calls `buildBedrockPrompt(text)` directly (since the function already accepts plain text content and has 3 examples), calls Bedrock with model `eu.amazon.nova-lite-v1:0`, validates the output with `validateRecipeInput()`, saves to DynamoDB with `sourceUrl: null`, and returns the created recipe. Follow the exact same pattern as the existing `importRecipe` function but skip URL fetching and HTML stripping.",
+    "Step 2 - Frontend service: Add `importRecipeFromText(text: string): Observable<Recipe>` method in apps/web/src/app/recipes/recipe.service.ts that POSTs to `${this.baseUrl}/import-text` with `{ text }` body.",
+    "Step 3 - Frontend component: Modify apps/web/src/app/recipes/recipe-import.component.ts to add a tab/toggle between 'URL' and 'Text' import modes. When 'Text' mode is selected, show a textarea for pasting recipe text instead of the URL input. Both modes share the same submit flow but call different service methods. Use the existing component structure (no new component needed, no route change needed). Use OnPush change detection and TranslatePipe for all new text.",
+    "Step 4 - i18n: Add translation keys to both apps/web/src/assets/i18n/en.json and apps/web/src/assets/i18n/de.json under RECIPES.IMPORT for the new text mode: TAB_URL, TAB_TEXT, TEXT_LABEL, TEXT_PLACEHOLDER, TEXT_REQUIRED, TEXT_DESCRIPTION (description shown when text tab is active).",
+    "Step 5 - Recipe list button: Add an 'Import from Text' button/link in apps/web/src/app/recipes/recipe-list.component.ts header-actions that navigates to `/recipes/import` (same page, since the import component now handles both modes). Add a translation key RECIPES.LIST.IMPORT_TEXT_RECIPE to both i18n files."
+  ],
+  "acceptance_criteria": [
+    "Running `pnpm nx run-many -t build lint` passes for all projects",
+    "The handler.ts file contains a route matching `POST /recipes/import-text` that accepts { text: string }",
+    "The handler reuses the existing buildBedrockPrompt function with the pasted text as pageContent",
+    "The model ID used is `eu.amazon.nova-lite-v1:0`",
+    "RecipeService has an importRecipeFromText method calling the new endpoint",
+    "The recipe-import component shows a tab/toggle between URL and Text modes",
+    "All new user-visible strings use translation keys present in both en.json and de.json"
+  ],
+  "verification": [
+    "eval \"$(mise activate bash)\" && cd /projects/sandbox/recipe-manager && pnpm nx run-many -t build lint"
+  ],
+  "blocked_reason": null,
+  "findings": "All build and lint checks pass. The existing buildBedrockPrompt function already had 3 example recipes and works with plain text. Budget warning for web bundle (504KB vs 500KB limit) is pre-existing. Review fixes applied: (1) parameterized buildBedrockPrompt with source type to use correct framing for text vs web input, (2) added ActivatedRoute to read mode query param for auto-switching tabs, (3) fixed initial validator asymmetry by calling switchMode in constructor."
+}
