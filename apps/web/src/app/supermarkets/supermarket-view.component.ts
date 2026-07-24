@@ -314,7 +314,8 @@ export class SupermarketViewComponent implements OnInit {
     this.aisleGroups = [];
     this.cdr.markForCheck();
 
-    this.supermarketService.sortIngredients(ingredients, selectedSupermarket.aisles).subscribe({
+    const currentLang = this.translateService.getCurrentLang() || 'en';
+    this.supermarketService.sortIngredients(ingredients, selectedSupermarket.aisles, currentLang).subscribe({
       next: (groups) => {
         this.aisleGroups = groups;
         this.sorting = false;

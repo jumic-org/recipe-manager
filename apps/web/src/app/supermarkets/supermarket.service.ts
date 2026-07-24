@@ -55,10 +55,10 @@ export class SupermarketService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  sortIngredients(ingredients: Ingredient[], aisles: string[]): Observable<AisleGroup[]> {
+  sortIngredients(ingredients: Ingredient[], aisles: string[], language: string): Observable<AisleGroup[]> {
     const url = `${this.configService.apiUrl}/sort-ingredients`;
     return this.http
-      .post<{ groups: AisleGroup[] }>(url, { ingredients, aisles })
+      .post<{ groups: AisleGroup[] }>(url, { ingredients, aisles, language })
       .pipe(map((res) => res.groups));
   }
 }

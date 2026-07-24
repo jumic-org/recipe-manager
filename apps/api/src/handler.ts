@@ -1010,10 +1010,37 @@ async function sortIngredients(
 
   const ingredients = parsed['ingredients'] as Ingredient[];
   const aisles = parsed['aisles'] as string[];
+  const language = (parsed['language'] as string) || 'en';
 
-  const system = `You are a grocery shopping assistant. Your task is to sort a list of recipe ingredients into the correct supermarket aisles. You must output valid JSON only, with no extra text or markdown.`;
+  let system: string;
+  let prompt: string;
 
-  const prompt = `Sort the following ingredients into the provided supermarket aisles. Each ingredient must be placed in exactly one aisle. If an ingredient does not clearly fit into any aisle, place it in the "Unknown" group.
+  if (language === 'de') {
+    system = `Du bist ein Einkaufsassistent. Deine Aufgabe ist es, eine Liste von Rezeptzutaten in die richtigen Supermarktgänge einzusortieren. Du musst nur gültiges JSON ausgeben, ohne zusätzlichen Text oder Markdown.`;
+
+    prompt = `Sortiere die folgenden Zutaten in die angegebenen Supermarktgänge. Jede Zutat muss genau einem Gang zugeordnet werden. Wenn eine Zutat nicht eindeutig in einen Gang passt, ordne sie der Gruppe "Unknown" zu.
+
+GÄNGE (in Reihenfolge):
+${aisles.map((a, i) => `${i + 1}. ${a}`).join('\n')}
+
+ZUTATEN:
+${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
+
+Gib ein JSON-Objekt mit einem einzigen Schlüssel "groups" zurück, der ein Array ist. Jedes Element hat:
+- "aisle": der Gangname (muss exakt einer der oben aufgelisteten Gänge sein, oder "Unknown")
+- "ingredientIndices": ein Array von 0-basierten Indizes, die auf die ZUTATEN-Liste oben verweisen
+
+Regeln:
+- Jeder Zutaten-Index (0 bis ${ingredients.length - 1}) muss genau einmal in allen Gruppen vorkommen.
+- Die Ausgabe-Gruppen MÜSSEN exakt die gleiche Reihenfolge wie die GÄNGE-Liste oben haben. Die erste Gruppe muss dem ersten Gang entsprechen, die zweite Gruppe dem zweiten Gang, usw.
+- Nur Gänge einschließen, denen mindestens eine Zutat zugeordnet ist. Leere Gänge überspringen, aber die relative Reihenfolge beibehalten.
+- "Unknown" als allerletzte Gruppe setzen, falls Zutaten nicht in die definierten Gänge passen.
+- Nutze dein Wissen über Supermärkte, um intelligente Zuordnungen zu treffen.
+- Gib NUR das JSON-Objekt zurück, keine Erklärung.`;
+  } else {
+    system = `You are a grocery shopping assistant. Your task is to sort a list of recipe ingredients into the correct supermarket aisles. You must output valid JSON only, with no extra text or markdown.`;
+
+    prompt = `Sort the following ingredients into the provided supermarket aisles. Each ingredient must be placed in exactly one aisle. If an ingredient does not clearly fit into any aisle, place it in the "Unknown" group.
 
 AISLES (in order):
 ${aisles.map((a, i) => `${i + 1}. ${a}`).join('\n')}
@@ -1032,6 +1059,7 @@ Rules:
 - Put "Unknown" as the very last group if any ingredients don't fit into the defined aisles.
 - Use your knowledge of grocery stores to make intelligent assignments.
 - Return ONLY the JSON object, no explanation.`;
+  }
 
   try {
     const bedrockResponse = await bedrockClient.send(
