@@ -1,0 +1,14 @@
+{
+  "task_id": "task-supermarket-view",
+  "task_description": "Implement supermarket shopping view feature: ingredients-on-hand configuration, supermarket layout management, recipe-to-shopping-list view with aisle grouping, copy-to-clipboard, and cookie-based default supermarket selection",
+  "status": "completed",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004"],
+  "blocked_reason": null,
+  "verification": {
+    "build": "pass",
+    "tests": "pass",
+    "test_quality": "skipped",
+    "docker_build": "skipped",
+    "summary": "All 4 projects (shared, api, web, infra) build and lint cleanly. Semantic review v2 APPROVED. No test runner configured in the project."
+  }
+}
