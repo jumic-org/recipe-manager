@@ -5,6 +5,8 @@
     "THEME_TOGGLE_DARK": "Switch to dark mode",
     "NAV": {
       "MY_RECIPES": "My Recipes",
+      "PANTRY": "Pantry",
+      "SUPERMARKETS": "Supermarkets",
       "SIGN_IN": "Sign In",
       "SIGN_OUT": "Sign Out",
       "CHANGE_PASSWORD": "Change Password"
@@ -70,6 +72,7 @@
       "LOADING": "Loading recipe...",
       "EDIT": "Edit",
       "DELETE": "Delete",
+      "SHOPPING_VIEW": "Shopping View",
       "CONFIRM_DELETE": "Are you sure you want to delete this recipe?",
       "PREP_TIME": "Prep Time",
       "COOK_TIME": "Cook Time",
@@ -135,5 +138,64 @@
       "ERROR": "Failed to import recipe. Please check the URL and try again.",
       "INVALID_URL": "Please enter a valid HTTPS URL (e.g. https://example.com/recipe)"
     }
+  },
+  "PANTRY": {
+    "TITLE": "Pantry - Ingredients on Hand",
+    "LOADING": "Loading ingredients...",
+    "EMPTY": "No ingredients on hand yet. Add some!",
+    "NAME_PLACEHOLDER": "Ingredient name",
+    "ADD": "Add",
+    "ADDING": "Adding...",
+    "DELETE": "Remove",
+    "ADD_ERROR": "Failed to add ingredient",
+    "DELETE_ERROR": "Failed to remove ingredient",
+    "LOAD_ERROR": "Failed to load ingredients"
+  },
+  "SUPERMARKETS": {
+    "LIST": {
+      "TITLE": "Supermarkets",
+      "NEW": "New Supermarket",
+      "LOADING": "Loading supermarkets...",
+      "EMPTY": "No supermarkets yet. Add one!",
+      "AISLES_COUNT": "{{count}} aisles",
+      "EDIT": "Edit",
+      "DELETE": "Delete",
+      "CONFIRM_DELETE": "Are you sure you want to delete this supermarket?",
+      "LOAD_ERROR": "Failed to load supermarkets",
+      "DELETE_ERROR": "Failed to delete supermarket"
+    },
+    "FORM": {
+      "TITLE_NEW": "New Supermarket",
+      "TITLE_EDIT": "Edit Supermarket",
+      "LOADING": "Loading...",
+      "NAME_LABEL": "Name",
+      "NAME_PLACEHOLDER": "Supermarket name",
+      "AISLES_TITLE": "Aisles",
+      "AISLE_PLACEHOLDER": "Aisle name",
+      "ADD_AISLE": "+ Add Aisle",
+      "UP": "Up",
+      "DOWN": "Down",
+      "CANCEL": "Cancel",
+      "CREATE": "Create Supermarket",
+      "UPDATE": "Update Supermarket",
+      "SAVING": "Saving...",
+      "LOAD_ERROR": "Failed to load supermarket",
+      "SAVE_ERROR": "Failed to save supermarket"
+    }
+  },
+  "SUPERMARKET_VIEW": {
+    "TITLE": "Shopping List: {{recipeName}}",
+    "LOADING": "Loading...",
+    "SELECT_SUPERMARKET": "Supermarket",
+    "NO_SUPERMARKET": "-- Select a supermarket --",
+    "TO_PURCHASE": "To Purchase",
+    "ON_HAND": "On Hand",
+    "COPY": "Copy List",
+    "COPIED": "Copied!",
+    "NOTHING_TO_BUY": "Nothing to purchase - you have everything!",
+    "NOTHING_ON_HAND": "No matching ingredients on hand.",
+    "OTHER_AISLE": "Other",
+    "RECIPE_NOT_FOUND": "Recipe not found",
+    "LOAD_ERROR": "Failed to load shopping view"
   }
 }

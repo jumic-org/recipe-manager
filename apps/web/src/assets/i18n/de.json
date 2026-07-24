@@ -5,6 +5,8 @@
     "THEME_TOGGLE_DARK": "Zum dunklen Modus wechseln",
     "NAV": {
       "MY_RECIPES": "Meine Rezepte",
+      "PANTRY": "Vorratskammer",
+      "SUPERMARKETS": "Supermaerkte",
       "SIGN_IN": "Anmelden",
       "SIGN_OUT": "Abmelden",
       "CHANGE_PASSWORD": "Passwort ändern"
@@ -70,6 +72,7 @@
       "LOADING": "Rezept wird geladen...",
       "EDIT": "Bearbeiten",
       "DELETE": "Löschen",
+      "SHOPPING_VIEW": "Einkaufsansicht",
       "CONFIRM_DELETE": "Sind Sie sicher, dass Sie dieses Rezept löschen möchten?",
       "PREP_TIME": "Vorbereitungszeit",
       "COOK_TIME": "Kochzeit",
@@ -135,5 +138,64 @@
       "ERROR": "Rezept konnte nicht importiert werden. Bitte URL pruefen und erneut versuchen.",
       "INVALID_URL": "Bitte geben Sie eine gueltige HTTPS-URL ein (z.B. https://example.com/rezept)"
     }
+  },
+  "PANTRY": {
+    "TITLE": "Vorratskammer - Zutaten auf Lager",
+    "LOADING": "Zutaten werden geladen...",
+    "EMPTY": "Noch keine Zutaten auf Lager. Fuegen Sie welche hinzu!",
+    "NAME_PLACEHOLDER": "Zutatname",
+    "ADD": "Hinzufuegen",
+    "ADDING": "Wird hinzugefuegt...",
+    "DELETE": "Entfernen",
+    "ADD_ERROR": "Zutat konnte nicht hinzugefuegt werden",
+    "DELETE_ERROR": "Zutat konnte nicht entfernt werden",
+    "LOAD_ERROR": "Zutaten konnten nicht geladen werden"
+  },
+  "SUPERMARKETS": {
+    "LIST": {
+      "TITLE": "Supermaerkte",
+      "NEW": "Neuer Supermarkt",
+      "LOADING": "Supermaerkte werden geladen...",
+      "EMPTY": "Noch keine Supermaerkte. Fuegen Sie einen hinzu!",
+      "AISLES_COUNT": "{{count}} Gaenge",
+      "EDIT": "Bearbeiten",
+      "DELETE": "Loeschen",
+      "CONFIRM_DELETE": "Sind Sie sicher, dass Sie diesen Supermarkt loeschen moechten?",
+      "LOAD_ERROR": "Supermaerkte konnten nicht geladen werden",
+      "DELETE_ERROR": "Supermarkt konnte nicht geloescht werden"
+    },
+    "FORM": {
+      "TITLE_NEW": "Neuer Supermarkt",
+      "TITLE_EDIT": "Supermarkt bearbeiten",
+      "LOADING": "Laden...",
+      "NAME_LABEL": "Name",
+      "NAME_PLACEHOLDER": "Supermarktname",
+      "AISLES_TITLE": "Gaenge",
+      "AISLE_PLACEHOLDER": "Gangname",
+      "ADD_AISLE": "+ Gang hinzufuegen",
+      "UP": "Hoch",
+      "DOWN": "Runter",
+      "CANCEL": "Abbrechen",
+      "CREATE": "Supermarkt erstellen",
+      "UPDATE": "Supermarkt aktualisieren",
+      "SAVING": "Speichern...",
+      "LOAD_ERROR": "Supermarkt konnte nicht geladen werden",
+      "SAVE_ERROR": "Supermarkt konnte nicht gespeichert werden"
+    }
+  },
+  "SUPERMARKET_VIEW": {
+    "TITLE": "Einkaufsliste: {{recipeName}}",
+    "LOADING": "Laden...",
+    "SELECT_SUPERMARKET": "Supermarkt",
+    "NO_SUPERMARKET": "-- Supermarkt auswaehlen --",
+    "TO_PURCHASE": "Zu kaufen",
+    "ON_HAND": "Auf Lager",
+    "COPY": "Liste kopieren",
+    "COPIED": "Kopiert!",
+    "NOTHING_TO_BUY": "Nichts zu kaufen - Sie haben alles!",
+    "NOTHING_ON_HAND": "Keine passenden Zutaten auf Lager.",
+    "OTHER_AISLE": "Sonstiges",
+    "RECIPE_NOT_FOUND": "Rezept nicht gefunden",
+    "LOAD_ERROR": "Einkaufsansicht konnte nicht geladen werden"
   }
 }

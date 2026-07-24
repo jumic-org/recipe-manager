@@ -8,6 +8,10 @@ import { RecipeListComponent } from './recipes/recipe-list.component';
 import { RecipeDetailComponent } from './recipes/recipe-detail.component';
 import { RecipeFormComponent } from './recipes/recipe-form.component';
 import { RecipeImportComponent } from './recipes/recipe-import.component';
+import { PantryComponent } from './pantry/pantry.component';
+import { SupermarketListComponent } from './supermarkets/supermarket-list.component';
+import { SupermarketFormComponent } from './supermarkets/supermarket-form.component';
+import { SupermarketViewComponent } from './supermarkets/supermarket-view.component';
 
 export const appRoutes: Routes = [
   { path: '', redirectTo: 'recipes', pathMatch: 'full' },
@@ -20,4 +24,9 @@ export const appRoutes: Routes = [
   { path: 'recipes/import', component: RecipeImportComponent, canActivate: [authGuard] },
   { path: 'recipes/:id', component: RecipeDetailComponent, canActivate: [authGuard] },
   { path: 'recipes/:id/edit', component: RecipeFormComponent, canActivate: [authGuard] },
+  { path: 'recipes/:id/shop', component: SupermarketViewComponent, canActivate: [authGuard] },
+  { path: 'pantry', component: PantryComponent, canActivate: [authGuard] },
+  { path: 'supermarkets', component: SupermarketListComponent, canActivate: [authGuard] },
+  { path: 'supermarkets/new', component: SupermarketFormComponent, canActivate: [authGuard] },
+  { path: 'supermarkets/:id/edit', component: SupermarketFormComponent, canActivate: [authGuard] },
 ];
