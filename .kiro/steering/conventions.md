@@ -29,14 +29,14 @@ Examples:
 - `feat: add recipe search by ingredient`
 - `fix: prevent parallel deploy workflow runs`
 - `docs: update API usage examples`
-- `ci: add Node 24 to test matrix`
+- `ci: add Node 26 to test matrix`
 
 When creating a PR, always use one of the allowed types followed by a colon, a space, and a lowercase description. Do not include a scope in parentheses unless explicitly requested.
 
 ## Runtime
 
-- **Node.js** >= 24.x is required for local development and CI/CD.
-- The GitHub Actions deploy workflow uses Node 24.
+- **Node.js** >= 26.x is required for local development and CI/CD.
+- The GitHub Actions deploy workflow uses Node 26.
 
 ## TypeScript
 
