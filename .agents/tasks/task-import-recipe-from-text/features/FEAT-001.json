@@ -23,5 +23,5 @@
     "eval \"$(mise activate bash)\" && cd /projects/sandbox/recipe-manager && pnpm nx run-many -t build lint"
   ],
   "blocked_reason": null,
-  "findings": "All build and lint checks pass. The existing buildBedrockPrompt function already had 3 example recipes and works with plain text. Budget warning for web bundle (504KB vs 500KB limit) is pre-existing. Review fixes applied: (1) parameterized buildBedrockPrompt with source type to use correct framing for text vs web input, (2) added ActivatedRoute to read mode query param for auto-switching tabs, (3) fixed initial validator asymmetry by calling switchMode in constructor."
+  "findings": "All build and lint checks pass. The existing buildBedrockPrompt function already had 3 example recipes and works with plain text. Budget warning for web bundle (504KB vs 500KB limit) is pre-existing. Review fixes applied: (1) parameterized buildBedrockPrompt with source type to use correct framing for text vs web input, (2) added ActivatedRoute to read mode query param for auto-switching tabs, (3) fixed initial validator asymmetry by calling switchMode in constructor, (4) added system-level message to both Bedrock InvokeModelCommand calls to enforce language preservation - the model was copying English values from few-shot examples despite user-message instructions."
 }
