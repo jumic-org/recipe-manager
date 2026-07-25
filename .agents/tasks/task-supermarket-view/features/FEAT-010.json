@@ -2,7 +2,7 @@
   "id": "FEAT-010",
   "type": "fix",
   "description": "Address PR review comments: remove ingredient group from prompt, improve SCHRITT 1 text, move prompt generation from frontend to new backend API endpoint",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In apps/api/src/handler.ts sortIngredients: remove ingredient group from ZUTATEN/INGREDIENTS listing in both German and English prompts",
     "In apps/api/src/handler.ts sortIngredients: improve SCHRITT 1 German text with aisle comment explanation, and translate for English",
@@ -24,5 +24,5 @@
     "Run: eval \"$(mise activate bash)\" && npx nx run-many -t build lint"
   ],
   "blocked_reason": null,
-  "findings": null
+  "findings": "All builds and lints pass cleanly. Extracted prompt generation into generateSortPrompts function shared by both sortIngredients and sortIngredientsPrompt. Frontend manual view now calls API to get prompts, ensuring consistency with backend. Pre-existing bundle size warnings remain unchanged."
 }
