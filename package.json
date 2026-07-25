@@ -66,6 +66,22 @@
       "lmdb",
       "msgpackr-extract",
       "nx"
-    ]
+    ],
+    "overrides": {
+      "undici": ">=7.28.0",
+      "ws": ">=8.21.0",
+      "adm-zip": ">=0.6.0",
+      "brace-expansion@>=5": ">=5.0.8",
+      "axios": ">=1.18.0",
+      "postcss": ">=8.5.18",
+      "webpack-dev-server": "^5.2.5",
+      "@hono/node-server": ">=2.0.5"
+    },
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2026-14257",
+        "CVE-2026-41907"
+      ]
+    }
   }
 }
