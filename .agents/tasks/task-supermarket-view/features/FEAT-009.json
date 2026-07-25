@@ -2,7 +2,7 @@
   "id": "FEAT-009",
   "type": "fix",
   "description": "Fix Bedrock response parsing to handle both wrapped {groups:[...]} and bare array [...] formats",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In apps/api/src/handler.ts sortIngredients function, change parsing to detect both formats: {groups:[...]} wrapper and bare array [...]",
     "In apps/api/src/handler.ts sortIngredientsManual function, apply the same fix"
@@ -16,5 +16,5 @@
     "Run: eval \"$(mise activate bash)\" && npx nx build api && npx nx lint api"
   ],
   "blocked_reason": null,
-  "findings": null
+  "findings": "Both sortIngredients and sortIngredientsManual now handle bare array format from Bedrock. Build and lint pass cleanly."
 }
