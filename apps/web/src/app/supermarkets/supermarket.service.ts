@@ -61,4 +61,16 @@ export class SupermarketService {
       .post<{ groups: AisleGroup[] }>(url, { ingredients, aisles, language })
       .pipe(map((res) => res.groups));
   }
+
+  sortIngredientsManual(body: {
+    systemPrompt: string;
+    userPrompt: string;
+    temperature: number;
+    maxTokens: number;
+    ingredients: Ingredient[];
+    aisles: Aisle[];
+  }): Observable<{ groups: AisleGroup[]; rawResponse: string }> {
+    const url = `${this.configService.apiUrl}/sort-ingredients-manual`;
+    return this.http.post<{ groups: AisleGroup[]; rawResponse: string }>(url, body);
+  }
 }

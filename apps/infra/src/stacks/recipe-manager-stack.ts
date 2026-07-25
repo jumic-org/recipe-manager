@@ -278,6 +278,10 @@ export class RecipeManagerStack extends Stack {
     const sortIngredients = api.root.addResource('sort-ingredients');
     sortIngredients.addMethod('POST', lambdaIntegration, methodOptions);
 
+    // /sort-ingredients-manual resource
+    const sortIngredientsManual = api.root.addResource('sort-ingredients-manual');
+    sortIngredientsManual.addMethod('POST', lambdaIntegration, methodOptions);
+
     // Frontend Deployment - deploys Angular build files AND runtime config.json
     // config.json is generated with real Cognito/API values resolved at deploy time.
     // Both sources are combined in a single BucketDeployment to ensure config.json

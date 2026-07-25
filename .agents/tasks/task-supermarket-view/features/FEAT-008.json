@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-008",
+  "type": "feat",
+  "description": "Add Manual Supermarket View page with editable Bedrock prompts and parameters for experimenting with sort results",
+  "status": "in_progress",
+  "steps": [
+    "Add POST /sort-ingredients-manual API route to apps/api/src/handler.ts that accepts systemPrompt, userPrompt, temperature, maxTokens, ingredients, and aisles and returns groups + rawResponse",
+    "Add /sort-ingredients-manual API Gateway resource in CDK stack",
+    "Add sortIngredientsManual method to supermarket.service.ts",
+    "Create ManualSupermarketViewComponent in apps/web/src/app/supermarkets/manual-supermarket-view.component.ts",
+    "Add route for recipes/:id/shop-manual in app.routes.ts",
+    "Add Manual Mode link to supermarket-view.component.ts",
+    "Add translation keys to en.json and de.json"
+  ],
+  "acceptance_criteria": [
+    "POST /sort-ingredients-manual API route accepts custom prompts and Bedrock parameters",
+    "API returns both sorted groups and raw Bedrock response text",
+    "Manual view component has editable textareas for system and user prompts",
+    "Manual view has temperature and max tokens inputs",
+    "Execute button calls the manual endpoint with custom values",
+    "Results show sorted groups and raw response",
+    "Regular shopping view has a link to Manual Mode",
+    "All i18n keys added for both en.json and de.json",
+    "npx nx run-many -t build lint passes cleanly"
+  ],
+  "verification": [
+    "Run: eval \"$(mise activate bash)\" && npx nx run-many -t build lint"
+  ],
+  "blocked_reason": null,
+  "findings": null
+}

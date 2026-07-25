@@ -200,5 +200,18 @@
     "OTHER_AISLE": "Unbekannt",
     "RECIPE_NOT_FOUND": "Rezept nicht gefunden",
     "LOAD_ERROR": "Einkaufsansicht konnte nicht geladen werden"
+  },
+  "MANUAL_SUPERMARKET_VIEW": {
+    "TITLE": "Manuelle Einkaufsansicht: {{recipeName}}",
+    "SYSTEM_PROMPT": "System Prompt",
+    "USER_PROMPT": "Benutzer-Prompt",
+    "TEMPERATURE": "Temperatur",
+    "MAX_TOKENS": "Max Tokens",
+    "EXECUTE": "Ausführen",
+    "EXECUTING": "Wird ausgeführt...",
+    "RAW_RESPONSE": "Rohe Bedrock-Antwort",
+    "RESULT": "Ergebnis",
+    "MANUAL_MODE": "Manueller Modus",
+    "BACK_TO_AUTO": "Zurück zum Auto-Modus"
   }
 }

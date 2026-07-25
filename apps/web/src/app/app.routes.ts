@@ -12,6 +12,7 @@ import { PantryComponent } from './pantry/pantry.component';
 import { SupermarketListComponent } from './supermarkets/supermarket-list.component';
 import { SupermarketFormComponent } from './supermarkets/supermarket-form.component';
 import { SupermarketViewComponent } from './supermarkets/supermarket-view.component';
+import { ManualSupermarketViewComponent } from './supermarkets/manual-supermarket-view.component';
 
 export const appRoutes: Routes = [
   { path: '', redirectTo: 'recipes', pathMatch: 'full' },
@@ -25,6 +26,7 @@ export const appRoutes: Routes = [
   { path: 'recipes/:id', component: RecipeDetailComponent, canActivate: [authGuard] },
   { path: 'recipes/:id/edit', component: RecipeFormComponent, canActivate: [authGuard] },
   { path: 'recipes/:id/shop', component: SupermarketViewComponent, canActivate: [authGuard] },
+  { path: 'recipes/:id/shop-manual', component: ManualSupermarketViewComponent, canActivate: [authGuard] },
   { path: 'pantry', component: PantryComponent, canActivate: [authGuard] },
   { path: 'supermarkets', component: SupermarketListComponent, canActivate: [authGuard] },
   { path: 'supermarkets/new', component: SupermarketFormComponent, canActivate: [authGuard] },

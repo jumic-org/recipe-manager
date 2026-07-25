@@ -116,6 +116,11 @@ export const handler: APIGatewayProxyHandler = async (
       return await sortIngredients(event);
     }
 
+    // POST /sort-ingredients-manual - sort ingredients with custom prompts/parameters
+    if (path === '/sort-ingredients-manual' && method === 'POST') {
+      return await sortIngredientsManual(event);
+    }
+
     // GET /supermarkets - list for user
     if (path === '/supermarkets' && method === 'GET') {
       return await listSupermarkets(userId);
@@ -1159,6 +1164,107 @@ Respond ONLY with the JSON object.`;
   } catch (error) {
     console.error('Error calling Bedrock for sort-ingredients:', error);
     return response(502, { message: 'Failed to sort ingredients using AI model' });
+  }
+}
+
+async function sortIngredientsManual(
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!parsed['systemPrompt'] || typeof parsed['systemPrompt'] !== 'string') {
+    return response(400, { message: 'systemPrompt is required and must be a string' });
+  }
+
+  if (!parsed['userPrompt'] || typeof parsed['userPrompt'] !== 'string') {
+    return response(400, { message: 'userPrompt is required and must be a string' });
+  }
+
+  if (typeof parsed['temperature'] !== 'number' || parsed['temperature'] < 0 || parsed['temperature'] > 1) {
+    return response(400, { message: 'temperature is required and must be a number between 0 and 1' });
+  }
+
+  if (typeof parsed['maxTokens'] !== 'number' || parsed['maxTokens'] < 1) {
+    return response(400, { message: 'maxTokens is required and must be a positive number' });
+  }
+
+  if (!Array.isArray(parsed['ingredients']) || parsed['ingredients'].length === 0) {
+    return response(400, { message: 'ingredients is required and must be a non-empty array' });
+  }
+
+  if (!Array.isArray(parsed['aisles']) || parsed['aisles'].length === 0) {
+    return response(400, { message: 'aisles is required and must be a non-empty array' });
+  }
+
+  const systemPrompt = parsed['systemPrompt'] as string;
+  const userPrompt = parsed['userPrompt'] as string;
+  const temperature = parsed['temperature'] as number;
+  const maxTokens = parsed['maxTokens'] as number;
+  const ingredients = parsed['ingredients'] as Ingredient[];
+
+  console.log('sort-ingredients-manual request:', JSON.stringify({ temperature, maxTokens, ingredientCount: ingredients.length }));
+  console.log('sort-ingredients-manual system prompt:', systemPrompt);
+  console.log('sort-ingredients-manual user prompt:', userPrompt);
+
+  try {
+    const bedrockResponse = await bedrockClient.send(
+      new InvokeModelCommand({
+        modelId: 'eu.amazon.nova-lite-v1:0',
+        contentType: 'application/json',
+        accept: 'application/json',
+        body: JSON.stringify({
+          system: [{ text: systemPrompt }],
+          messages: [{ role: 'user', content: [{ text: userPrompt }] }],
+          inferenceConfig: { maxTokens, temperature },
+        }),
+      }),
+    );
+
+    const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
+    const outputText = responseBody['output']?.['message']?.['content']?.[0]?.['text'];
+
+    console.log('sort-ingredients-manual Bedrock response:', outputText);
+
+    if (!outputText) {
+      console.error('Unexpected Bedrock response structure:', JSON.stringify(responseBody));
+      return response(502, { message: 'Failed to get a valid response from AI model', rawResponse: '' });
+    }
+
+    // Parse the JSON from the model output (handle potential markdown code blocks)
+    let jsonText = outputText.trim();
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+    }
+
+    const parsed2 = JSON.parse(jsonText) as { groups: { aisle: string; ingredientIndices: number[] }[] };
+
+    // Map indices back to actual ingredients
+    const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
+    for (const group of parsed2.groups) {
+      const groupIngredients: Ingredient[] = [];
+      for (const idx of group.ingredientIndices) {
+        if (idx >= 0 && idx < ingredients.length) {
+          groupIngredients.push(ingredients[idx]);
+        }
+      }
+      if (groupIngredients.length > 0) {
+        groups.push({ aisle: group.aisle, ingredients: groupIngredients });
+      }
+    }
+
+    return response(200, { groups, rawResponse: outputText });
+  } catch (error) {
+    console.error('Error calling Bedrock for sort-ingredients-manual:', error);
+    return response(502, { message: 'Failed to sort ingredients using AI model', rawResponse: '' });
   }
 }
 

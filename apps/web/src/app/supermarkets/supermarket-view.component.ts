@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import type { Recipe, Supermarket, IngredientOnHand, Ingredient } from '@recipe-manager/shared';
 import { RecipeService } from '../recipes/recipe.service';
@@ -13,7 +13,7 @@ import { forkJoin } from 'rxjs';
 @Component({
   selector: 'rm-supermarket-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, RouterLink],
   template: `
     <div class="shop-container">
       @if (loading) {
@@ -24,6 +24,12 @@ import { forkJoin } from 'rxjs';
       }
       @if (recipe) {
         <h2>{{ 'SUPERMARKET_VIEW.TITLE' | translate: { recipeName: recipe.title } }}</h2>
+
+        <div class="view-actions">
+          <a class="btn-manual" [routerLink]="['/recipes', recipe.id, 'shop-manual']">
+            {{ 'MANUAL_SUPERMARKET_VIEW.MANUAL_MODE' | translate }}
+          </a>
+        </div>
 
         <div class="supermarket-selector">
           <label for="supermarket">{{ 'SUPERMARKET_VIEW.SELECT_SUPERMARKET' | translate }}</label>
@@ -87,6 +93,18 @@ import { forkJoin } from 'rxjs';
       }
       h2 {
         margin: 0 0 24px;
+      }
+      .view-actions {
+        margin-bottom: 16px;
+      }
+      .btn-manual {
+        color: var(--rm-primary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .btn-manual:hover {
+        text-decoration: underline;
       }
       .loading {
         text-align: center;

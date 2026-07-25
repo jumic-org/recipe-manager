@@ -200,5 +200,18 @@
     "OTHER_AISLE": "Unknown",
     "RECIPE_NOT_FOUND": "Recipe not found",
     "LOAD_ERROR": "Failed to load shopping view"
+  },
+  "MANUAL_SUPERMARKET_VIEW": {
+    "TITLE": "Manual Shopping View: {{recipeName}}",
+    "SYSTEM_PROMPT": "System Prompt",
+    "USER_PROMPT": "User Prompt",
+    "TEMPERATURE": "Temperature",
+    "MAX_TOKENS": "Max Tokens",
+    "EXECUTE": "Execute",
+    "EXECUTING": "Executing...",
+    "RAW_RESPONSE": "Raw Bedrock Response",
+    "RESULT": "Result",
+    "MANUAL_MODE": "Manual Mode",
+    "BACK_TO_AUTO": "Back to Auto Mode"
   }
 }
