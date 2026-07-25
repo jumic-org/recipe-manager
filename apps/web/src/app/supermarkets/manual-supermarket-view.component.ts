@@ -406,90 +406,19 @@ export class ManualSupermarketViewComponent implements OnInit {
     }
 
     this.selectedAisles = selectedSupermarket.aisles;
-    const aisles = selectedSupermarket.aisles;
-    const ingredients = this.toPurchase;
     const currentLang = this.translateService.getCurrentLang() || 'en';
 
-    const formatAisle = (aisle: Aisle, index: number): string => {
-      if (aisle.comment) {
-        return `${index + 1}. ${aisle.name} (${aisle.comment})`;
-      }
-      return `${index + 1}. ${aisle.name}`;
-    };
-
-    if (currentLang === 'de') {
-      this.systemPrompt = `Du bist ein JSON-Generator fuer Supermarkt-Einkaufslisten. Du ordnest Zutaten den nummerierten Gaengen zu und gibst die Gruppen STRIKT in aufsteigender Gang-Nummer zurueck. Die Reihenfolge der Gaenge in deiner Ausgabe ist die WICHTIGSTE Anforderung. Antworte NUR mit validem JSON.`;
-
-      this.userPrompt = `AUFGABE: Ordne jede Zutat einem Gang zu. Die Gruppen in deiner Antwort MUESSEN in aufsteigender Reihenfolge der Gang-Nummern sortiert sein.
-
-SCHRITT 1 - Ordne jede Zutat einer Gang-Nummer zu:
-Fuer jede Zutat, bestimme welcher nummerierte Gang am besten passt.
-
-SCHRITT 2 - Sortiere die Gruppen nach Gang-Nummer:
-Gib die Gruppen in AUFSTEIGENDER Reihenfolge der Gang-Nummern aus (kleinste Nummer zuerst).
-
-NUMMERIERTE GAENGE:
-${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
-
-ZUTATEN:
-${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
-
-BEISPIEL:
-Gaenge: 1. Obst und Gemuese  2. Milchprodukte  3. Kaese  4. Mehl  5. Gewuerze
-Zutaten: 0=Magerquark, 1=Dinkelmehl, 2=Pizzakraeuter, 3=Mozzarella
-Zuordnung: Magerquark->Gang 2, Dinkelmehl->Gang 4, Pizzakraeuter->Gang 5, Mozzarella->Gang 3
-Sortiert nach Gang-Nummer (2,3,4,5):
-{"groups":[{"aisle":"Milchprodukte","ingredientIndices":[0]},{"aisle":"Kaese","ingredientIndices":[3]},{"aisle":"Mehl","ingredientIndices":[1]},{"aisle":"Gewuerze","ingredientIndices":[2]}]}
-
-AUSGABEFORMAT - JSON-Objekt mit einem Schluessel "groups" (Array). Jedes Element:
-- "aisle": exakter Gangname aus der Liste oben (oder "Unknown")
-- "ingredientIndices": Array von 0-basierten Indizes der ZUTATEN-Liste
-
-REGELN (nach Prioritaet):
-1. REIHENFOLGE: Die Gruppen im Array MUESSEN in aufsteigender Gang-Nummer sortiert sein. Gang 1 vor Gang 2, Gang 2 vor Gang 3, usw. Dies ist die wichtigste Regel.
-2. VOLLSTAENDIGKEIT: Jeder Index von 0 bis ${ingredients.length - 1} muss genau einmal vorkommen.
-3. ZUORDNUNG: Nutze dein Wissen ueber Supermaerkte und die Kommentare in Klammern als Hilfe.
-4. UNBEKANNT: "Unknown" nur als allerletzte Gruppe, falls eine Zutat in keinen Gang passt.
-5. LEERE GAENGE: Ueberspringe Gaenge ohne Zutaten, aber behalte die aufsteigende Reihenfolge bei.
-
-Antworte NUR mit dem JSON-Objekt.`;
-    } else {
-      this.systemPrompt = `You are a JSON generator for supermarket shopping lists. You assign ingredients to numbered aisles and return groups STRICTLY in ascending aisle number order. The ordering of aisles in your output is the MOST IMPORTANT requirement. Respond ONLY with valid JSON.`;
-
-      this.userPrompt = `TASK: Assign each ingredient to an aisle. The groups in your response MUST be sorted in ascending aisle number order.
-
-STEP 1 - Assign each ingredient to an aisle number:
-For each ingredient, determine which numbered aisle is the best fit.
-
-STEP 2 - Sort groups by aisle number:
-Output the groups in ASCENDING order of aisle numbers (lowest number first).
-
-NUMBERED AISLES:
-${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
-
-INGREDIENTS:
-${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
-
-EXAMPLE:
-Aisles: 1. Fruits and vegetables  2. Dairy  3. Cheese  4. Flour  5. Spices
-Ingredients: 0=low-fat quark, 1=spelt flour, 2=pizza herbs, 3=mozzarella
-Assignment: low-fat quark->aisle 2, spelt flour->aisle 4, pizza herbs->aisle 5, mozzarella->aisle 3
-Sorted by aisle number (2,3,4,5):
-{"groups":[{"aisle":"Dairy","ingredientIndices":[0]},{"aisle":"Cheese","ingredientIndices":[3]},{"aisle":"Flour","ingredientIndices":[1]},{"aisle":"Spices","ingredientIndices":[2]}]}
-
-OUTPUT FORMAT - JSON object with a single key "groups" (array). Each element:
-- "aisle": exact aisle name from the list above (or "Unknown")
-- "ingredientIndices": array of 0-based indices referencing the INGREDIENTS list
-
-RULES (by priority):
-1. ORDER: The groups array MUST be sorted in ascending aisle number order. Aisle 1 before aisle 2, aisle 2 before aisle 3, etc. This is the most important rule.
-2. COMPLETENESS: Every index from 0 to ${ingredients.length - 1} must appear exactly once.
-3. ASSIGNMENT: Use your grocery knowledge and the comments in parentheses as hints.
-4. UNKNOWN: "Unknown" only as the very last group, if an ingredient fits no aisle.
-5. EMPTY AISLES: Skip aisles with no ingredients, but maintain ascending order.
-
-Respond ONLY with the JSON object.`;
-    }
+    this.supermarketService.getPrompt(this.toPurchase, selectedSupermarket.aisles, currentLang).subscribe({
+      next: (result) => {
+        this.systemPrompt = result.systemPrompt;
+        this.userPrompt = result.userPrompt;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.error = this.translateService.instant('SUPERMARKET_VIEW.LOAD_ERROR');
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   private readCookie(): string {

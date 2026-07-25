@@ -278,6 +278,10 @@ export class RecipeManagerStack extends Stack {
     const sortIngredients = api.root.addResource('sort-ingredients');
     sortIngredients.addMethod('POST', lambdaIntegration, methodOptions);
 
+    // /sort-ingredients-prompt resource
+    const sortIngredientsPrompt = api.root.addResource('sort-ingredients-prompt');
+    sortIngredientsPrompt.addMethod('POST', lambdaIntegration, methodOptions);
+
     // /sort-ingredients-manual resource
     const sortIngredientsManual = api.root.addResource('sort-ingredients-manual');
     sortIngredientsManual.addMethod('POST', lambdaIntegration, methodOptions);

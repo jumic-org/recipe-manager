@@ -116,6 +116,11 @@ export const handler: APIGatewayProxyHandler = async (
       return await sortIngredients(event);
     }
 
+    // POST /sort-ingredients-prompt - get the generated prompts without calling AI
+    if (path === '/sort-ingredients-prompt' && method === 'POST') {
+      return await sortIngredientsPrompt(event);
+    }
+
     // POST /sort-ingredients-manual - sort ingredients with custom prompts/parameters
     if (path === '/sort-ingredients-manual' && method === 'POST') {
       return await sortIngredientsManual(event);
@@ -991,6 +996,138 @@ async function deleteIngredientOnHand(
   }
 }
 
+function generateSortPrompts(
+  ingredients: Ingredient[],
+  aisles: Aisle[],
+  language: string,
+): { systemPrompt: string; userPrompt: string } {
+  // Format aisles for the prompt, including comments as product examples
+  const formatAisle = (aisle: Aisle, index: number): string => {
+    if (aisle.comment) {
+      return `${index + 1}. ${aisle.name} (${aisle.comment})`;
+    }
+    return `${index + 1}. ${aisle.name}`;
+  };
+
+  let systemPrompt: string;
+  let userPrompt: string;
+
+  if (language === 'de') {
+    systemPrompt = `Du bist ein Angestellter im Supermarkt, der den Kunden hilft, den Einkaufszettel in der richtigen Reihenfolge zu sortieren. Die Produkte auf dem Einkaufszettel sollen in der Reihenfolge sortiert werden, wie die Gänge im Supermarkt angeordnet sind. Wichtig ist, die Zutaten im JSON Format (ohne weitere Erklärung) zurückzugeben.`;
+
+    userPrompt = `AUFGABE: Ordne die Zutaten den Gängen zu, in denen sie normalerweise im Supermarkt zu finden sind. Gibt dann die Gänge mit den Zutaten zurück.
+
+SCHRITT 1 - Ordne jede Zutat einer Gang-Nummer zu:
+Für jede Zutat, bestimme welcher nummerierte Gang am besten passt. Manche Gänge haben in Klammern eine weitere Kommentare wie bestimmte Produkte, berücksichtige dies. Beispiel: "Alkohol (Autoreifen)" bedeutet, dass es im Regal "Alkohol" auch Autoreifen und ähnliche Produkte gibt.
+
+SCHRITT 2 - Entferne die Gänge ohne Zutat:
+Wenn in einem Gang keine Zutat gewünscht ist, gib den Gang nicht zurück.
+
+NUMMERIERTE GÄNGE:
+${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
+
+ZUTATEN:
+${ingredients.map((ing, i) => `${i + 1}. ${ing.name}`).join('\n')}
+
+BEISPIEL:
+Gänge: 1. Obst und Gemüse  2. Milchprodukte  3. Käse  4. Mehl  5. Gewürze
+Zutaten: 0=Magerquark, 1=Dinkelmehl, 2=Pizzakräuter, 3=Mozzarella
+Zuordnung: Magerquark->Gang 2, Dinkelmehl->Gang 4, Pizzakräuter->Gang 5, Mozzarella->Gang 3
+Sortiert nach Gang-Nummer (2,3,4,5):
+{"groups":[{"aisle":"Milchprodukte","ingredientIndices":[0]},{"aisle":"Käse","ingredientIndices":[3]},{"aisle":"Mehl","ingredientIndices":[1]},{"aisle":"Gewürze","ingredientIndices":[2]}]}
+
+AUSGABEFORMAT - JSON-Objekt mit einem Schlüssel "groups" (Array). Jedes Element:
+- "aisle": exakter Gangname aus der Liste oben (oder "Unknown")
+- "ingredientIndices": Array von 0-basierten Indizes der ZUTATEN-Liste
+
+REGELN (nach Priorität):
+1. REIHENFOLGE: Die Gruppen im Array MÜSSEN in aufsteigender Gang-Nummer sortiert sein. Gang 1 vor Gang 2, Gang 2 vor Gang 3, usw. Dies ist die wichtigste Regel.
+2. VOLLSTÄNDIGKEIT: Jeder Index von 0 bis ${ingredients.length - 1} muss genau einmal vorkommen.
+3. ZUORDNUNG: Nutze dein Wissen über Supermärkte und die Kommentare in Klammern als Hilfe.
+4. UNBEKANNT: "Unknown" nur als allerletzte Gruppe, falls eine Zutat in keinen Gang passt.
+5. LEERE GÄNGE: Überspringe Gänge ohne Zutaten, aber behalte die aufsteigende Reihenfolge bei.
+
+Antworte NUR mit dem JSON-Objekt.`;
+  } else {
+    systemPrompt = `You are a supermarket employee helping customers sort their shopping list in the correct order. The products on the shopping list should be sorted in the order the aisles are arranged in the supermarket. It is important to return the ingredients in JSON format (without further explanation).`;
+
+    userPrompt = `TASK: Assign the ingredients to the aisles where they are normally found in the supermarket. Then return the aisles with the ingredients.
+
+STEP 1 - Assign each ingredient to an aisle number:
+For each ingredient, determine which numbered aisle is the best fit. Some aisles have additional comments in parentheses like specific products, take these into account. Example: "Alcohol (car tires)" means that on the "Alcohol" shelf there are also car tires and similar products.
+
+STEP 2 - Remove aisles without ingredients:
+If no ingredient is needed from an aisle, do not return that aisle.
+
+NUMBERED AISLES:
+${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
+
+INGREDIENTS:
+${ingredients.map((ing, i) => `${i + 1}. ${ing.name}`).join('\n')}
+
+EXAMPLE:
+Aisles: 1. Fruits and vegetables  2. Dairy  3. Cheese  4. Flour  5. Spices
+Ingredients: 0=low-fat quark, 1=spelt flour, 2=pizza herbs, 3=mozzarella
+Assignment: low-fat quark->aisle 2, spelt flour->aisle 4, pizza herbs->aisle 5, mozzarella->aisle 3
+Sorted by aisle number (2,3,4,5):
+{"groups":[{"aisle":"Dairy","ingredientIndices":[0]},{"aisle":"Cheese","ingredientIndices":[3]},{"aisle":"Flour","ingredientIndices":[1]},{"aisle":"Spices","ingredientIndices":[2]}]}
+
+OUTPUT FORMAT - JSON object with a single key "groups" (array). Each element:
+- "aisle": exact aisle name from the list above (or "Unknown")
+- "ingredientIndices": array of 0-based indices from the INGREDIENTS list
+
+RULES (by priority):
+1. ORDER: The groups in the array MUST be sorted in ascending aisle number order. Aisle 1 before aisle 2, aisle 2 before aisle 3, etc. This is the most important rule.
+2. COMPLETENESS: Every index from 0 to ${ingredients.length - 1} must appear exactly once.
+3. ASSIGNMENT: Use your knowledge about supermarkets and the comments in parentheses as hints.
+4. UNKNOWN: "Unknown" only as the very last group, if an ingredient does not fit any aisle.
+5. EMPTY AISLES: Skip aisles without ingredients, but maintain ascending order.
+
+Respond ONLY with the JSON object.`;
+  }
+
+  return { systemPrompt, userPrompt };
+}
+
+async function sortIngredientsPrompt(
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!Array.isArray(parsed['ingredients']) || parsed['ingredients'].length === 0) {
+    return response(400, { message: 'ingredients is required and must be a non-empty array' });
+  }
+
+  if (!Array.isArray(parsed['aisles']) || parsed['aisles'].length === 0) {
+    return response(400, { message: 'aisles is required and must be a non-empty array' });
+  }
+
+  const ingredients = parsed['ingredients'] as Ingredient[];
+  const rawAisles = parsed['aisles'] as (string | { name: string; comment?: string })[];
+  const language = (parsed['language'] as string) || 'en';
+
+  // Normalize aisles: support both string[] (legacy) and Aisle[] formats
+  const aisles: Aisle[] = rawAisles.map((a) => {
+    if (typeof a === 'string') {
+      return { name: a };
+    }
+    return { name: a.name, comment: a.comment };
+  });
+
+  const { systemPrompt, userPrompt } = generateSortPrompts(ingredients, aisles, language);
+
+  return response(200, { systemPrompt, userPrompt });
+}
+
 async function sortIngredients(
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
@@ -1025,90 +1162,7 @@ async function sortIngredients(
     return { name: a.name, comment: a.comment };
   });
 
-  // Format aisles for the prompt, including comments as product examples
-  const formatAisle = (aisle: Aisle, index: number): string => {
-    if (aisle.comment) {
-      return `${index + 1}. ${aisle.name} (${aisle.comment})`;
-    }
-    return `${index + 1}. ${aisle.name}`;
-  };
-
-  let system: string;
-  let prompt: string;
-
-  if (language === 'de') {
-    system = `Du bist ein Angestellter im Supermarkt, der den Kunden hilft, den Einkaufszettel in der richtigen Reihenfolge zu sortieren. Die Produkte auf dem Einkaufszettel sollen in der Reihenfolge sortiert werden, wie die Gänge im Supermarkt angeordnet sind. Wichtig ist, die Zutaten im JSON Format (ohne weitere Erklärung) zurückzugeben.`;
-
-    prompt = `AUFGABE: Ordne die Zutaten den Gängen zu, in denen sie normalerweise im Supermarkt zu finden sind. Gibt dann die Gänge mit den Zutaten zurück.
-
-SCHRITT 1 - Ordne jede Zutat einer Gang-Nummer zu:
-Für jede Zutat, bestimme welcher nummerierte Gang am besten passt.
-
-SCHRITT 2 - Entferne die Gänge ohne Zutat:
-Wenn in einem Gang keine Zutat gewünscht ist, gib den Gang nicht zurück.
-
-NUMMERIERTE GÄNGE:
-${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
-
-ZUTATEN:
-${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
-
-BEISPIEL:
-Gänge: 1. Obst und Gemüse  2. Milchprodukte  3. Käse  4. Mehl  5. Gewürze
-Zutaten: 0=Magerquark, 1=Dinkelmehl, 2=Pizzakräuter, 3=Mozzarella
-Zuordnung: Magerquark->Gang 2, Dinkelmehl->Gang 4, Pizzakräuter->Gang 5, Mozzarella->Gang 3
-Sortiert nach Gang-Nummer (2,3,4,5):
-{"groups":[{"aisle":"Milchprodukte","ingredientIndices":[0]},{"aisle":"Käse","ingredientIndices":[3]},{"aisle":"Mehl","ingredientIndices":[1]},{"aisle":"Gewürze","ingredientIndices":[2]}]}
-
-AUSGABEFORMAT - JSON-Objekt mit einem Schlüssel "groups" (Array). Jedes Element:
-- "aisle": exakter Gangname aus der Liste oben (oder "Unknown")
-- "ingredientIndices": Array von 0-basierten Indizes der ZUTATEN-Liste
-
-REGELN (nach Priorität):
-1. REIHENFOLGE: Die Gruppen im Array MÜSSEN in aufsteigender Gang-Nummer sortiert sein. Gang 1 vor Gang 2, Gang 2 vor Gang 3, usw. Dies ist die wichtigste Regel.
-2. VOLLSTÄNDIGKEIT: Jeder Index von 0 bis ${ingredients.length - 1} muss genau einmal vorkommen.
-3. ZUORDNUNG: Nutze dein Wissen über Supermärkte und die Kommentare in Klammern als Hilfe.
-4. UNBEKANNT: "Unknown" nur als allerletzte Gruppe, falls eine Zutat in keinen Gang passt.
-5. LEERE GÄNGE: Überspringe Gänge ohne Zutaten, aber behalte die aufsteigende Reihenfolge bei.
-
-Antworte NUR mit dem JSON-Objekt.`;
-  } else {
-    system = `You are a supermarket employee helping customers sort their shopping list in the correct order. The products on the shopping list should be sorted in the order the aisles are arranged in the supermarket. It is important to return the ingredients in JSON format (without further explanation).`;
-
-    prompt = `TASK: Assign the ingredients to the aisles where they are normally found in the supermarket. Then return the aisles with the ingredients.
-
-STEP 1 - Assign each ingredient to an aisle number:
-For each ingredient, determine which numbered aisle is the best fit.
-
-STEP 2 - Remove aisles without ingredients:
-If no ingredient is needed from an aisle, do not return that aisle.
-
-NUMBERED AISLES:
-${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
-
-INGREDIENTS:
-${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
-
-EXAMPLE:
-Aisles: 1. Fruits and vegetables  2. Dairy  3. Cheese  4. Flour  5. Spices
-Ingredients: 0=low-fat quark, 1=spelt flour, 2=pizza herbs, 3=mozzarella
-Assignment: low-fat quark->aisle 2, spelt flour->aisle 4, pizza herbs->aisle 5, mozzarella->aisle 3
-Sorted by aisle number (2,3,4,5):
-{"groups":[{"aisle":"Dairy","ingredientIndices":[0]},{"aisle":"Cheese","ingredientIndices":[3]},{"aisle":"Flour","ingredientIndices":[1]},{"aisle":"Spices","ingredientIndices":[2]}]}
-
-OUTPUT FORMAT - JSON object with a single key "groups" (array). Each element:
-- "aisle": exact aisle name from the list above (or "Unknown")
-- "ingredientIndices": array of 0-based indices from the INGREDIENTS list
-
-RULES (by priority):
-1. ORDER: The groups in the array MUST be sorted in ascending aisle number order. Aisle 1 before aisle 2, aisle 2 before aisle 3, etc. This is the most important rule.
-2. COMPLETENESS: Every index from 0 to ${ingredients.length - 1} must appear exactly once.
-3. ASSIGNMENT: Use your knowledge about supermarkets and the comments in parentheses as hints.
-4. UNKNOWN: "Unknown" only as the very last group, if an ingredient does not fit any aisle.
-5. EMPTY AISLES: Skip aisles without ingredients, but maintain ascending order.
-
-Respond ONLY with the JSON object.`;
-  }
+  const { systemPrompt: system, userPrompt: prompt } = generateSortPrompts(ingredients, aisles, language);
 
   console.log('sort-ingredients request:', JSON.stringify({ language, aisles: aisles.map((a) => a.name), ingredientCount: ingredients.length }));
   console.log('sort-ingredients system prompt:', system);

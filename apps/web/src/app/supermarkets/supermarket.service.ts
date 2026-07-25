@@ -62,6 +62,12 @@ export class SupermarketService {
       .pipe(map((res) => res.groups));
   }
 
+  getPrompt(ingredients: Ingredient[], aisles: Aisle[], language: string): Observable<{ systemPrompt: string; userPrompt: string }> {
+    const url = `${this.configService.apiUrl}/sort-ingredients-prompt`;
+    return this.http
+      .post<{ systemPrompt: string; userPrompt: string }>(url, { ingredients, aisles, language });
+  }
+
   sortIngredientsManual(body: {
     systemPrompt: string;
     userPrompt: string;
