@@ -1009,81 +1009,37 @@ function generateSortPrompts(
     return `${index + 1}. ${aisle.name}`;
   };
 
-  let systemPrompt: string;
+  const systemPrompt = '';
   let userPrompt: string;
 
   if (language === 'de') {
-    systemPrompt = `Du bist ein Angestellter im Supermarkt, der den Kunden hilft, den Einkaufszettel in der richtigen Reihenfolge zu sortieren. Die Produkte auf dem Einkaufszettel sollen in der Reihenfolge sortiert werden, wie die Gänge im Supermarkt angeordnet sind. Wichtig ist, die Zutaten im JSON Format (ohne weitere Erklärung) zurückzugeben.`;
+    userPrompt = `Du bist Angestellter im Supermarkt und solst den Kunden helfen, die Produkte schnell zu finden. Du erhälst die Supermarkt-Gänge zu einem spezifischen Supermarkt und die Produkte, die gekauft werden sollen. Ordne diese Produkte den Gängen zu.
 
-    userPrompt = `AUFGABE: Ordne die Zutaten den Gängen zu, in denen sie normalerweise im Supermarkt zu finden sind. Gibt dann die Gänge mit den Zutaten zurück.
+Gehe jedes Produkt durch und entscheide, in welchem Gang es am wahrscheinlichsten zu finden ist. Ordne es genau diesem Gang zu. Findest du keinen passenden Gang, füge es am Ende under "Unknown" hinzu. In den Gängen sind in Klammern kommentare ergänzt, wie z.B. weitere Produkte, die dort zu finden sind. Berücksichtige dies.
+Lösche die Gänge, zu denen kein Produkt zugeordnet ist.
+Gib jeweils den Gang aus und darunter eine Auflistung der Produkte, die dort gekauft werden sollen.
+Als Ergebnis gib ein JSON Format zurück: [{"aisle": "Obst und Gemüse", "products": ["Apfel", "Bierne"]}, {"aisle": "Milchprodukte", "products": ["Erdbeerjoghurt"]}, {"aisle": "UNKNWON", "products": ["Flugzeug"]}]
+Gib keine Erklärung zurück, nur das JSON. Bei den Supermarkt Gängen, lass die Kommentare in Klammern weg.
 
-SCHRITT 1 - Ordne jede Zutat einer Gang-Nummer zu:
-Für jede Zutat, bestimme welcher nummerierte Gang am besten passt. Manche Gänge haben in Klammern eine weitere Kommentare wie bestimmte Produkte, berücksichtige dies. Beispiel: "Alkohol (Autoreifen)" bedeutet, dass es im Regal "Alkohol" auch Autoreifen und ähnliche Produkte gibt.
-
-SCHRITT 2 - Entferne die Gänge ohne Zutat:
-Wenn in einem Gang keine Zutat gewünscht ist, gib den Gang nicht zurück.
-
-NUMMERIERTE GÄNGE:
+Supermarkt-Gänge
 ${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
 
-ZUTATEN:
-${ingredients.map((ing, i) => `${i + 1}. ${ing.name}`).join('\n')}
-
-BEISPIEL:
-Gänge: 1. Obst und Gemüse  2. Milchprodukte  3. Käse  4. Mehl  5. Gewürze
-Zutaten: 0=Magerquark, 1=Dinkelmehl, 2=Pizzakräuter, 3=Mozzarella
-Zuordnung: Magerquark->Gang 2, Dinkelmehl->Gang 4, Pizzakräuter->Gang 5, Mozzarella->Gang 3
-Sortiert nach Gang-Nummer (2,3,4,5):
-{"groups":[{"aisle":"Milchprodukte","ingredientIndices":[0]},{"aisle":"Käse","ingredientIndices":[3]},{"aisle":"Mehl","ingredientIndices":[1]},{"aisle":"Gewürze","ingredientIndices":[2]}]}
-
-AUSGABEFORMAT - JSON-Objekt mit einem Schlüssel "groups" (Array). Jedes Element:
-- "aisle": exakter Gangname aus der Liste oben (oder "Unknown")
-- "ingredientIndices": Array von 0-basierten Indizes der ZUTATEN-Liste
-
-REGELN (nach Priorität):
-1. REIHENFOLGE: Die Gruppen im Array MÜSSEN in aufsteigender Gang-Nummer sortiert sein. Gang 1 vor Gang 2, Gang 2 vor Gang 3, usw. Dies ist die wichtigste Regel.
-2. VOLLSTÄNDIGKEIT: Jeder Index von 0 bis ${ingredients.length - 1} muss genau einmal vorkommen.
-3. ZUORDNUNG: Nutze dein Wissen über Supermärkte und die Kommentare in Klammern als Hilfe.
-4. UNBEKANNT: "Unknown" nur als allerletzte Gruppe, falls eine Zutat in keinen Gang passt.
-5. LEERE GÄNGE: Überspringe Gänge ohne Zutaten, aber behalte die aufsteigende Reihenfolge bei.
-
-Antworte NUR mit dem JSON-Objekt.`;
+Produkte:
+${ingredients.map((ing, i) => `${i + 1}. ${ing.name}`).join('\n')}`;
   } else {
-    systemPrompt = `You are a supermarket employee helping customers sort their shopping list in the correct order. The products on the shopping list should be sorted in the order the aisles are arranged in the supermarket. It is important to return the ingredients in JSON format (without further explanation).`;
+    userPrompt = `You are a supermarket employee and should help customers find products quickly. You receive the supermarket aisles for a specific supermarket and the products that need to be purchased. Assign these products to the aisles.
 
-    userPrompt = `TASK: Assign the ingredients to the aisles where they are normally found in the supermarket. Then return the aisles with the ingredients.
+Go through each product and decide which aisle it is most likely to be found in. Assign it to exactly that aisle. If you cannot find a matching aisle, add it at the end under "Unknown". The aisles have comments in parentheses, such as additional products that can be found there. Take this into account.
+Remove aisles to which no product is assigned.
+Output each aisle and below it a list of products to be purchased there.
+As a result, return a JSON format: [{"aisle": "Fruits and Vegetables", "products": ["Apple", "Pear"]}, {"aisle": "Dairy", "products": ["Strawberry Yogurt"]}, {"aisle": "UNKNOWN", "products": ["Airplane"]}]
+Do not return any explanation, only the JSON. For the supermarket aisles, leave out the comments in parentheses.
 
-STEP 1 - Assign each ingredient to an aisle number:
-For each ingredient, determine which numbered aisle is the best fit. Some aisles have additional comments in parentheses like specific products, take these into account. Example: "Alcohol (car tires)" means that on the "Alcohol" shelf there are also car tires and similar products.
-
-STEP 2 - Remove aisles without ingredients:
-If no ingredient is needed from an aisle, do not return that aisle.
-
-NUMBERED AISLES:
+Supermarket Aisles
 ${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
 
-INGREDIENTS:
-${ingredients.map((ing, i) => `${i + 1}. ${ing.name}`).join('\n')}
-
-EXAMPLE:
-Aisles: 1. Fruits and vegetables  2. Dairy  3. Cheese  4. Flour  5. Spices
-Ingredients: 0=low-fat quark, 1=spelt flour, 2=pizza herbs, 3=mozzarella
-Assignment: low-fat quark->aisle 2, spelt flour->aisle 4, pizza herbs->aisle 5, mozzarella->aisle 3
-Sorted by aisle number (2,3,4,5):
-{"groups":[{"aisle":"Dairy","ingredientIndices":[0]},{"aisle":"Cheese","ingredientIndices":[3]},{"aisle":"Flour","ingredientIndices":[1]},{"aisle":"Spices","ingredientIndices":[2]}]}
-
-OUTPUT FORMAT - JSON object with a single key "groups" (array). Each element:
-- "aisle": exact aisle name from the list above (or "Unknown")
-- "ingredientIndices": array of 0-based indices from the INGREDIENTS list
-
-RULES (by priority):
-1. ORDER: The groups in the array MUST be sorted in ascending aisle number order. Aisle 1 before aisle 2, aisle 2 before aisle 3, etc. This is the most important rule.
-2. COMPLETENESS: Every index from 0 to ${ingredients.length - 1} must appear exactly once.
-3. ASSIGNMENT: Use your knowledge about supermarkets and the comments in parentheses as hints.
-4. UNKNOWN: "Unknown" only as the very last group, if an ingredient does not fit any aisle.
-5. EMPTY AISLES: Skip aisles without ingredients, but maintain ascending order.
-
-Respond ONLY with the JSON object.`;
+Products:
+${ingredients.map((ing, i) => `${i + 1}. ${ing.name}`).join('\n')}`;
   }
 
   return { systemPrompt, userPrompt };
@@ -1169,16 +1125,22 @@ async function sortIngredients(
   console.log('sort-ingredients user prompt:', prompt);
 
   try {
+    const bedrockBody: Record<string, unknown> = {
+      messages: [{ role: 'user', content: [{ text: prompt }] }],
+      inferenceConfig: { maxTokens: 4096, temperature: 0.1 },
+    };
+    if (system) {
+      bedrockBody['system'] = [{ text: system }];
+    } else {
+      bedrockBody['system'] = [];
+    }
+
     const bedrockResponse = await bedrockClient.send(
       new InvokeModelCommand({
         modelId: 'eu.amazon.nova-lite-v1:0',
         contentType: 'application/json',
         accept: 'application/json',
-        body: JSON.stringify({
-          system: [{ text: system }],
-          messages: [{ role: 'user', content: [{ text: prompt }] }],
-          inferenceConfig: { maxTokens: 4096, temperature: 0.1 },
-        }),
+        body: JSON.stringify(bedrockBody),
       }),
     );
 
@@ -1201,17 +1163,37 @@ async function sortIngredients(
     const parsedJson = JSON.parse(jsonText);
 
     // Handle both formats: {"groups":[...]} or bare array [...]
-    const rawGroups: { aisle: string; ingredientIndices: number[] }[] = Array.isArray(parsedJson)
+    const rawGroups: { aisle: string; products?: (string | number)[]; ingredientIndices?: number[] }[] = Array.isArray(parsedJson)
       ? parsedJson
       : parsedJson.groups ?? [];
 
-    // Map indices back to actual ingredients
+    // Map products/indices back to actual ingredients
     const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
+    const matchedIndices = new Set<number>();
     for (const group of rawGroups) {
       const groupIngredients: Ingredient[] = [];
-      for (const idx of group.ingredientIndices) {
-        if (idx >= 0 && idx < ingredients.length) {
-          groupIngredients.push(ingredients[idx]);
+      const products: (string | number)[] = group.products || group.ingredientIndices || [];
+      for (const product of products) {
+        if (typeof product === 'number') {
+          // Legacy index format
+          if (product >= 0 && product < ingredients.length && !matchedIndices.has(product)) {
+            groupIngredients.push(ingredients[product]);
+            matchedIndices.add(product);
+          }
+        } else {
+          // New name-based format
+          const lowerProduct = product.toLowerCase();
+          const idx = ingredients.findIndex((ing, i) =>
+            !matchedIndices.has(i) && (
+              ing.name.toLowerCase() === lowerProduct ||
+              ing.name.toLowerCase().includes(lowerProduct) ||
+              lowerProduct.includes(ing.name.toLowerCase())
+            )
+          );
+          if (idx >= 0) {
+            groupIngredients.push(ingredients[idx]);
+            matchedIndices.add(idx);
+          }
         }
       }
       if (groupIngredients.length > 0) {
@@ -1240,7 +1222,7 @@ async function sortIngredientsManual(
     return response(400, { message: 'Invalid JSON in request body' });
   }
 
-  if (!parsed['systemPrompt'] || typeof parsed['systemPrompt'] !== 'string') {
+  if (typeof parsed['systemPrompt'] !== 'string') {
     return response(400, { message: 'systemPrompt is required and must be a string' });
   }
 
@@ -1275,16 +1257,22 @@ async function sortIngredientsManual(
   console.log('sort-ingredients-manual user prompt:', userPrompt);
 
   try {
+    const bedrockBody: Record<string, unknown> = {
+      messages: [{ role: 'user', content: [{ text: userPrompt }] }],
+      inferenceConfig: { maxTokens, temperature },
+    };
+    if (systemPrompt) {
+      bedrockBody['system'] = [{ text: systemPrompt }];
+    } else {
+      bedrockBody['system'] = [];
+    }
+
     const bedrockResponse = await bedrockClient.send(
       new InvokeModelCommand({
         modelId: 'eu.amazon.nova-lite-v1:0',
         contentType: 'application/json',
         accept: 'application/json',
-        body: JSON.stringify({
-          system: [{ text: systemPrompt }],
-          messages: [{ role: 'user', content: [{ text: userPrompt }] }],
-          inferenceConfig: { maxTokens, temperature },
-        }),
+        body: JSON.stringify(bedrockBody),
       }),
     );
 
@@ -1307,17 +1295,37 @@ async function sortIngredientsManual(
     const parsedJson = JSON.parse(jsonText);
 
     // Handle both formats: {"groups":[...]} or bare array [...]
-    const rawGroups: { aisle: string; ingredientIndices: number[] }[] = Array.isArray(parsedJson)
+    const rawGroups: { aisle: string; products?: (string | number)[]; ingredientIndices?: number[] }[] = Array.isArray(parsedJson)
       ? parsedJson
       : parsedJson.groups ?? [];
 
-    // Map indices back to actual ingredients
+    // Map products/indices back to actual ingredients
     const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
+    const matchedIndices = new Set<number>();
     for (const group of rawGroups) {
       const groupIngredients: Ingredient[] = [];
-      for (const idx of group.ingredientIndices) {
-        if (idx >= 0 && idx < ingredients.length) {
-          groupIngredients.push(ingredients[idx]);
+      const products: (string | number)[] = group.products || group.ingredientIndices || [];
+      for (const product of products) {
+        if (typeof product === 'number') {
+          // Legacy index format
+          if (product >= 0 && product < ingredients.length && !matchedIndices.has(product)) {
+            groupIngredients.push(ingredients[product]);
+            matchedIndices.add(product);
+          }
+        } else {
+          // New name-based format
+          const lowerProduct = product.toLowerCase();
+          const idx = ingredients.findIndex((ing, i) =>
+            !matchedIndices.has(i) && (
+              ing.name.toLowerCase() === lowerProduct ||
+              ing.name.toLowerCase().includes(lowerProduct) ||
+              lowerProduct.includes(ing.name.toLowerCase())
+            )
+          );
+          if (idx >= 0) {
+            groupIngredients.push(ingredients[idx]);
+            matchedIndices.add(idx);
+          }
         }
       }
       if (groupIngredients.length > 0) {

@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-011",
+  "type": "fix",
+  "description": "Replace old system+user prompt with single user prompt, change response format from ingredientIndices to products (name-based), pass empty system array to Bedrock",
+  "status": "in_progress",
+  "steps": [
+    "Update generateSortPrompts: set systemPrompt to empty string, rewrite userPrompt with user's exact German text (dynamic aisles/products), add English translation",
+    "Update sortIngredients response parsing to handle new products format (name-based matching) with backward compatibility for old ingredientIndices format",
+    "Update sortIngredientsManual response parsing similarly",
+    "When systemPrompt is empty, pass system: [] to Bedrock InvokeModelCommand"
+  ],
+  "acceptance_criteria": [
+    "generateSortPrompts returns empty string as systemPrompt",
+    "German userPrompt uses user's exact text with dynamic Supermarkt-Gange and Produkte sections",
+    "English userPrompt is a translation of the German prompt with same structure",
+    "Response parsing handles both old {groups:[{aisle,ingredientIndices}]} and new [{aisle,products}] formats",
+    "Name-based matching uses case-insensitive partial/contains match",
+    "Bedrock is called with system: [] when systemPrompt is empty",
+    "npx nx run-many -t build lint passes cleanly"
+  ],
+  "verification": [
+    "Run: eval \"$(mise activate bash)\" && npx nx build api && npx nx lint api"
+  ],
+  "blocked_reason": null,
+  "findings": null
+}
