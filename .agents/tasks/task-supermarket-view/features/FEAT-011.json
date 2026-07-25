@@ -22,5 +22,5 @@
     "Run: eval \"$(mise activate bash)\" && npx nx build api && npx nx lint api"
   ],
   "blocked_reason": null,
-  "findings": "All builds and lints pass cleanly. Replaced old two-prompt approach (system + user) with single user-only prompt. German prompt uses user's exact text. English prompt is a faithful translation. Response parsing handles both legacy ingredientIndices (number[]) and new products (string[]) formats with case-insensitive partial matching. Bedrock is called with system: [] when systemPrompt is empty."
+  "findings": "All builds and lints pass cleanly. Replaced old two-prompt approach (system + user) with single user-only prompt. German prompt uses user's exact text. English prompt is a faithful translation. Response parsing handles both legacy ingredientIndices (number[]) and new products (string[]) formats with case-insensitive partial matching. FOLLOW-UP FIX: Removed else branch that set system: [] because Amazon Nova requires at least 1 item in the system array or the key must be omitted entirely. The empty array caused ValidationException."
 }
