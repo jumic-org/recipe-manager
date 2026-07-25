@@ -1037,51 +1037,51 @@ async function sortIngredients(
   let prompt: string;
 
   if (language === 'de') {
-    system = `Du bist ein JSON-Generator fuer Supermarkt-Einkaufslisten. Du ordnest Zutaten den nummerierten Gaengen zu und gibst die Gruppen STRIKT in aufsteigender Gang-Nummer zurueck. Die Reihenfolge der Gaenge in deiner Ausgabe ist die WICHTIGSTE Anforderung. Antworte NUR mit validem JSON.`;
+    system = `Du bist ein Angestellter im Supermarkt, der den Kunden hilft, den Einkaufszettel in der richtigen Reihenfolge zu sortieren. Die Produkte auf dem Einkaufszettel sollen in der Reihenfolge sortiert werden, wie die Gänge im Supermarkt angeordnet sind. Wichtig ist, die Zutaten im JSON Format (ohne weitere Erklärung) zurückzugeben.`;
 
-    prompt = `AUFGABE: Ordne jede Zutat einem Gang zu. Die Gruppen in deiner Antwort MUESSEN in aufsteigender Reihenfolge der Gang-Nummern sortiert sein.
+    prompt = `AUFGABE: Ordne die Zutaten den Gängen zu, in denen sie normalerweise im Supermarkt zu finden sind. Gibt dann die Gänge mit den Zutaten zurück.
 
 SCHRITT 1 - Ordne jede Zutat einer Gang-Nummer zu:
-Fuer jede Zutat, bestimme welcher nummerierte Gang am besten passt.
+Für jede Zutat, bestimme welcher nummerierte Gang am besten passt.
 
-SCHRITT 2 - Sortiere die Gruppen nach Gang-Nummer:
-Gib die Gruppen in AUFSTEIGENDER Reihenfolge der Gang-Nummern aus (kleinste Nummer zuerst).
+SCHRITT 2 - Entferne die Gänge ohne Zutat:
+Wenn in einem Gang keine Zutat gewünscht ist, gib den Gang nicht zurück.
 
-NUMMERIERTE GAENGE:
+NUMMERIERTE GÄNGE:
 ${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
 
 ZUTATEN:
 ${ingredients.map((ing, i) => `${i + 1}. ${ing.name}${ing.group ? ` (${ing.group})` : ''}`).join('\n')}
 
 BEISPIEL:
-Gaenge: 1. Obst und Gemuese  2. Milchprodukte  3. Kaese  4. Mehl  5. Gewuerze
-Zutaten: 0=Magerquark, 1=Dinkelmehl, 2=Pizzakraeuter, 3=Mozzarella
-Zuordnung: Magerquark->Gang 2, Dinkelmehl->Gang 4, Pizzakraeuter->Gang 5, Mozzarella->Gang 3
+Gänge: 1. Obst und Gemüse  2. Milchprodukte  3. Käse  4. Mehl  5. Gewürze
+Zutaten: 0=Magerquark, 1=Dinkelmehl, 2=Pizzakräuter, 3=Mozzarella
+Zuordnung: Magerquark->Gang 2, Dinkelmehl->Gang 4, Pizzakräuter->Gang 5, Mozzarella->Gang 3
 Sortiert nach Gang-Nummer (2,3,4,5):
-{"groups":[{"aisle":"Milchprodukte","ingredientIndices":[0]},{"aisle":"Kaese","ingredientIndices":[3]},{"aisle":"Mehl","ingredientIndices":[1]},{"aisle":"Gewuerze","ingredientIndices":[2]}]}
+{"groups":[{"aisle":"Milchprodukte","ingredientIndices":[0]},{"aisle":"Käse","ingredientIndices":[3]},{"aisle":"Mehl","ingredientIndices":[1]},{"aisle":"Gewürze","ingredientIndices":[2]}]}
 
-AUSGABEFORMAT - JSON-Objekt mit einem Schluessel "groups" (Array). Jedes Element:
+AUSGABEFORMAT - JSON-Objekt mit einem Schlüssel "groups" (Array). Jedes Element:
 - "aisle": exakter Gangname aus der Liste oben (oder "Unknown")
 - "ingredientIndices": Array von 0-basierten Indizes der ZUTATEN-Liste
 
-REGELN (nach Prioritaet):
-1. REIHENFOLGE: Die Gruppen im Array MUESSEN in aufsteigender Gang-Nummer sortiert sein. Gang 1 vor Gang 2, Gang 2 vor Gang 3, usw. Dies ist die wichtigste Regel.
-2. VOLLSTAENDIGKEIT: Jeder Index von 0 bis ${ingredients.length - 1} muss genau einmal vorkommen.
-3. ZUORDNUNG: Nutze dein Wissen ueber Supermaerkte und die Kommentare in Klammern als Hilfe.
+REGELN (nach Priorität):
+1. REIHENFOLGE: Die Gruppen im Array MÜSSEN in aufsteigender Gang-Nummer sortiert sein. Gang 1 vor Gang 2, Gang 2 vor Gang 3, usw. Dies ist die wichtigste Regel.
+2. VOLLSTÄNDIGKEIT: Jeder Index von 0 bis ${ingredients.length - 1} muss genau einmal vorkommen.
+3. ZUORDNUNG: Nutze dein Wissen über Supermärkte und die Kommentare in Klammern als Hilfe.
 4. UNBEKANNT: "Unknown" nur als allerletzte Gruppe, falls eine Zutat in keinen Gang passt.
-5. LEERE GAENGE: Ueberspringe Gaenge ohne Zutaten, aber behalte die aufsteigende Reihenfolge bei.
+5. LEERE GÄNGE: Überspringe Gänge ohne Zutaten, aber behalte die aufsteigende Reihenfolge bei.
 
 Antworte NUR mit dem JSON-Objekt.`;
   } else {
-    system = `You are a JSON generator for supermarket shopping lists. You assign ingredients to numbered aisles and return groups STRICTLY in ascending aisle number order. The ordering of aisles in your output is the MOST IMPORTANT requirement. Respond ONLY with valid JSON.`;
+    system = `You are a supermarket employee helping customers sort their shopping list in the correct order. The products on the shopping list should be sorted in the order the aisles are arranged in the supermarket. It is important to return the ingredients in JSON format (without further explanation).`;
 
-    prompt = `TASK: Assign each ingredient to an aisle. The groups in your response MUST be sorted in ascending aisle number order.
+    prompt = `TASK: Assign the ingredients to the aisles where they are normally found in the supermarket. Then return the aisles with the ingredients.
 
 STEP 1 - Assign each ingredient to an aisle number:
 For each ingredient, determine which numbered aisle is the best fit.
 
-STEP 2 - Sort groups by aisle number:
-Output the groups in ASCENDING order of aisle numbers (lowest number first).
+STEP 2 - Remove aisles without ingredients:
+If no ingredient is needed from an aisle, do not return that aisle.
 
 NUMBERED AISLES:
 ${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
@@ -1098,14 +1098,14 @@ Sorted by aisle number (2,3,4,5):
 
 OUTPUT FORMAT - JSON object with a single key "groups" (array). Each element:
 - "aisle": exact aisle name from the list above (or "Unknown")
-- "ingredientIndices": array of 0-based indices referencing the INGREDIENTS list
+- "ingredientIndices": array of 0-based indices from the INGREDIENTS list
 
 RULES (by priority):
-1. ORDER: The groups array MUST be sorted in ascending aisle number order. Aisle 1 before aisle 2, aisle 2 before aisle 3, etc. This is the most important rule.
+1. ORDER: The groups in the array MUST be sorted in ascending aisle number order. Aisle 1 before aisle 2, aisle 2 before aisle 3, etc. This is the most important rule.
 2. COMPLETENESS: Every index from 0 to ${ingredients.length - 1} must appear exactly once.
-3. ASSIGNMENT: Use your grocery knowledge and the comments in parentheses as hints.
-4. UNKNOWN: "Unknown" only as the very last group, if an ingredient fits no aisle.
-5. EMPTY AISLES: Skip aisles with no ingredients, but maintain ascending order.
+3. ASSIGNMENT: Use your knowledge about supermarkets and the comments in parentheses as hints.
+4. UNKNOWN: "Unknown" only as the very last group, if an ingredient does not fit any aisle.
+5. EMPTY AISLES: Skip aisles without ingredients, but maintain ascending order.
 
 Respond ONLY with the JSON object.`;
   }
