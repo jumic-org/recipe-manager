@@ -1131,8 +1131,6 @@ async function sortIngredients(
     };
     if (system) {
       bedrockBody['system'] = [{ text: system }];
-    } else {
-      bedrockBody['system'] = [];
     }
 
     const bedrockResponse = await bedrockClient.send(
@@ -1263,8 +1261,6 @@ async function sortIngredientsManual(
     };
     if (systemPrompt) {
       bedrockBody['system'] = [{ text: systemPrompt }];
-    } else {
-      bedrockBody['system'] = [];
     }
 
     const bedrockResponse = await bedrockClient.send(
