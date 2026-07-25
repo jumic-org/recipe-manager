@@ -1144,11 +1144,16 @@ Respond ONLY with the JSON object.`;
       jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
     }
 
-    const parsed2 = JSON.parse(jsonText) as { groups: { aisle: string; ingredientIndices: number[] }[] };
+    const parsedJson = JSON.parse(jsonText);
+
+    // Handle both formats: {"groups":[...]} or bare array [...]
+    const rawGroups: { aisle: string; ingredientIndices: number[] }[] = Array.isArray(parsedJson)
+      ? parsedJson
+      : parsedJson.groups ?? [];
 
     // Map indices back to actual ingredients
     const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
-    for (const group of parsed2.groups) {
+    for (const group of rawGroups) {
       const groupIngredients: Ingredient[] = [];
       for (const idx of group.ingredientIndices) {
         if (idx >= 0 && idx < ingredients.length) {
@@ -1245,11 +1250,16 @@ async function sortIngredientsManual(
       jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
     }
 
-    const parsed2 = JSON.parse(jsonText) as { groups: { aisle: string; ingredientIndices: number[] }[] };
+    const parsedJson = JSON.parse(jsonText);
+
+    // Handle both formats: {"groups":[...]} or bare array [...]
+    const rawGroups: { aisle: string; ingredientIndices: number[] }[] = Array.isArray(parsedJson)
+      ? parsedJson
+      : parsedJson.groups ?? [];
 
     // Map indices back to actual ingredients
     const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
-    for (const group of parsed2.groups) {
+    for (const group of rawGroups) {
       const groupIngredients: Ingredient[] = [];
       for (const idx of group.ingredientIndices) {
         if (idx >= 0 && idx < ingredients.length) {
