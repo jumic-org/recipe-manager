@@ -6,7 +6,7 @@ The stack is deployed to the **`eu-west-1`** (Ireland) AWS region. All infrastru
 
 ## Prerequisites
 
-- **Node.js** >= 24.x
+- **Node.js** >= 26.x
 - **pnpm** >= 10.x (enable via `corepack enable`)
 - **AWS CLI** configured with credentials for the target account
 - **AWS CDK CLI** (installed as a dev dependency, use via `pnpm cdk`)

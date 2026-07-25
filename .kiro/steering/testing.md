@@ -211,7 +211,7 @@ describe('RecipeManagerStack', () => {
 
   it('creates a Lambda function with Node.js runtime', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
-      Runtime: 'nodejs20.x',
+      Runtime: 'nodejs24.x',
       MemorySize: 256,
     });
   });
