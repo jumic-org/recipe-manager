@@ -1,0 +1,26 @@
+{
+  "project_type": "Nx monorepo with Angular frontend, Lambda backend, CDK infrastructure",
+  "language": "TypeScript",
+  "build_system": "Nx 23.1 with pnpm. The api project build target runs `tsc -p apps/api/tsconfig.app.json --noEmit` for type checking. CDK bundles Lambda via esbuild (NodejsFunction with entry property).",
+  "test_framework": "No test files currently exist for the API",
+  "build_command": "source /opt/env_var.sh && . \"$NVM_DIR/nvm.sh\" && nvm use 24 && cd /projects/sandbox/recipe-manager && pnpm install && pnpm nx build api",
+  "test_command": "No tests exist for api project. Verify with TypeScript type checking: pnpm nx build api",
+  "verification_instructions": "1. Run pnpm install to install dependencies. 2. Run pnpm nx build api to type-check the API. 3. Run pnpm nx build infra to type-check the CDK stack. 4. Run pnpm nx lint api to lint the API code.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "source /opt/env_var.sh && . \"$NVM_DIR/nvm.sh\" && nvm use 24 && cd /projects/sandbox/recipe-manager && pnpm install",
+  "environment_constraints": "Node.js 24.18.0 available (project requires 26 but 24 is sufficient for type-checking). pnpm 11.1.2 available via NVM. Network access to npmjs.org confirmed. No Docker daemon available.",
+  "contribution_requirements": "PR title must be semantic (e.g., 'refactor: split monolithic lambda handler'). TypeScript strict mode with noPropertyAccessFromIndexSignature - must use bracket notation for index signatures. Use NodejsFunction with entry property in CDK. CORS headers on every response.",
+  "key_patterns": "Single DynamoDB table with userId PK + id SK. byEntityType GSI for queries. User identity from event.requestContext.authorizer.claims.sub. Response helper function wraps status + CORS headers. Bedrock client for AI operations. HTML stripping for URL import. Large prompt templates with English/German examples.",
+  "relevant_files": [
+    "apps/api/src/handler.ts",
+    "apps/api/src/index.ts",
+    "apps/api/project.json",
+    "apps/api/tsconfig.app.json",
+    "apps/infra/src/stacks/recipe-manager-stack.ts",
+    "apps/infra/src/main.ts",
+    "libs/shared/src/index.ts",
+    ".kiro/steering/conventions.md",
+    ".kiro/steering/architecture.md"
+  ],
+  "directory_structure": "apps/api/src/ - Lambda handler source (currently single file). apps/infra/src/stacks/ - CDK stack. apps/web/ - Angular frontend. libs/shared/src/ - Shared TypeScript types. tsconfig.base.json defines @recipe-manager/shared path alias."
+}

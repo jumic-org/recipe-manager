@@ -1,0 +1,7 @@
+{
+  "task_id": "task-refactor-lambda-handler",
+  "task_description": "Refactor the monolithic 1538-line Lambda handler (apps/api/src/handler.ts) into multiple domain-specific Lambda handlers with shared utilities. Split into four handlers: recipes (CRUD + import), ingredients-on-hand (CRUD), supermarkets (CRUD), and sort-ingredients (AI operations). Update CDK stack to create four separate Lambda functions with appropriate route integrations and IAM permissions.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}
