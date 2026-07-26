@@ -124,18 +124,18 @@ jobs:
           echo "PR table: $PR_TABLE"
 
           TOTAL_ITEMS=0
-          NEXT_TOKEN=""
+          LAST_KEY=""
 
           while true; do
             # Build scan command with optional pagination token
-            if [[ -z "$NEXT_TOKEN" ]]; then
+            if [[ -z "$LAST_KEY" ]]; then
               SCAN_OUTPUT=$(aws dynamodb scan \
                 --table-name "$PROD_TABLE" \
                 --output json)
             else
               SCAN_OUTPUT=$(aws dynamodb scan \
                 --table-name "$PROD_TABLE" \
-                --starting-token "$NEXT_TOKEN" \
+                --exclusive-start-key "$LAST_KEY" \
                 --output json)
             fi
 
@@ -158,20 +158,42 @@ jobs:
                   --argjson start "$BATCH_START" --argjson end "$BATCH_END" \
                   '{($table): [.[$start:$end][] | {PutRequest: {Item: .}}]}')
 
-                aws dynamodb batch-write-item \
-                  --request-items "$BATCH_PAYLOAD" \
-                  --output json > /dev/null
+                # Write batch with retry logic for unprocessed items
+                RETRIES=0
+                MAX_RETRIES=3
+                CURRENT_PAYLOAD="$BATCH_PAYLOAD"
+
+                while [[ $RETRIES -le $MAX_RETRIES ]]; do
+                  WRITE_OUTPUT=$(aws dynamodb batch-write-item \
+                    --request-items "$CURRENT_PAYLOAD" \
+                    --output json)
+
+                  UNPROCESSED=$(echo "$WRITE_OUTPUT" | jq -c '.UnprocessedItems // {}')
+                  if [[ "$UNPROCESSED" == "{}" || -z "$UNPROCESSED" ]]; then
+                    break
+                  fi
+
+                  RETRIES=$((RETRIES + 1))
+                  if [[ $RETRIES -gt $MAX_RETRIES ]]; then
+                    echo "::error::Failed to process all items after $MAX_RETRIES retries."
+                    exit 1
+                  fi
+
+                  echo "Retrying unprocessed items (attempt $RETRIES/$MAX_RETRIES)..."
+                  sleep $((RETRIES * 2))
+                  CURRENT_PAYLOAD="$UNPROCESSED"
+                done
 
                 BATCH_SIZE=$(echo "$ITEMS" | jq --argjson start "$BATCH_START" --argjson end "$BATCH_END" \
-                  '[.[$start:$end]] | .[0] | length')
+                  '.[$start:$end] | length')
                 TOTAL_ITEMS=$((TOTAL_ITEMS + BATCH_SIZE))
                 BATCH_START=$BATCH_END
               done
             fi
 
-            # Check for pagination
-            NEXT_TOKEN=$(echo "$SCAN_OUTPUT" | jq -r '.NextToken // empty')
-            if [[ -z "$NEXT_TOKEN" ]]; then
+            # Check for pagination using LastEvaluatedKey
+            LAST_KEY=$(echo "$SCAN_OUTPUT" | jq -c '.LastEvaluatedKey // empty')
+            if [[ -z "$LAST_KEY" || "$LAST_KEY" == "null" ]]; then
               break
             fi
             echo "Fetching next page..."
