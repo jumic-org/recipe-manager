@@ -47,7 +47,7 @@ jobs:
         run: pnpm verify:web
 
       - name: Configure AWS credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@451ce2a72e8d729a59ebeaacab82dbce58e7af4c # v6
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v6
         with:
           role-to-assume: arn:aws:iam::352770552266:role/RecipeManagerGitHubDeployRole
           aws-region: ${{ env.AWS_REGION }}
