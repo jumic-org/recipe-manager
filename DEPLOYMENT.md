@@ -82,6 +82,22 @@ For PR deployments the same role is reused.  It additionally needs `cloudformati
   "Effect": "Allow",
   "Action": "cloudformation:DescribeStacks",
   "Resource": "arn:aws:cloudformation:eu-west-1:352770552266:stack/RecipeManagerStack/*"
+},
+{
+  "Sid": "SeedPRDatabaseFromProd",
+  "Effect": "Allow",
+  "Action": [
+    "dynamodb:Scan"
+  ],
+  "Resource": "arn:aws:dynamodb:eu-west-1:352770552266:table/RecipeManagerStack-*"
+},
+{
+  "Sid": "SeedPRDatabaseWrite",
+  "Effect": "Allow",
+  "Action": [
+    "dynamodb:BatchWriteItem"
+  ],
+  "Resource": "arn:aws:dynamodb:eu-west-1:352770552266:table/RecipeManagerStack-PR*"
 }
 ```
 

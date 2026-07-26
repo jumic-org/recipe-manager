@@ -348,5 +348,12 @@ export class RecipeManagerStack extends Stack {
       value: distribution.distributionId,
       description: 'CloudFront distribution ID',
     });
+
+    new CfnOutput(this, 'TableName', {
+      value: recipesTable.tableName,
+      description: isPrDeployment
+        ? 'DynamoDB table name for PR preview'
+        : 'DynamoDB table name for recipes',
+    });
   }
 }

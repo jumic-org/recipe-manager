@@ -95,6 +95,114 @@ jobs:
             --context mainUserPoolId="${{ steps.main-stack.outputs.userPoolId }}" \
             --context mainUserPoolClientId="${{ steps.main-stack.outputs.userPoolClientId }}"
 
+      # ── Seed PR database from production ───────────────────────────────────────
+      # Requires dynamodb:Scan on the production table and dynamodb:BatchWriteItem
+      # on the PR table. See DEPLOYMENT.md for IAM policy details.
+      - name: Seed PR database from production
+        run: |
+          # Read the production table name from the main stack outputs
+          PROD_TABLE=$(aws cloudformation describe-stacks \
+            --stack-name "$MAIN_STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='TableName'].OutputValue" \
+            --output text)
+
+          # Read the PR table name from the PR stack outputs
+          PR_TABLE=$(aws cloudformation describe-stacks \
+            --stack-name "$PR_STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='TableName'].OutputValue" \
+            --output text)
+
+          if [[ -z "$PROD_TABLE" || "$PROD_TABLE" == "None" ]]; then
+            echo "::warning::Could not read TableName from $MAIN_STACK_NAME. Skipping seed."
+            exit 0
+          fi
+
+          if [[ -z "$PR_TABLE" || "$PR_TABLE" == "None" ]]; then
+            echo "::warning::Could not read TableName from $PR_STACK_NAME. Skipping seed."
+            exit 0
+          fi
+
+          echo "Production table: $PROD_TABLE"
+          echo "PR table: $PR_TABLE"
+
+          TOTAL_ITEMS=0
+          LAST_KEY=""
+
+          while true; do
+            # Build scan command with optional pagination token
+            if [[ -z "$LAST_KEY" ]]; then
+              SCAN_OUTPUT=$(aws dynamodb scan \
+                --table-name "$PROD_TABLE" \
+                --output json)
+            else
+              SCAN_OUTPUT=$(aws dynamodb scan \
+                --table-name "$PROD_TABLE" \
+                --exclusive-start-key "$LAST_KEY" \
+                --output json)
+            fi
+
+            # Extract items from the scan result
+            ITEMS=$(echo "$SCAN_OUTPUT" | jq -c '.Items')
+            ITEM_COUNT=$(echo "$ITEMS" | jq 'length')
+
+            if [[ "$ITEM_COUNT" -eq 0 ]]; then
+              echo "No items found in this page."
+            else
+              echo "Processing $ITEM_COUNT items..."
+
+              # Write items in batches of 25
+              BATCH_START=0
+              while [[ $BATCH_START -lt $ITEM_COUNT ]]; do
+                BATCH_END=$((BATCH_START + 25))
+
+                # Build the batch-write-item payload
+                BATCH_PAYLOAD=$(echo "$ITEMS" | jq -c --arg table "$PR_TABLE" \
+                  --argjson start "$BATCH_START" --argjson end "$BATCH_END" \
+                  '{($table): [.[$start:$end][] | {PutRequest: {Item: .}}]}')
+
+                # Write batch with retry logic for unprocessed items
+                RETRIES=0
+                MAX_RETRIES=3
+                CURRENT_PAYLOAD="$BATCH_PAYLOAD"
+
+                while [[ $RETRIES -le $MAX_RETRIES ]]; do
+                  WRITE_OUTPUT=$(aws dynamodb batch-write-item \
+                    --request-items "$CURRENT_PAYLOAD" \
+                    --output json)
+
+                  UNPROCESSED=$(echo "$WRITE_OUTPUT" | jq -c '.UnprocessedItems // {}')
+                  if [[ "$UNPROCESSED" == "{}" || -z "$UNPROCESSED" ]]; then
+                    break
+                  fi
+
+                  RETRIES=$((RETRIES + 1))
+                  if [[ $RETRIES -gt $MAX_RETRIES ]]; then
+                    echo "::error::Failed to process all items after $MAX_RETRIES retries."
+                    exit 1
+                  fi
+
+                  echo "Retrying unprocessed items (attempt $RETRIES/$MAX_RETRIES)..."
+                  sleep $((RETRIES * 2))
+                  CURRENT_PAYLOAD="$UNPROCESSED"
+                done
+
+                BATCH_SIZE=$(echo "$ITEMS" | jq --argjson start "$BATCH_START" --argjson end "$BATCH_END" \
+                  '.[$start:$end] | length')
+                TOTAL_ITEMS=$((TOTAL_ITEMS + BATCH_SIZE))
+                BATCH_START=$BATCH_END
+              done
+            fi
+
+            # Check for pagination using LastEvaluatedKey
+            LAST_KEY=$(echo "$SCAN_OUTPUT" | jq -c '.LastEvaluatedKey // empty')
+            if [[ -z "$LAST_KEY" || "$LAST_KEY" == "null" ]]; then
+              break
+            fi
+            echo "Fetching next page..."
+          done
+
+          echo "Seeding complete. Copied $TOTAL_ITEMS items from $PROD_TABLE to $PR_TABLE."
+
       # ── Read the CloudFront URL from the new stack ────────────────────────────
       - name: Read PR stack CloudFront URL
         id: pr-stack
