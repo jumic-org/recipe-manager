@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Add a data seeding step to the deploy-pr.yml workflow that copies all data from the production DynamoDB table into the PR preview stack's DynamoDB table after deployment",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In .github/workflows/deploy-pr.yml, after the 'CDK Deploy PR stack' step, add a new step called 'Seed PR database from production'. This step should: (1) Read the production table name from the main stack's CloudFormation resources using `aws cloudformation describe-stack-resources` filtering for the DynamoDB table (resource type AWS::DynamoDB::Table), or alternatively use `aws cloudformation list-stack-resources` to find the table. (2) Read the PR stack's table name the same way. (3) Use `aws dynamodb scan` to read all items from the production table (handling pagination with --starting-token if LastEvaluatedKey is returned). (4) Use `aws dynamodb batch-write-item` to write the items into the PR table in batches of up to 25 items (DynamoDB BatchWriteItem limit). (5) Handle the case where the production table might be empty gracefully (just skip with a message). (6) Log how many items were copied.",
     "The script should be written as inline bash in the workflow step. Use a while loop for pagination of the scan. Use jq to transform scan output into batch-write-item format. The batch-write-item payload needs the table name and PutRequest items.",
@@ -24,5 +24,5 @@
     "Verify the workflow YAML is parseable: `export PATH=\"/root/.local/share/mise/installs/node/26.5.0/bin:$PATH\" && cd /projects/sandbox/recipe-manager && node -e \"const yaml = require('yaml'); const fs = require('fs'); yaml.parse(fs.readFileSync('.github/workflows/deploy-pr.yml', 'utf8')); console.log('Valid YAML');\"`"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All verification steps pass: infra builds, full build+lint succeeds, YAML is valid. Used yaml@2.9.0 from pnpm store for YAML validation since no top-level yaml module was available."
 }
