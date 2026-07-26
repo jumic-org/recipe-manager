@@ -96,6 +96,8 @@ jobs:
             --context mainUserPoolClientId="${{ steps.main-stack.outputs.userPoolClientId }}"
 
       # ── Seed PR database from production ───────────────────────────────────────
+      # Requires dynamodb:Scan on the production table and dynamodb:BatchWriteItem
+      # on the PR table. See DEPLOYMENT.md for IAM policy details.
       - name: Seed PR database from production
         run: |
           # Read the production table name from the main stack outputs
