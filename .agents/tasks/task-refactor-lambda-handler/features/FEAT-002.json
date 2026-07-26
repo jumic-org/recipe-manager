@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "refactor",
   "description": "Extract shared utilities from the monolithic handler into a shared module, then split the handler into four domain-specific Lambda handlers (recipes, ingredients-on-hand, supermarkets, sort-ingredients), and update the CDK stack to create four separate Lambda functions with their respective API Gateway route integrations.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create apps/api/src/shared/db.ts - export the DynamoDB client setup (DynamoDBClient, DynamoDBDocumentClient) and TABLE_NAME constant. Exact code to extract: `const client = new DynamoDBClient({}); const docClient = DynamoDBDocumentClient.from(client); const TABLE_NAME = process.env['TABLE_NAME'] ?? '';`",
     "Create apps/api/src/shared/bedrock.ts - export the Bedrock client setup. Exact code: `const BEDROCK_REGION = process.env['BEDROCK_REGION'] ?? process.env['AWS_REGION'] ?? 'eu-central-1'; const bedrockClient = new BedrockRuntimeClient({ region: BEDROCK_REGION });`",

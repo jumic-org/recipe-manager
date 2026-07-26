@@ -172,9 +172,15 @@ export class RecipeManagerStack extends Stack {
       ],
     });
 
-    // Lambda Function
-    const apiHandler = new NodejsFunction(this, 'RecipeApiHandler', {
-      entry: path.join(__dirname, '../../../api/src/handler.ts'),
+    // Lambda Functions - domain-specific handlers
+    const lambdaBundling = {
+      format: OutputFormat.CJS,
+      minify: true,
+      sourceMap: true,
+    };
+
+    const recipesHandler = new NodejsFunction(this, 'RecipesHandler', {
+      entry: path.join(__dirname, '../../../api/src/handlers/recipes.ts'),
       handler: 'handler',
       runtime: Runtime.NODEJS_24_X,
       memorySize: 256,
@@ -182,27 +188,63 @@ export class RecipeManagerStack extends Stack {
       environment: {
         TABLE_NAME: recipesTable.tableName,
       },
-      bundling: {
-        format: OutputFormat.CJS,
-        minify: true,
-        sourceMap: true,
-      },
+      bundling: lambdaBundling,
     });
 
-    recipesTable.grantReadWriteData(apiHandler);
+    const ingredientsOnHandHandler = new NodejsFunction(this, 'IngredientsOnHandHandler', {
+      entry: path.join(__dirname, '../../../api/src/handlers/ingredients-on-hand.ts'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_24_X,
+      memorySize: 256,
+      timeout: Duration.seconds(60),
+      environment: {
+        TABLE_NAME: recipesTable.tableName,
+      },
+      bundling: lambdaBundling,
+    });
 
-    // Grant Bedrock InvokeModel permission
+    const supermarketsHandler = new NodejsFunction(this, 'SupermarketsHandler', {
+      entry: path.join(__dirname, '../../../api/src/handlers/supermarkets.ts'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_24_X,
+      memorySize: 256,
+      timeout: Duration.seconds(60),
+      environment: {
+        TABLE_NAME: recipesTable.tableName,
+      },
+      bundling: lambdaBundling,
+    });
+
+    const sortIngredientsHandler = new NodejsFunction(this, 'SortIngredientsHandler', {
+      entry: path.join(__dirname, '../../../api/src/handlers/sort-ingredients.ts'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_24_X,
+      memorySize: 256,
+      timeout: Duration.seconds(60),
+      environment: {
+        TABLE_NAME: recipesTable.tableName,
+      },
+      bundling: lambdaBundling,
+    });
+
+    // Grant DynamoDB read/write to all handlers
+    recipesTable.grantReadWriteData(recipesHandler);
+    recipesTable.grantReadWriteData(ingredientsOnHandHandler);
+    recipesTable.grantReadWriteData(supermarketsHandler);
+    recipesTable.grantReadWriteData(sortIngredientsHandler);
+
+    // Grant Bedrock InvokeModel permission only to handlers that use AI
     // Cross-region inference profiles require permission on both the inference profile
     // itself and the underlying foundation model that requests are routed to.
-    apiHandler.addToRolePolicy(
-      new PolicyStatement({
-        actions: ['bedrock:InvokeModel'],
-        resources: [
-          'arn:aws:bedrock:*:*:inference-profile/eu.amazon.nova-lite-v1:0',
-          'arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0',
-        ],
-      })
-    );
+    const bedrockPolicy = new PolicyStatement({
+      actions: ['bedrock:InvokeModel'],
+      resources: [
+        'arn:aws:bedrock:*:*:inference-profile/eu.amazon.nova-lite-v1:0',
+        'arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0',
+      ],
+    });
+    recipesHandler.addToRolePolicy(bedrockPolicy);
+    sortIngredientsHandler.addToRolePolicy(bedrockPolicy);
 
     // API Gateway with Cognito Authorizer
     const cognitoAuthorizer = new CognitoUserPoolsAuthorizer(this, 'CognitoAuthorizer', {
@@ -226,7 +268,10 @@ export class RecipeManagerStack extends Stack {
       },
     });
 
-    const lambdaIntegration = new LambdaIntegration(apiHandler);
+    const recipesIntegration = new LambdaIntegration(recipesHandler);
+    const ingredientsOnHandIntegration = new LambdaIntegration(ingredientsOnHandHandler);
+    const supermarketsIntegration = new LambdaIntegration(supermarketsHandler);
+    const sortIngredientsIntegration = new LambdaIntegration(sortIngredientsHandler);
 
     const methodOptions = {
       authorizationType: AuthorizationType.COGNITO,
@@ -234,57 +279,57 @@ export class RecipeManagerStack extends Stack {
     };
 
     // Root resource
-    api.root.addMethod('GET', lambdaIntegration, methodOptions);
+    api.root.addMethod('GET', recipesIntegration, methodOptions);
 
     // /recipes resource
     const recipes = api.root.addResource('recipes');
-    recipes.addMethod('GET', lambdaIntegration, methodOptions);
-    recipes.addMethod('POST', lambdaIntegration, methodOptions);
+    recipes.addMethod('GET', recipesIntegration, methodOptions);
+    recipes.addMethod('POST', recipesIntegration, methodOptions);
 
     // /recipes/import resource
     const importResource = recipes.addResource('import');
-    importResource.addMethod('POST', lambdaIntegration, methodOptions);
+    importResource.addMethod('POST', recipesIntegration, methodOptions);
 
     // /recipes/import-text resource
     const importTextResource = recipes.addResource('import-text');
-    importTextResource.addMethod('POST', lambdaIntegration, methodOptions);
+    importTextResource.addMethod('POST', recipesIntegration, methodOptions);
 
     // /recipes/{id} resource
     const recipe = recipes.addResource('{id}');
-    recipe.addMethod('GET', lambdaIntegration, methodOptions);
-    recipe.addMethod('PUT', lambdaIntegration, methodOptions);
-    recipe.addMethod('DELETE', lambdaIntegration, methodOptions);
+    recipe.addMethod('GET', recipesIntegration, methodOptions);
+    recipe.addMethod('PUT', recipesIntegration, methodOptions);
+    recipe.addMethod('DELETE', recipesIntegration, methodOptions);
 
     // /ingredients-on-hand resource
     const ingredientsOnHand = api.root.addResource('ingredients-on-hand');
-    ingredientsOnHand.addMethod('GET', lambdaIntegration, methodOptions);
-    ingredientsOnHand.addMethod('POST', lambdaIntegration, methodOptions);
+    ingredientsOnHand.addMethod('GET', ingredientsOnHandIntegration, methodOptions);
+    ingredientsOnHand.addMethod('POST', ingredientsOnHandIntegration, methodOptions);
 
     // /ingredients-on-hand/{id} resource
     const ingredientOnHand = ingredientsOnHand.addResource('{id}');
-    ingredientOnHand.addMethod('DELETE', lambdaIntegration, methodOptions);
+    ingredientOnHand.addMethod('DELETE', ingredientsOnHandIntegration, methodOptions);
 
     // /supermarkets resource
     const supermarkets = api.root.addResource('supermarkets');
-    supermarkets.addMethod('GET', lambdaIntegration, methodOptions);
-    supermarkets.addMethod('POST', lambdaIntegration, methodOptions);
+    supermarkets.addMethod('GET', supermarketsIntegration, methodOptions);
+    supermarkets.addMethod('POST', supermarketsIntegration, methodOptions);
 
     // /supermarkets/{id} resource
     const supermarket = supermarkets.addResource('{id}');
-    supermarket.addMethod('PUT', lambdaIntegration, methodOptions);
-    supermarket.addMethod('DELETE', lambdaIntegration, methodOptions);
+    supermarket.addMethod('PUT', supermarketsIntegration, methodOptions);
+    supermarket.addMethod('DELETE', supermarketsIntegration, methodOptions);
 
     // /sort-ingredients resource
     const sortIngredients = api.root.addResource('sort-ingredients');
-    sortIngredients.addMethod('POST', lambdaIntegration, methodOptions);
+    sortIngredients.addMethod('POST', sortIngredientsIntegration, methodOptions);
 
     // /sort-ingredients-prompt resource
     const sortIngredientsPrompt = api.root.addResource('sort-ingredients-prompt');
-    sortIngredientsPrompt.addMethod('POST', lambdaIntegration, methodOptions);
+    sortIngredientsPrompt.addMethod('POST', sortIngredientsIntegration, methodOptions);
 
     // /sort-ingredients-manual resource
     const sortIngredientsManual = api.root.addResource('sort-ingredients-manual');
-    sortIngredientsManual.addMethod('POST', lambdaIntegration, methodOptions);
+    sortIngredientsManual.addMethod('POST', sortIngredientsIntegration, methodOptions);
 
     // Frontend Deployment - deploys Angular build files AND runtime config.json
     // config.json is generated with real Cognito/API values resolved at deploy time.
