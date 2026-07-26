@@ -221,17 +221,13 @@ export class RecipeManagerStack extends Stack {
       runtime: Runtime.NODEJS_24_X,
       memorySize: 256,
       timeout: Duration.seconds(60),
-      environment: {
-        TABLE_NAME: recipesTable.tableName,
-      },
       bundling: lambdaBundling,
     });
 
-    // Grant DynamoDB read/write to all handlers
+    // Grant DynamoDB read/write only to handlers that access DynamoDB
     recipesTable.grantReadWriteData(recipesHandler);
     recipesTable.grantReadWriteData(ingredientsOnHandHandler);
     recipesTable.grantReadWriteData(supermarketsHandler);
-    recipesTable.grantReadWriteData(sortIngredientsHandler);
 
     // Grant Bedrock InvokeModel permission only to handlers that use AI
     // Cross-region inference profiles require permission on both the inference profile

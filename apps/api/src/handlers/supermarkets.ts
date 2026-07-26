@@ -11,7 +11,9 @@ import {
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { Supermarket, CreateSupermarketInput, UpdateSupermarketInput, Aisle } from '@recipe-manager/shared';
-import { docClient, TABLE_NAME, response, getUserId } from '../shared';
+import { docClient, TABLE_NAME } from '../shared/db';
+import { response } from '../shared/response';
+import { getUserId } from '../shared/auth';
 
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent,

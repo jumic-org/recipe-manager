@@ -5,7 +5,9 @@ import type {
 } from 'aws-lambda';
 import { InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import type { Ingredient, Aisle } from '@recipe-manager/shared';
-import { bedrockClient, response, getUserId } from '../shared';
+import { bedrockClient } from '../shared/bedrock';
+import { response } from '../shared/response';
+import { getUserId } from '../shared/auth';
 
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent,
@@ -44,6 +46,60 @@ export const handler: APIGatewayProxyHandler = async (
     return response(500, { message: 'Internal server error' });
   }
 };
+
+function parseAndMatchGroups(
+  outputText: string,
+  ingredients: Ingredient[],
+): { aisle: string; ingredients: Ingredient[] }[] {
+  // Strip markdown code fences if present
+  let jsonText = outputText.trim();
+  if (jsonText.startsWith('```')) {
+    jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+  }
+
+  const parsedJson = JSON.parse(jsonText);
+
+  // Handle both formats: {"groups":[...]} or bare array [...]
+  const rawGroups: { aisle: string; products?: (string | number)[]; ingredientIndices?: number[] }[] = Array.isArray(parsedJson)
+    ? parsedJson
+    : parsedJson.groups ?? [];
+
+  // Map products/indices back to actual ingredients
+  const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
+  const matchedIndices = new Set<number>();
+  for (const group of rawGroups) {
+    const groupIngredients: Ingredient[] = [];
+    const products: (string | number)[] = group.products || group.ingredientIndices || [];
+    for (const product of products) {
+      if (typeof product === 'number') {
+        // Legacy index format
+        if (product >= 0 && product < ingredients.length && !matchedIndices.has(product)) {
+          groupIngredients.push(ingredients[product]);
+          matchedIndices.add(product);
+        }
+      } else {
+        // Name-based format with fuzzy matching
+        const lowerProduct = product.toLowerCase();
+        const idx = ingredients.findIndex((ing, i) =>
+          !matchedIndices.has(i) && (
+            ing.name.toLowerCase() === lowerProduct ||
+            ing.name.toLowerCase().includes(lowerProduct) ||
+            lowerProduct.includes(ing.name.toLowerCase())
+          )
+        );
+        if (idx >= 0) {
+          groupIngredients.push(ingredients[idx]);
+          matchedIndices.add(idx);
+        }
+      }
+    }
+    if (groupIngredients.length > 0) {
+      groups.push({ aisle: group.aisle, ingredients: groupIngredients });
+    }
+  }
+
+  return groups;
+}
 
 function generateSortPrompts(
   ingredients: Ingredient[],
@@ -201,52 +257,7 @@ async function sortIngredients(
       return response(502, { message: 'Failed to get a valid response from AI model' });
     }
 
-    // Parse the JSON from the model output (handle potential markdown code blocks)
-    let jsonText = outputText.trim();
-    if (jsonText.startsWith('```')) {
-      jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
-    }
-
-    const parsedJson = JSON.parse(jsonText);
-
-    // Handle both formats: {"groups":[...]} or bare array [...]
-    const rawGroups: { aisle: string; products?: (string | number)[]; ingredientIndices?: number[] }[] = Array.isArray(parsedJson)
-      ? parsedJson
-      : parsedJson.groups ?? [];
-
-    // Map products/indices back to actual ingredients
-    const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
-    const matchedIndices = new Set<number>();
-    for (const group of rawGroups) {
-      const groupIngredients: Ingredient[] = [];
-      const products: (string | number)[] = group.products || group.ingredientIndices || [];
-      for (const product of products) {
-        if (typeof product === 'number') {
-          // Legacy index format
-          if (product >= 0 && product < ingredients.length && !matchedIndices.has(product)) {
-            groupIngredients.push(ingredients[product]);
-            matchedIndices.add(product);
-          }
-        } else {
-          // New name-based format
-          const lowerProduct = product.toLowerCase();
-          const idx = ingredients.findIndex((ing, i) =>
-            !matchedIndices.has(i) && (
-              ing.name.toLowerCase() === lowerProduct ||
-              ing.name.toLowerCase().includes(lowerProduct) ||
-              lowerProduct.includes(ing.name.toLowerCase())
-            )
-          );
-          if (idx >= 0) {
-            groupIngredients.push(ingredients[idx]);
-            matchedIndices.add(idx);
-          }
-        }
-      }
-      if (groupIngredients.length > 0) {
-        groups.push({ aisle: group.aisle, ingredients: groupIngredients });
-      }
-    }
+    const groups = parseAndMatchGroups(outputText, ingredients);
 
     return response(200, { groups });
   } catch (error) {
@@ -331,52 +342,7 @@ async function sortIngredientsManual(
       return response(502, { message: 'Failed to get a valid response from AI model', rawResponse: '' });
     }
 
-    // Parse the JSON from the model output (handle potential markdown code blocks)
-    let jsonText = outputText.trim();
-    if (jsonText.startsWith('```')) {
-      jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
-    }
-
-    const parsedJson = JSON.parse(jsonText);
-
-    // Handle both formats: {"groups":[...]} or bare array [...]
-    const rawGroups: { aisle: string; products?: (string | number)[]; ingredientIndices?: number[] }[] = Array.isArray(parsedJson)
-      ? parsedJson
-      : parsedJson.groups ?? [];
-
-    // Map products/indices back to actual ingredients
-    const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
-    const matchedIndices = new Set<number>();
-    for (const group of rawGroups) {
-      const groupIngredients: Ingredient[] = [];
-      const products: (string | number)[] = group.products || group.ingredientIndices || [];
-      for (const product of products) {
-        if (typeof product === 'number') {
-          // Legacy index format
-          if (product >= 0 && product < ingredients.length && !matchedIndices.has(product)) {
-            groupIngredients.push(ingredients[product]);
-            matchedIndices.add(product);
-          }
-        } else {
-          // New name-based format
-          const lowerProduct = product.toLowerCase();
-          const idx = ingredients.findIndex((ing, i) =>
-            !matchedIndices.has(i) && (
-              ing.name.toLowerCase() === lowerProduct ||
-              ing.name.toLowerCase().includes(lowerProduct) ||
-              lowerProduct.includes(ing.name.toLowerCase())
-            )
-          );
-          if (idx >= 0) {
-            groupIngredients.push(ingredients[idx]);
-            matchedIndices.add(idx);
-          }
-        }
-      }
-      if (groupIngredients.length > 0) {
-        groups.push({ aisle: group.aisle, ingredients: groupIngredients });
-      }
-    }
+    const groups = parseAndMatchGroups(outputText, ingredients);
 
     return response(200, { groups, rawResponse: outputText });
   } catch (error) {
