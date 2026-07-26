@@ -1,0 +1,7 @@
+{
+  "task_id": "task-seed-pr-dynamodb",
+  "task_description": "Seed the PR preview DynamoDB table with production data by adding a workflow step that scans the prod table and batch-writes all items to the new PR table after deployment",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001"],
+  "blocked_reason": null
+}

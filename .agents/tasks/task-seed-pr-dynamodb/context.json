@@ -1,0 +1,21 @@
+{
+  "project_type": "Nx monorepo with Angular frontend, Lambda API, CDK infrastructure",
+  "language": "TypeScript",
+  "build_system": "pnpm + Nx. Use `pnpm nx build infra` to build the infra app. Use `pnpm nx run-many -t build` for all apps. CDK app entry point uses ts-node directly.",
+  "test_framework": "No test runner currently configured. Testing steering recommends Vitest but it is not installed.",
+  "build_command": "export PATH=\"/root/.local/share/mise/installs/node/26.5.0/bin:$PATH\" && cd /projects/sandbox/recipe-manager && pnpm nx run-many -t build lint",
+  "test_command": "No test command available - project has no test runner configured",
+  "verification_instructions": "1. Run `pnpm nx run-many -t build lint` to verify all apps build and lint passes. 2. Verify the workflow YAML is valid syntax. 3. CDK synth cannot fully run without Angular build output (dist/apps/web/browser), so validate infra compilation via `pnpm nx build infra`.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "export PATH=\"/root/.local/share/mise/installs/node/26.5.0/bin:$PATH\" && cd /projects/sandbox/recipe-manager && pnpm install --frozen-lockfile",
+  "environment_constraints": "Node.js 26.5.0 installed via mise. pnpm 10.14.0 installed globally. No AWS credentials available (cannot run actual CDK deploy). CDK synth fails without Angular dist output but infra TypeScript compilation works.",
+  "contribution_requirements": "PR titles must follow semantic PR format (e.g., 'feat: ...'). Always run full build and lint before submitting. See .kiro/steering/conventions.md.",
+  "key_patterns": "CDK stack in apps/infra/src/stacks/recipe-manager-stack.ts. PR preview uses context values (prNumber, prUrl, mainUserPoolId, mainUserPoolClientId). deploy-pr.yml workflow handles PR deployments. DynamoDB table outputs are available as CloudFormation stack outputs. Table uses userId (partition) + id (sort key). DynamoDB table resource logical ID in the stack is 'RecipesTable'.",
+  "relevant_files": [
+    ".github/workflows/deploy-pr.yml",
+    "apps/infra/src/stacks/recipe-manager-stack.ts",
+    "apps/infra/src/main.ts",
+    ".github/workflows/cleanup-pr.yml"
+  ],
+  "directory_structure": "apps/api/ - Lambda handler, apps/infra/ - CDK infrastructure, apps/web/ - Angular frontend, libs/shared/ - shared types, .github/workflows/ - CI/CD workflows, scripts/ - utility scripts"
+}
