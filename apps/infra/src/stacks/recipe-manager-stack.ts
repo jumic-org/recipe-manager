@@ -89,6 +89,13 @@ export class RecipeManagerStack extends Stack {
       projectionType: ProjectionType.ALL,
     });
 
+    recipesTable.addGlobalSecondaryIndex({
+      indexName: 'byEntityType',
+      partitionKey: { name: 'userId', type: AttributeType.STRING },
+      sortKey: { name: 'entityType', type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
+    });
+
     // Cognito User Pool - either create new or import existing
     let userPool: import('aws-cdk-lib/aws-cognito').IUserPool;
     let userPoolClient: UserPoolClient;
@@ -247,6 +254,37 @@ export class RecipeManagerStack extends Stack {
     recipe.addMethod('GET', lambdaIntegration, methodOptions);
     recipe.addMethod('PUT', lambdaIntegration, methodOptions);
     recipe.addMethod('DELETE', lambdaIntegration, methodOptions);
+
+    // /ingredients-on-hand resource
+    const ingredientsOnHand = api.root.addResource('ingredients-on-hand');
+    ingredientsOnHand.addMethod('GET', lambdaIntegration, methodOptions);
+    ingredientsOnHand.addMethod('POST', lambdaIntegration, methodOptions);
+
+    // /ingredients-on-hand/{id} resource
+    const ingredientOnHand = ingredientsOnHand.addResource('{id}');
+    ingredientOnHand.addMethod('DELETE', lambdaIntegration, methodOptions);
+
+    // /supermarkets resource
+    const supermarkets = api.root.addResource('supermarkets');
+    supermarkets.addMethod('GET', lambdaIntegration, methodOptions);
+    supermarkets.addMethod('POST', lambdaIntegration, methodOptions);
+
+    // /supermarkets/{id} resource
+    const supermarket = supermarkets.addResource('{id}');
+    supermarket.addMethod('PUT', lambdaIntegration, methodOptions);
+    supermarket.addMethod('DELETE', lambdaIntegration, methodOptions);
+
+    // /sort-ingredients resource
+    const sortIngredients = api.root.addResource('sort-ingredients');
+    sortIngredients.addMethod('POST', lambdaIntegration, methodOptions);
+
+    // /sort-ingredients-prompt resource
+    const sortIngredientsPrompt = api.root.addResource('sort-ingredients-prompt');
+    sortIngredientsPrompt.addMethod('POST', lambdaIntegration, methodOptions);
+
+    // /sort-ingredients-manual resource
+    const sortIngredientsManual = api.root.addResource('sort-ingredients-manual');
+    sortIngredientsManual.addMethod('POST', lambdaIntegration, methodOptions);
 
     // Frontend Deployment - deploys Angular build files AND runtime config.json
     // config.json is generated with real Cognito/API values resolved at deploy time.

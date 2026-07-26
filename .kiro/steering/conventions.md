@@ -162,3 +162,12 @@ function response(statusCode: number, body?: unknown): APIGatewayProxyResult {
   ```json
   "@recipe-manager/shared": ["libs/shared/src/index.ts"]
   ```
+
+## Language-Specific AI Prompts
+
+When calling Bedrock for user-facing features, always pass the user's current language (from the frontend's `TranslateService.getCurrentLang()`) to the API. The backend should use language-specific prompts to improve AI output quality:
+
+- Pass `language` in the request body alongside other parameters.
+- Default to `'en'` when no language is specified.
+- Use the same language as the user's data for the prompt instructions (e.g., German prompt for German ingredient names and aisle categories).
+- The prompt structure and JSON output format should remain consistent regardless of language.

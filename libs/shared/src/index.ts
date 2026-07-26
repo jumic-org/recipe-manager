@@ -20,6 +20,7 @@ export interface NutritionalInfo {
 export interface Recipe {
   id: string;
   userId: string;
+  entityType: 'recipe';
   title: string;
   description: string;
   servings: number;
@@ -37,6 +38,35 @@ export interface Recipe {
   updatedAt: string;
 }
 
-export type CreateRecipeInput = Omit<Recipe, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
+export type CreateRecipeInput = Omit<Recipe, 'id' | 'userId' | 'entityType' | 'createdAt' | 'updatedAt'>;
 
-export type UpdateRecipeInput = Omit<Recipe, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
+export type UpdateRecipeInput = Omit<Recipe, 'id' | 'userId' | 'entityType' | 'createdAt' | 'updatedAt'>;
+
+export interface IngredientOnHand {
+  id: string;
+  userId: string;
+  entityType: 'ingredientOnHand';
+  name: string;
+  createdAt: string;
+}
+
+export type CreateIngredientOnHandInput = Omit<IngredientOnHand, 'id' | 'userId' | 'entityType' | 'createdAt'>;
+
+export interface Aisle {
+  name: string;
+  comment?: string;
+}
+
+export interface Supermarket {
+  id: string;
+  userId: string;
+  entityType: 'supermarket';
+  name: string;
+  aisles: Aisle[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateSupermarketInput = Omit<Supermarket, 'id' | 'userId' | 'entityType' | 'createdAt' | 'updatedAt'>;
+
+export type UpdateSupermarketInput = Omit<Supermarket, 'id' | 'userId' | 'entityType' | 'createdAt' | 'updatedAt'>;

@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-006",
+  "type": "feat",
+  "description": "Add optional comment field to aisles and add few-shot example to Bedrock sort prompt to improve sorting quality",
+  "status": "completed",
+  "steps": [
+    "Update libs/shared/src/index.ts: add Aisle interface with name (string) and comment (optional string), change Supermarket.aisles to Aisle[]",
+    "Update apps/api/src/handler.ts: update createSupermarket and updateSupermarket validation to accept Aisle objects, update sortIngredients to pass comments in prompt and add few-shot example",
+    "Update apps/web/src/app/supermarkets/supermarket-form.component.ts: change aisles to Aisle[], add comment input field next to each aisle",
+    "Update apps/web/src/app/supermarkets/supermarket.service.ts: update sortIngredients to pass Aisle[] instead of string[]",
+    "Update apps/web/src/app/supermarkets/supermarket-view.component.ts: update to pass full Aisle objects to sortIngredients",
+    "Update apps/web/src/app/supermarkets/supermarket-list.component.ts: no changes needed since it just accesses aisles.length",
+    "Add i18n keys for comment placeholder in en.json and de.json"
+  ],
+  "acceptance_criteria": [
+    "Aisle interface exported from shared library with name and optional comment fields",
+    "Supermarket.aisles uses Aisle[] instead of string[]",
+    "API validation accepts objects with name (required string) and comment (optional string)",
+    "Bedrock sort prompt includes aisle comments in parentheses when available",
+    "Bedrock sort prompt includes a few-shot example showing expected behavior",
+    "Frontend form shows comment input next to each aisle name",
+    "sortIngredients service passes full Aisle[] to the API",
+    "npx nx run-many -t build lint passes cleanly"
+  ],
+  "verification": [
+    "Run: eval \"$(mise activate bash)\" && npx nx run-many -t build lint"
+  ],
+  "blocked_reason": null,
+  "findings": "All builds and lints pass cleanly. Changed aisles from string[] to Aisle[] (with name and optional comment). The API sortIngredients function now normalizes both legacy string[] and new Aisle[] formats. Added few-shot example in both English and German prompts. Frontend form now shows a comment input when editing an aisle. Pre-existing bundle size warnings remain unchanged."
+}

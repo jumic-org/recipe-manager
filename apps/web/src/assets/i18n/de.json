@@ -5,6 +5,8 @@
     "THEME_TOGGLE_DARK": "Zum dunklen Modus wechseln",
     "NAV": {
       "MY_RECIPES": "Meine Rezepte",
+      "PANTRY": "Vorratskammer",
+      "SUPERMARKETS": "Supermärkte",
       "SIGN_IN": "Anmelden",
       "SIGN_OUT": "Abmelden",
       "CHANGE_PASSWORD": "Passwort ändern"
@@ -70,6 +72,7 @@
       "LOADING": "Rezept wird geladen...",
       "EDIT": "Bearbeiten",
       "DELETE": "Löschen",
+      "SHOPPING_VIEW": "Einkaufsansicht",
       "CONFIRM_DELETE": "Sind Sie sicher, dass Sie dieses Rezept löschen möchten?",
       "PREP_TIME": "Vorbereitungszeit",
       "COOK_TIME": "Kochzeit",
@@ -125,15 +128,90 @@
       "URL_PLACEHOLDER": "https://beispiel.de/rezept/...",
       "URL_REQUIRED": "URL ist erforderlich",
       "TEXT_LABEL": "Rezepttext",
-      "TEXT_PLACEHOLDER": "Rezepttext hier einfuegen...",
+      "TEXT_PLACEHOLDER": "Rezepttext hier einfügen...",
       "TEXT_REQUIRED": "Rezepttext ist erforderlich",
-      "TEXT_DESCRIPTION": "Rezepttext unten einfuegen und wir konvertieren ihn automatisch in ein strukturiertes Rezept.",
+      "TEXT_DESCRIPTION": "Rezepttext unten einfügen und wir konvertieren ihn automatisch in ein strukturiertes Rezept.",
       "SUBMIT": "Rezept importieren",
       "SUBMITTING": "Rezept wird importiert...",
       "CANCEL": "Abbrechen",
       "SUCCESS": "Rezept erfolgreich importiert!",
-      "ERROR": "Rezept konnte nicht importiert werden. Bitte URL pruefen und erneut versuchen.",
-      "INVALID_URL": "Bitte geben Sie eine gueltige HTTPS-URL ein (z.B. https://example.com/rezept)"
+      "ERROR": "Rezept konnte nicht importiert werden. Bitte URL prüfen und erneut versuchen.",
+      "INVALID_URL": "Bitte geben Sie eine gültige HTTPS-URL ein (z.B. https://example.com/rezept)"
     }
+  },
+  "PANTRY": {
+    "TITLE": "Vorratskammer - Zutaten auf Lager",
+    "LOADING": "Zutaten werden geladen...",
+    "EMPTY": "Noch keine Zutaten auf Lager. Fügen Sie welche hinzu!",
+    "NAME_PLACEHOLDER": "Zutatname",
+    "ADD": "Hinzufügen",
+    "ADDING": "Wird hinzugefügt...",
+    "DELETE": "Entfernen",
+    "ADD_ERROR": "Zutat konnte nicht hinzugefügt werden",
+    "DELETE_ERROR": "Zutat konnte nicht entfernt werden",
+    "LOAD_ERROR": "Zutaten konnten nicht geladen werden"
+  },
+  "SUPERMARKETS": {
+    "LIST": {
+      "TITLE": "Supermärkte",
+      "NEW": "Neuer Supermarkt",
+      "LOADING": "Supermärkte werden geladen...",
+      "EMPTY": "Noch keine Supermärkte. Fügen Sie einen hinzu!",
+      "AISLES_COUNT": "{{count}} Gänge",
+      "EDIT": "Bearbeiten",
+      "DELETE": "Löschen",
+      "CONFIRM_DELETE": "Sind Sie sicher, dass Sie diesen Supermarkt löschen möchten?",
+      "LOAD_ERROR": "Supermärkte konnten nicht geladen werden",
+      "DELETE_ERROR": "Supermarkt konnte nicht gelöscht werden"
+    },
+    "FORM": {
+      "TITLE_NEW": "Neuer Supermarkt",
+      "TITLE_EDIT": "Supermarkt bearbeiten",
+      "LOADING": "Laden...",
+      "NAME_LABEL": "Name",
+      "NAME_PLACEHOLDER": "Supermarktname",
+      "AISLES_TITLE": "Gänge",
+      "AISLE_PLACEHOLDER": "Gangname",
+      "COMMENT_PLACEHOLDER": "Produktbeispiele (optional)",
+      "ADD_AISLE": "+ Gang hinzufügen",
+      "UP": "Hoch",
+      "DOWN": "Runter",
+      "EDIT": "Bearbeiten",
+      "CANCEL": "Abbrechen",
+      "CREATE": "Supermarkt erstellen",
+      "UPDATE": "Supermarkt aktualisieren",
+      "SAVING": "Speichern...",
+      "LOAD_ERROR": "Supermarkt konnte nicht geladen werden",
+      "SAVE_ERROR": "Supermarkt konnte nicht gespeichert werden"
+    }
+  },
+  "SUPERMARKET_VIEW": {
+    "TITLE": "Einkaufsliste: {{recipeName}}",
+    "LOADING": "Laden...",
+    "SORTING": "Artikel werden in Gänge sortiert...",
+    "SELECT_SUPERMARKET": "Supermarkt",
+    "NO_SUPERMARKET": "-- Supermarkt auswählen --",
+    "TO_PURCHASE": "Zu kaufen",
+    "ON_HAND": "Auf Lager",
+    "COPY": "Liste kopieren",
+    "COPIED": "Kopiert!",
+    "NOTHING_TO_BUY": "Nichts zu kaufen - Sie haben alles!",
+    "NOTHING_ON_HAND": "Keine passenden Zutaten auf Lager.",
+    "OTHER_AISLE": "Unbekannt",
+    "RECIPE_NOT_FOUND": "Rezept nicht gefunden",
+    "LOAD_ERROR": "Einkaufsansicht konnte nicht geladen werden"
+  },
+  "MANUAL_SUPERMARKET_VIEW": {
+    "TITLE": "Manuelle Einkaufsansicht: {{recipeName}}",
+    "SYSTEM_PROMPT": "System Prompt",
+    "USER_PROMPT": "Benutzer-Prompt",
+    "TEMPERATURE": "Temperatur",
+    "MAX_TOKENS": "Max Tokens",
+    "EXECUTE": "Ausführen",
+    "EXECUTING": "Wird ausgeführt...",
+    "RAW_RESPONSE": "Rohe Bedrock-Antwort",
+    "RESULT": "Ergebnis",
+    "MANUAL_MODE": "Manueller Modus",
+    "BACK_TO_AUTO": "Zurück zum Auto-Modus"
   }
 }

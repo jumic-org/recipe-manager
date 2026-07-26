@@ -24,6 +24,8 @@
     <nav>
       @if (isAuthenticated$ | async) {
         <a routerLink="/recipes" class="nav-link">{{ 'APP.NAV.MY_RECIPES' | translate }}</a>
+        <a routerLink="/pantry" class="nav-link">{{ 'APP.NAV.PANTRY' | translate }}</a>
+        <a routerLink="/supermarkets" class="nav-link">{{ 'APP.NAV.SUPERMARKETS' | translate }}</a>
         <a routerLink="/change-password" class="nav-link">{{ 'APP.NAV.CHANGE_PASSWORD' | translate }}</a>
         <button class="btn-logout" (click)="signOut()">{{ 'APP.NAV.SIGN_OUT' | translate }}</button>
       } @else {

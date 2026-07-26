@@ -1,0 +1,20 @@
+{
+  "id": "FEAT-009",
+  "type": "fix",
+  "description": "Fix Bedrock response parsing to handle both wrapped {groups:[...]} and bare array [...] formats",
+  "status": "completed",
+  "steps": [
+    "In apps/api/src/handler.ts sortIngredients function, change parsing to detect both formats: {groups:[...]} wrapper and bare array [...]",
+    "In apps/api/src/handler.ts sortIngredientsManual function, apply the same fix"
+  ],
+  "acceptance_criteria": [
+    "sortIngredients correctly parses both {groups:[...]} and bare array [...] Bedrock responses",
+    "sortIngredientsManual correctly parses both {groups:[...]} and bare array [...] Bedrock responses",
+    "npx nx build api and npx nx lint api pass cleanly"
+  ],
+  "verification": [
+    "Run: eval \"$(mise activate bash)\" && npx nx build api && npx nx lint api"
+  ],
+  "blocked_reason": null,
+  "findings": "Both sortIngredients and sortIngredientsManual now handle bare array format from Bedrock. Build and lint pass cleanly."
+}

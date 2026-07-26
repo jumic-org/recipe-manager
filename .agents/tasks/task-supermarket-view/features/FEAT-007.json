@@ -1,0 +1,23 @@
+{
+  "id": "FEAT-007",
+  "type": "fix",
+  "description": "Rewrite Bedrock sort prompts to enforce strict aisle ordering and lower temperature to 0.1",
+  "status": "completed",
+  "steps": [
+    "Rewrite the German prompt in sortIngredients to use a two-step approach emphasizing that output groups MUST appear in the exact numbered order of the aisles",
+    "Rewrite the English prompt in sortIngredients with the same two-step ordering-first approach",
+    "Lower the temperature from 0.2 to 0.1 in the InvokeModelCommand inferenceConfig"
+  ],
+  "acceptance_criteria": [
+    "German prompt makes ordering the absolute primary focus with explicit numbered aisle references",
+    "English prompt makes ordering the absolute primary focus with explicit numbered aisle references",
+    "Temperature is set to 0.1 instead of 0.2",
+    "formatAisle helper, aisles normalization, logging, and response parsing code remain unchanged",
+    "npx nx run-many -t build lint passes cleanly"
+  ],
+  "verification": [
+    "Run: eval \"$(mise activate bash)\" && npx nx build api && npx nx lint api"
+  ],
+  "blocked_reason": null,
+  "findings": "Build and lint pass cleanly. Rewrote both German and English prompts with a two-step approach (assign then sort by aisle number). Made ordering the #1 priority rule. Added an inline example that demonstrates the exact user scenario (Magerquark, Dinkelmehl, Pizzakraeuter, Mozzarella mapped to correct aisle order). Lowered temperature from 0.2 to 0.1 for more deterministic output."
+}

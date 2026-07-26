@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-010",
+  "type": "fix",
+  "description": "Address PR review comments: remove ingredient group from prompt, improve SCHRITT 1 text, move prompt generation from frontend to new backend API endpoint",
+  "status": "completed",
+  "steps": [
+    "In apps/api/src/handler.ts sortIngredients: remove ingredient group from ZUTATEN/INGREDIENTS listing in both German and English prompts",
+    "In apps/api/src/handler.ts sortIngredients: improve SCHRITT 1 German text with aisle comment explanation, and translate for English",
+    "In apps/api/src/handler.ts: extract prompt generation into a reusable function and add POST /sort-ingredients-prompt endpoint",
+    "Add route for /sort-ingredients-prompt in handler routing",
+    "Add CDK resource for /sort-ingredients-prompt in recipe-manager-stack.ts",
+    "Add getPrompt method to supermarket.service.ts",
+    "Update manual-supermarket-view.component.ts to call API for prompts instead of hardcoding them"
+  ],
+  "acceptance_criteria": [
+    "Ingredient group is no longer included in the ZUTATEN/INGREDIENTS prompt section",
+    "SCHRITT 1 text mentions aisle comments in parentheses with example",
+    "STEP 1 English text has equivalent explanation about aisle comments",
+    "New POST /sort-ingredients-prompt endpoint returns { systemPrompt, userPrompt }",
+    "Frontend manual view calls the API to get prompts instead of hardcoding them",
+    "npx nx run-many -t build lint passes cleanly"
+  ],
+  "verification": [
+    "Run: eval \"$(mise activate bash)\" && npx nx run-many -t build lint"
+  ],
+  "blocked_reason": null,
+  "findings": "All builds and lints pass cleanly. Extracted prompt generation into generateSortPrompts function shared by both sortIngredients and sortIngredientsPrompt. Frontend manual view now calls API to get prompts, ensuring consistency with backend. Pre-existing bundle size warnings remain unchanged."
+}

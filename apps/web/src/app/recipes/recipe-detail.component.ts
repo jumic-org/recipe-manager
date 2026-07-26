@@ -29,6 +29,9 @@ import { RecipeService } from './recipe.service';
             }
           </div>
           <div class="actions">
+            <a [routerLink]="['/recipes', recipe.id, 'shop']" class="btn-shop">{{
+              'RECIPES.DETAIL.SHOPPING_VIEW' | translate
+            }}</a>
             <a [routerLink]="['/recipes', recipe.id, 'edit']" class="btn-edit">{{
               'RECIPES.DETAIL.EDIT' | translate
             }}</a>
@@ -151,6 +154,15 @@ import { RecipeService } from './recipe.service';
       .btn-edit {
         background: var(--rm-primary);
         color: #fff;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .btn-shop {
+        background: var(--rm-primary-surface);
+        color: var(--rm-primary);
         text-decoration: none;
         padding: 8px 16px;
         border-radius: 6px;

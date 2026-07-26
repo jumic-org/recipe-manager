@@ -1,0 +1,25 @@
+{
+  "id": "FEAT-004",
+  "type": "fix",
+  "description": "Add language-specific Bedrock prompts for sort-ingredients API to improve sorting accuracy for non-English languages (e.g., German)",
+  "status": "completed",
+  "steps": [
+    "Update apps/web/src/app/supermarkets/supermarket.service.ts sortIngredients method to accept and pass a language parameter",
+    "Update apps/web/src/app/supermarkets/supermarket-view.component.ts sortIntoAisles method to get current language from TranslateService and pass it to sortIngredients",
+    "Update apps/api/src/handler.ts sortIngredients function to read language from request body and use German prompt when language is 'de'",
+    "Add Language-Specific AI Prompts section to .kiro/steering/conventions.md"
+  ],
+  "acceptance_criteria": [
+    "sortIngredients service method accepts a language parameter and passes it in the request body",
+    "supermarket-view component gets the current language from TranslateService and passes it to sortIngredients",
+    "Backend sortIngredients function uses German system prompt and instruction text when language is 'de'",
+    "Backend defaults to English prompt when no language specified or language is 'en'",
+    "conventions.md has a new section documenting language-specific AI prompts pattern",
+    "npx nx run-many -t build lint passes cleanly"
+  ],
+  "verification": [
+    "Run: eval \"$(mise activate bash)\" && npx nx run-many -t build lint"
+  ],
+  "blocked_reason": null,
+  "findings": "All builds and lints pass cleanly. Used existing pattern from recipe-import feature (getCurrentLang method). German prompt uses equivalent instructions in German to help the model better understand German ingredient names and aisle categories. The prompt structure and JSON output format remain identical regardless of language."
+}

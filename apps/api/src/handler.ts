@@ -17,7 +17,7 @@ import {
   BedrockRuntimeClient,
   InvokeModelCommand,
 } from '@aws-sdk/client-bedrock-runtime';
-import type { Recipe, CreateRecipeInput, UpdateRecipeInput } from '@recipe-manager/shared';
+import type { Recipe, CreateRecipeInput, UpdateRecipeInput, Ingredient, IngredientOnHand, CreateIngredientOnHandInput, Supermarket, CreateSupermarketInput, UpdateSupermarketInput, Aisle } from '@recipe-manager/shared';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -90,6 +90,68 @@ export const handler: APIGatewayProxyHandler = async (
       }
     }
 
+    // GET /ingredients-on-hand - list for user
+    if (path === '/ingredients-on-hand' && method === 'GET') {
+      return await listIngredientsOnHand(userId);
+    }
+
+    // POST /ingredients-on-hand - create
+    if (path === '/ingredients-on-hand' && method === 'POST') {
+      return await createIngredientOnHand(userId, event);
+    }
+
+    // Match /ingredients-on-hand/{id}
+    const iohIdMatch = path.match(/^\/ingredients-on-hand\/([^/]+)$/);
+    if (iohIdMatch) {
+      const iohId = iohIdMatch[1];
+
+      // DELETE /ingredients-on-hand/{id}
+      if (method === 'DELETE') {
+        return await deleteIngredientOnHand(userId, iohId);
+      }
+    }
+
+    // POST /sort-ingredients - sort ingredients into supermarket aisles using AI
+    if (path === '/sort-ingredients' && method === 'POST') {
+      return await sortIngredients(event);
+    }
+
+    // POST /sort-ingredients-prompt - get the generated prompts without calling AI
+    if (path === '/sort-ingredients-prompt' && method === 'POST') {
+      return await sortIngredientsPrompt(event);
+    }
+
+    // POST /sort-ingredients-manual - sort ingredients with custom prompts/parameters
+    if (path === '/sort-ingredients-manual' && method === 'POST') {
+      return await sortIngredientsManual(event);
+    }
+
+    // GET /supermarkets - list for user
+    if (path === '/supermarkets' && method === 'GET') {
+      return await listSupermarkets(userId);
+    }
+
+    // POST /supermarkets - create
+    if (path === '/supermarkets' && method === 'POST') {
+      return await createSupermarket(userId, event);
+    }
+
+    // Match /supermarkets/{id}
+    const smIdMatch = path.match(/^\/supermarkets\/([^/]+)$/);
+    if (smIdMatch) {
+      const smId = smIdMatch[1];
+
+      // PUT /supermarkets/{id}
+      if (method === 'PUT') {
+        return await updateSupermarket(userId, smId, event);
+      }
+
+      // DELETE /supermarkets/{id}
+      if (method === 'DELETE') {
+        return await deleteSupermarket(userId, smId);
+      }
+    }
+
     return response(404, { message: 'Route not found' });
   } catch (error) {
     console.error('Unhandled error:', error);
@@ -107,9 +169,11 @@ async function listRecipes(
   const result = await docClient.send(
     new QueryCommand({
       TableName: TABLE_NAME,
-      KeyConditionExpression: 'userId = :userId',
+      IndexName: 'byEntityType',
+      KeyConditionExpression: 'userId = :userId AND entityType = :entityType',
       ExpressionAttributeValues: {
         ':userId': userId,
+        ':entityType': 'recipe',
       },
     }),
   );
@@ -184,6 +248,7 @@ async function createRecipe(
     ...input,
     id: crypto.randomUUID(),
     userId,
+    entityType: 'recipe',
     sourceUrl: null,
     createdAt: now,
     updatedAt: now,
@@ -739,6 +804,7 @@ async function importRecipe(
     ...recipeInput,
     id: crypto.randomUUID(),
     userId,
+    entityType: 'recipe',
     sourceUrl: url,
     createdAt: now,
     updatedAt: now,
@@ -835,6 +901,7 @@ async function importRecipeFromText(
     ...recipeInput,
     id: crypto.randomUUID(),
     userId,
+    entityType: 'recipe',
     sourceUrl: null,
     createdAt: now,
     updatedAt: now,
@@ -848,6 +915,617 @@ async function importRecipeFromText(
   );
 
   return response(201, { recipe });
+}
+
+async function listIngredientsOnHand(userId: string): Promise<APIGatewayProxyResult> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TABLE_NAME,
+      IndexName: 'byEntityType',
+      KeyConditionExpression: 'userId = :userId AND entityType = :entityType',
+      ExpressionAttributeValues: {
+        ':userId': userId,
+        ':entityType': 'ingredientOnHand',
+      },
+    }),
+  );
+
+  const ingredientsOnHand = (result.Items ?? []) as IngredientOnHand[];
+  return response(200, { ingredientsOnHand });
+}
+
+async function createIngredientOnHand(
+  userId: string,
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!parsed['name'] || typeof parsed['name'] !== 'string') {
+    return response(400, { message: 'name is required and must be a string' });
+  }
+
+  const input: CreateIngredientOnHandInput = { name: parsed['name'] as string };
+  const now = new Date().toISOString();
+
+  const item: IngredientOnHand = {
+    id: `ioh_${crypto.randomUUID()}`,
+    userId,
+    entityType: 'ingredientOnHand',
+    name: input.name,
+    createdAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TABLE_NAME,
+      Item: item,
+    }),
+  );
+
+  return response(201, { ingredientOnHand: item });
+}
+
+async function deleteIngredientOnHand(
+  userId: string,
+  iohId: string,
+): Promise<APIGatewayProxyResult> {
+  try {
+    await docClient.send(
+      new DeleteCommand({
+        TableName: TABLE_NAME,
+        Key: { userId, id: iohId },
+        ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)',
+      }),
+    );
+
+    return response(204);
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      return response(404, { message: 'Ingredient on hand not found' });
+    }
+    throw error;
+  }
+}
+
+function generateSortPrompts(
+  ingredients: Ingredient[],
+  aisles: Aisle[],
+  language: string,
+): { systemPrompt: string; userPrompt: string } {
+  // Format aisles for the prompt, including comments as product examples
+  const formatAisle = (aisle: Aisle, index: number): string => {
+    if (aisle.comment) {
+      return `${index + 1}. ${aisle.name} (${aisle.comment})`;
+    }
+    return `${index + 1}. ${aisle.name}`;
+  };
+
+  const systemPrompt = '';
+  let userPrompt: string;
+
+  if (language === 'de') {
+    userPrompt = `Du bist Angestellter im Supermarkt und solst den Kunden helfen, die Produkte schnell zu finden. Du erhälst die Supermarkt-Gänge zu einem spezifischen Supermarkt und die Produkte, die gekauft werden sollen. Ordne diese Produkte den Gängen zu.
+
+Gehe jedes Produkt durch und entscheide, in welchem Gang es am wahrscheinlichsten zu finden ist. Ordne es genau diesem Gang zu. Findest du keinen passenden Gang, füge es am Ende under "Unknown" hinzu. In den Gängen sind in Klammern kommentare ergänzt, wie z.B. weitere Produkte, die dort zu finden sind. Berücksichtige dies.
+Lösche die Gänge, zu denen kein Produkt zugeordnet ist.
+Gib jeweils den Gang aus und darunter eine Auflistung der Produkte, die dort gekauft werden sollen.
+Als Ergebnis gib ein JSON Format zurück: [{"aisle": "Obst und Gemüse", "products": ["Apfel", "Bierne"]}, {"aisle": "Milchprodukte", "products": ["Erdbeerjoghurt"]}, {"aisle": "UNKNWON", "products": ["Flugzeug"]}]
+Gib keine Erklärung zurück, nur das JSON. Bei den Supermarkt Gängen, lass die Kommentare in Klammern weg.
+
+Supermarkt-Gänge
+${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
+
+Produkte:
+${ingredients.map((ing, i) => `${i + 1}. ${ing.name}`).join('\n')}`;
+  } else {
+    userPrompt = `You are a supermarket employee and should help customers find products quickly. You receive the supermarket aisles for a specific supermarket and the products that need to be purchased. Assign these products to the aisles.
+
+Go through each product and decide which aisle it is most likely to be found in. Assign it to exactly that aisle. If you cannot find a matching aisle, add it at the end under "Unknown". The aisles have comments in parentheses, such as additional products that can be found there. Take this into account.
+Remove aisles to which no product is assigned.
+Output each aisle and below it a list of products to be purchased there.
+As a result, return a JSON format: [{"aisle": "Fruits and Vegetables", "products": ["Apple", "Pear"]}, {"aisle": "Dairy", "products": ["Strawberry Yogurt"]}, {"aisle": "UNKNOWN", "products": ["Airplane"]}]
+Do not return any explanation, only the JSON. For the supermarket aisles, leave out the comments in parentheses.
+
+Supermarket Aisles
+${aisles.map((a, i) => formatAisle(a, i)).join('\n')}
+
+Products:
+${ingredients.map((ing, i) => `${i + 1}. ${ing.name}`).join('\n')}`;
+  }
+
+  return { systemPrompt, userPrompt };
+}
+
+async function sortIngredientsPrompt(
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!Array.isArray(parsed['ingredients']) || parsed['ingredients'].length === 0) {
+    return response(400, { message: 'ingredients is required and must be a non-empty array' });
+  }
+
+  if (!Array.isArray(parsed['aisles']) || parsed['aisles'].length === 0) {
+    return response(400, { message: 'aisles is required and must be a non-empty array' });
+  }
+
+  const ingredients = parsed['ingredients'] as Ingredient[];
+  const rawAisles = parsed['aisles'] as (string | { name: string; comment?: string })[];
+  const language = (parsed['language'] as string) || 'en';
+
+  // Normalize aisles: support both string[] (legacy) and Aisle[] formats
+  const aisles: Aisle[] = rawAisles.map((a) => {
+    if (typeof a === 'string') {
+      return { name: a };
+    }
+    return { name: a.name, comment: a.comment };
+  });
+
+  const { systemPrompt, userPrompt } = generateSortPrompts(ingredients, aisles, language);
+
+  return response(200, { systemPrompt, userPrompt });
+}
+
+async function sortIngredients(
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!Array.isArray(parsed['ingredients']) || parsed['ingredients'].length === 0) {
+    return response(400, { message: 'ingredients is required and must be a non-empty array' });
+  }
+
+  if (!Array.isArray(parsed['aisles']) || parsed['aisles'].length === 0) {
+    return response(400, { message: 'aisles is required and must be a non-empty array' });
+  }
+
+  const ingredients = parsed['ingredients'] as Ingredient[];
+  const rawAisles = parsed['aisles'] as (string | { name: string; comment?: string })[];
+  const language = (parsed['language'] as string) || 'en';
+
+  // Normalize aisles: support both string[] (legacy) and Aisle[] formats
+  const aisles: Aisle[] = rawAisles.map((a) => {
+    if (typeof a === 'string') {
+      return { name: a };
+    }
+    return { name: a.name, comment: a.comment };
+  });
+
+  const { systemPrompt: system, userPrompt: prompt } = generateSortPrompts(ingredients, aisles, language);
+
+  console.log('sort-ingredients request:', JSON.stringify({ language, aisles: aisles.map((a) => a.name), ingredientCount: ingredients.length }));
+  console.log('sort-ingredients system prompt:', system);
+  console.log('sort-ingredients user prompt:', prompt);
+
+  try {
+    const bedrockBody: Record<string, unknown> = {
+      messages: [{ role: 'user', content: [{ text: prompt }] }],
+      inferenceConfig: { maxTokens: 4096, temperature: 0.1 },
+    };
+    if (system) {
+      bedrockBody['system'] = [{ text: system }];
+    }
+
+    const bedrockResponse = await bedrockClient.send(
+      new InvokeModelCommand({
+        modelId: 'eu.amazon.nova-lite-v1:0',
+        contentType: 'application/json',
+        accept: 'application/json',
+        body: JSON.stringify(bedrockBody),
+      }),
+    );
+
+    const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
+    const outputText = responseBody['output']?.['message']?.['content']?.[0]?.['text'];
+
+    console.log('sort-ingredients Bedrock response:', outputText);
+
+    if (!outputText) {
+      console.error('Unexpected Bedrock response structure:', JSON.stringify(responseBody));
+      return response(502, { message: 'Failed to get a valid response from AI model' });
+    }
+
+    // Parse the JSON from the model output (handle potential markdown code blocks)
+    let jsonText = outputText.trim();
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+    }
+
+    const parsedJson = JSON.parse(jsonText);
+
+    // Handle both formats: {"groups":[...]} or bare array [...]
+    const rawGroups: { aisle: string; products?: (string | number)[]; ingredientIndices?: number[] }[] = Array.isArray(parsedJson)
+      ? parsedJson
+      : parsedJson.groups ?? [];
+
+    // Map products/indices back to actual ingredients
+    const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
+    const matchedIndices = new Set<number>();
+    for (const group of rawGroups) {
+      const groupIngredients: Ingredient[] = [];
+      const products: (string | number)[] = group.products || group.ingredientIndices || [];
+      for (const product of products) {
+        if (typeof product === 'number') {
+          // Legacy index format
+          if (product >= 0 && product < ingredients.length && !matchedIndices.has(product)) {
+            groupIngredients.push(ingredients[product]);
+            matchedIndices.add(product);
+          }
+        } else {
+          // New name-based format
+          const lowerProduct = product.toLowerCase();
+          const idx = ingredients.findIndex((ing, i) =>
+            !matchedIndices.has(i) && (
+              ing.name.toLowerCase() === lowerProduct ||
+              ing.name.toLowerCase().includes(lowerProduct) ||
+              lowerProduct.includes(ing.name.toLowerCase())
+            )
+          );
+          if (idx >= 0) {
+            groupIngredients.push(ingredients[idx]);
+            matchedIndices.add(idx);
+          }
+        }
+      }
+      if (groupIngredients.length > 0) {
+        groups.push({ aisle: group.aisle, ingredients: groupIngredients });
+      }
+    }
+
+    return response(200, { groups });
+  } catch (error) {
+    console.error('Error calling Bedrock for sort-ingredients:', error);
+    return response(502, { message: 'Failed to sort ingredients using AI model' });
+  }
+}
+
+async function sortIngredientsManual(
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (typeof parsed['systemPrompt'] !== 'string') {
+    return response(400, { message: 'systemPrompt is required and must be a string' });
+  }
+
+  if (!parsed['userPrompt'] || typeof parsed['userPrompt'] !== 'string') {
+    return response(400, { message: 'userPrompt is required and must be a string' });
+  }
+
+  if (typeof parsed['temperature'] !== 'number' || parsed['temperature'] < 0 || parsed['temperature'] > 1) {
+    return response(400, { message: 'temperature is required and must be a number between 0 and 1' });
+  }
+
+  if (typeof parsed['maxTokens'] !== 'number' || parsed['maxTokens'] < 1) {
+    return response(400, { message: 'maxTokens is required and must be a positive number' });
+  }
+
+  if (!Array.isArray(parsed['ingredients']) || parsed['ingredients'].length === 0) {
+    return response(400, { message: 'ingredients is required and must be a non-empty array' });
+  }
+
+  if (!Array.isArray(parsed['aisles']) || parsed['aisles'].length === 0) {
+    return response(400, { message: 'aisles is required and must be a non-empty array' });
+  }
+
+  const systemPrompt = parsed['systemPrompt'] as string;
+  const userPrompt = parsed['userPrompt'] as string;
+  const temperature = parsed['temperature'] as number;
+  const maxTokens = parsed['maxTokens'] as number;
+  const ingredients = parsed['ingredients'] as Ingredient[];
+
+  console.log('sort-ingredients-manual request:', JSON.stringify({ temperature, maxTokens, ingredientCount: ingredients.length }));
+  console.log('sort-ingredients-manual system prompt:', systemPrompt);
+  console.log('sort-ingredients-manual user prompt:', userPrompt);
+
+  try {
+    const bedrockBody: Record<string, unknown> = {
+      messages: [{ role: 'user', content: [{ text: userPrompt }] }],
+      inferenceConfig: { maxTokens, temperature },
+    };
+    if (systemPrompt) {
+      bedrockBody['system'] = [{ text: systemPrompt }];
+    }
+
+    const bedrockResponse = await bedrockClient.send(
+      new InvokeModelCommand({
+        modelId: 'eu.amazon.nova-lite-v1:0',
+        contentType: 'application/json',
+        accept: 'application/json',
+        body: JSON.stringify(bedrockBody),
+      }),
+    );
+
+    const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
+    const outputText = responseBody['output']?.['message']?.['content']?.[0]?.['text'];
+
+    console.log('sort-ingredients-manual Bedrock response:', outputText);
+
+    if (!outputText) {
+      console.error('Unexpected Bedrock response structure:', JSON.stringify(responseBody));
+      return response(502, { message: 'Failed to get a valid response from AI model', rawResponse: '' });
+    }
+
+    // Parse the JSON from the model output (handle potential markdown code blocks)
+    let jsonText = outputText.trim();
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+    }
+
+    const parsedJson = JSON.parse(jsonText);
+
+    // Handle both formats: {"groups":[...]} or bare array [...]
+    const rawGroups: { aisle: string; products?: (string | number)[]; ingredientIndices?: number[] }[] = Array.isArray(parsedJson)
+      ? parsedJson
+      : parsedJson.groups ?? [];
+
+    // Map products/indices back to actual ingredients
+    const groups: { aisle: string; ingredients: Ingredient[] }[] = [];
+    const matchedIndices = new Set<number>();
+    for (const group of rawGroups) {
+      const groupIngredients: Ingredient[] = [];
+      const products: (string | number)[] = group.products || group.ingredientIndices || [];
+      for (const product of products) {
+        if (typeof product === 'number') {
+          // Legacy index format
+          if (product >= 0 && product < ingredients.length && !matchedIndices.has(product)) {
+            groupIngredients.push(ingredients[product]);
+            matchedIndices.add(product);
+          }
+        } else {
+          // New name-based format
+          const lowerProduct = product.toLowerCase();
+          const idx = ingredients.findIndex((ing, i) =>
+            !matchedIndices.has(i) && (
+              ing.name.toLowerCase() === lowerProduct ||
+              ing.name.toLowerCase().includes(lowerProduct) ||
+              lowerProduct.includes(ing.name.toLowerCase())
+            )
+          );
+          if (idx >= 0) {
+            groupIngredients.push(ingredients[idx]);
+            matchedIndices.add(idx);
+          }
+        }
+      }
+      if (groupIngredients.length > 0) {
+        groups.push({ aisle: group.aisle, ingredients: groupIngredients });
+      }
+    }
+
+    return response(200, { groups, rawResponse: outputText });
+  } catch (error) {
+    console.error('Error calling Bedrock for sort-ingredients-manual:', error);
+    return response(502, { message: 'Failed to sort ingredients using AI model', rawResponse: '' });
+  }
+}
+
+async function listSupermarkets(userId: string): Promise<APIGatewayProxyResult> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TABLE_NAME,
+      IndexName: 'byEntityType',
+      KeyConditionExpression: 'userId = :userId AND entityType = :entityType',
+      ExpressionAttributeValues: {
+        ':userId': userId,
+        ':entityType': 'supermarket',
+      },
+    }),
+  );
+
+  const supermarkets = (result.Items ?? []) as Supermarket[];
+  return response(200, { supermarkets });
+}
+
+async function createSupermarket(
+  userId: string,
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!parsed['name'] || typeof parsed['name'] !== 'string') {
+    return response(400, { message: 'name is required and must be a string' });
+  }
+
+  if (!Array.isArray(parsed['aisles'])) {
+    return response(400, { message: 'aisles is required and must be an array' });
+  }
+
+  const aislesValid = (parsed['aisles'] as unknown[]).every(
+    (el) =>
+      typeof el === 'object' &&
+      el !== null &&
+      typeof (el as Record<string, unknown>)['name'] === 'string' &&
+      ((el as Record<string, unknown>)['name'] as string).trim().length > 0 &&
+      ((el as Record<string, unknown>)['comment'] === undefined ||
+        typeof (el as Record<string, unknown>)['comment'] === 'string'),
+  );
+  if (!aislesValid) {
+    return response(400, { message: 'Every aisle must be an object with a non-empty name and an optional comment string' });
+  }
+
+  const aisles: Aisle[] = (parsed['aisles'] as Record<string, unknown>[]).map((el) => {
+    const aisle: Aisle = { name: (el['name'] as string).trim() };
+    if (el['comment'] && typeof el['comment'] === 'string' && el['comment'].trim().length > 0) {
+      aisle.comment = el['comment'].trim();
+    }
+    return aisle;
+  });
+
+  const input: CreateSupermarketInput = {
+    name: parsed['name'] as string,
+    aisles,
+  };
+  const now = new Date().toISOString();
+
+  const item: Supermarket = {
+    id: `sm_${crypto.randomUUID()}`,
+    userId,
+    entityType: 'supermarket',
+    name: input.name,
+    aisles: input.aisles,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TABLE_NAME,
+      Item: item,
+    }),
+  );
+
+  return response(201, { supermarket: item });
+}
+
+async function updateSupermarket(
+  userId: string,
+  smId: string,
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+  if (!event.body) {
+    return response(400, { message: 'Request body is required' });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(event.body);
+  } catch {
+    return response(400, { message: 'Invalid JSON in request body' });
+  }
+
+  if (!parsed['name'] || typeof parsed['name'] !== 'string') {
+    return response(400, { message: 'name is required and must be a string' });
+  }
+
+  if (!Array.isArray(parsed['aisles'])) {
+    return response(400, { message: 'aisles is required and must be an array' });
+  }
+
+  const aislesValid = (parsed['aisles'] as unknown[]).every(
+    (el) =>
+      typeof el === 'object' &&
+      el !== null &&
+      typeof (el as Record<string, unknown>)['name'] === 'string' &&
+      ((el as Record<string, unknown>)['name'] as string).trim().length > 0 &&
+      ((el as Record<string, unknown>)['comment'] === undefined ||
+        typeof (el as Record<string, unknown>)['comment'] === 'string'),
+  );
+  if (!aislesValid) {
+    return response(400, { message: 'Every aisle must be an object with a non-empty name and an optional comment string' });
+  }
+
+  const aisles: Aisle[] = (parsed['aisles'] as Record<string, unknown>[]).map((el) => {
+    const aisle: Aisle = { name: (el['name'] as string).trim() };
+    if (el['comment'] && typeof el['comment'] === 'string' && el['comment'].trim().length > 0) {
+      aisle.comment = el['comment'].trim();
+    }
+    return aisle;
+  });
+
+  const input: UpdateSupermarketInput = {
+    name: parsed['name'] as string,
+    aisles,
+  };
+  const now = new Date().toISOString();
+
+  try {
+    const result = await docClient.send(
+      new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { userId, id: smId },
+        UpdateExpression: 'SET #n = :name, aisles = :aisles, updatedAt = :updatedAt',
+        ExpressionAttributeNames: {
+          '#n': 'name',
+        },
+        ExpressionAttributeValues: {
+          ':name': input.name,
+          ':aisles': input.aisles,
+          ':updatedAt': now,
+        },
+        ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)',
+        ReturnValues: 'ALL_NEW',
+      }),
+    );
+
+    if (!result.Attributes) {
+      return response(404, { message: 'Supermarket not found' });
+    }
+
+    return response(200, { supermarket: result.Attributes as Supermarket });
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      return response(404, { message: 'Supermarket not found' });
+    }
+    throw error;
+  }
+}
+
+async function deleteSupermarket(
+  userId: string,
+  smId: string,
+): Promise<APIGatewayProxyResult> {
+  try {
+    await docClient.send(
+      new DeleteCommand({
+        TableName: TABLE_NAME,
+        Key: { userId, id: smId },
+        ConditionExpression: 'attribute_exists(userId) AND attribute_exists(id)',
+      }),
+    );
+
+    return response(204);
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      return response(404, { message: 'Supermarket not found' });
+    }
+    throw error;
+  }
 }
 
 function response(statusCode: number, body?: unknown): APIGatewayProxyResult {
