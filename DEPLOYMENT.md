@@ -98,10 +98,21 @@ For PR deployments the same role is reused.  It additionally needs `cloudformati
     "dynamodb:BatchWriteItem"
   ],
   "Resource": "arn:aws:dynamodb:eu-west-1:352770552266:table/RecipeManagerStack-PR*"
+},
+{
+  "Sid": "SeedPRDatabaseKMSAccess",
+  "Effect": "Allow",
+  "Action": [
+    "kms:Decrypt",
+    "kms:GenerateDataKey*"
+  ],
+  "Resource": "arn:aws:kms:eu-west-1:352770552266:key/*"
 }
 ```
 
 > `cloudformation:ListStacks` (without a resource condition) is required by the scheduled cleanup job to enumerate existing PR stacks.
+
+> `SeedPRDatabaseKMSAccess` is required because the DynamoDB tables are encrypted with customer-managed KMS keys. Scanning the production table requires `kms:Decrypt`, and writing to the PR table requires `kms:Decrypt` and `kms:GenerateDataKey*`. The resource uses `key/*` because CDK generates new key IDs when stacks are created or recreated.
 
 ### GitHub repository permissions
 
