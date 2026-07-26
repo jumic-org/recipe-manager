@@ -92,10 +92,20 @@ When adding a new domain concept:
 
 ### Handler Pattern
 
-- Single file: `apps/api/src/handler.ts`.
-- Export a named `handler` of type `APIGatewayProxyHandler`.
-- Route matching via `event.path` and `event.httpMethod`.
-- User identity from `event.requestContext.authorizer.claims.sub`.
+- Domain-specific handlers in `apps/api/src/handlers/`:
+  - `recipes.ts` - recipe CRUD and AI-powered import
+  - `ingredients-on-hand.ts` - ingredients on hand CRUD
+  - `supermarkets.ts` - supermarket CRUD
+  - `sort-ingredients.ts` - AI-powered ingredient sorting
+- Shared utilities in `apps/api/src/shared/`:
+  - `db.ts` - DynamoDB client and table name
+  - `bedrock.ts` - Bedrock AI client
+  - `response.ts` - CORS headers and response helper
+  - `auth.ts` - user ID extraction from Cognito claims
+  - `index.ts` - barrel exports
+- Each handler exports a named `handler` of type `APIGatewayProxyHandler`.
+- Route matching via `event.path` and `event.httpMethod` within each domain handler.
+- User identity from `event.requestContext.authorizer.claims.sub` via shared `getUserId()` helper.
 
 ### CORS
 

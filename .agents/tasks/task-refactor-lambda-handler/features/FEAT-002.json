@@ -1,0 +1,43 @@
+{
+  "id": "FEAT-002",
+  "type": "refactor",
+  "description": "Extract shared utilities from the monolithic handler into a shared module, then split the handler into four domain-specific Lambda handlers (recipes, ingredients-on-hand, supermarkets, sort-ingredients), and update the CDK stack to create four separate Lambda functions with their respective API Gateway route integrations.",
+  "status": "completed",
+  "steps": [
+    "Create apps/api/src/shared/db.ts - export the DynamoDB client setup (DynamoDBClient, DynamoDBDocumentClient) and TABLE_NAME constant. Exact code to extract: `const client = new DynamoDBClient({}); const docClient = DynamoDBDocumentClient.from(client); const TABLE_NAME = process.env['TABLE_NAME'] ?? '';`",
+    "Create apps/api/src/shared/bedrock.ts - export the Bedrock client setup. Exact code: `const BEDROCK_REGION = process.env['BEDROCK_REGION'] ?? process.env['AWS_REGION'] ?? 'eu-central-1'; const bedrockClient = new BedrockRuntimeClient({ region: BEDROCK_REGION });`",
+    "Create apps/api/src/shared/response.ts - export the corsHeaders object and the response() helper function exactly as they exist in handler.ts",
+    "Create apps/api/src/shared/auth.ts - export a getUserId(event: APIGatewayProxyEvent) function that extracts userId from event.requestContext?.authorizer?.['claims']?.['sub'] and returns string | undefined",
+    "Create apps/api/src/shared/index.ts - barrel export from all shared modules",
+    "Create apps/api/src/handlers/recipes.ts - export a named `handler` of type APIGatewayProxyHandler. Move the recipe CRUD functions here: listRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, validateRecipeInput. Also move importRecipe, importRecipeFromText, stripHtmlToText, buildBedrockPrompt, isPrivateOrReservedHost. The handler function should check OPTIONS for CORS, extract userId, then route based on path/method for: GET /recipes, POST /recipes, POST /recipes/import, POST /recipes/import-text, GET /recipes/{id}, PUT /recipes/{id}, DELETE /recipes/{id}. Import shared utilities from ../shared/",
+    "Create apps/api/src/handlers/ingredients-on-hand.ts - export a named `handler` of type APIGatewayProxyHandler. Move: listIngredientsOnHand, createIngredientOnHand, deleteIngredientOnHand. Route: GET /ingredients-on-hand, POST /ingredients-on-hand, DELETE /ingredients-on-hand/{id}. Import shared utilities from ../shared/",
+    "Create apps/api/src/handlers/supermarkets.ts - export a named `handler` of type APIGatewayProxyHandler. Move: listSupermarkets, createSupermarket, updateSupermarket, deleteSupermarket. Route: GET /supermarkets, POST /supermarkets, PUT /supermarkets/{id}, DELETE /supermarkets/{id}. Import shared utilities from ../shared/",
+    "Create apps/api/src/handlers/sort-ingredients.ts - export a named `handler` of type APIGatewayProxyHandler. Move: sortIngredients, sortIngredientsPrompt, sortIngredientsManual, generateSortPrompts. Route: POST /sort-ingredients, POST /sort-ingredients-prompt, POST /sort-ingredients-manual. Import shared utilities from ../shared/",
+    "Update apps/api/src/index.ts - export all four handlers with distinct names: export { handler as recipesHandler } from './handlers/recipes'; export { handler as ingredientsOnHandHandler } from './handlers/ingredients-on-hand'; export { handler as supermarketsHandler } from './handlers/supermarkets'; export { handler as sortIngredientsHandler } from './handlers/sort-ingredients';",
+    "Delete apps/api/src/handler.ts - it is fully replaced by the new modules",
+    "Update apps/infra/src/stacks/recipe-manager-stack.ts: Replace the single NodejsFunction with four NodejsFunction constructs, each with entry pointing to their respective handler file. Create four LambdaIntegration objects. Update the API Gateway resource methods to use the correct integration for each route group. Grant DynamoDB readWriteData to all four Lambdas. Grant Bedrock InvokeModel only to the recipes Lambda and sort-ingredients Lambda (since only they call Bedrock). Each Lambda gets TABLE_NAME env var. The recipes and sort-ingredients Lambdas also get BEDROCK_REGION env var (or inherit from AWS_REGION).",
+    "Update .kiro/steering/architecture.md - update the 'Key Decisions' and 'Serverless API' sections to reflect the multi-Lambda architecture with domain-based routing",
+    "Update .kiro/steering/conventions.md - update the 'Lambda (apps/api)' section: change 'Single file: apps/api/src/handler.ts' to describe the new multi-handler structure in apps/api/src/handlers/. Update the Handler Pattern section to describe the per-domain handler approach."
+  ],
+  "acceptance_criteria": [
+    "apps/api/src/handler.ts no longer exists",
+    "apps/api/src/shared/ directory contains db.ts, bedrock.ts, response.ts, auth.ts, index.ts",
+    "apps/api/src/handlers/ directory contains recipes.ts, ingredients-on-hand.ts, supermarkets.ts, sort-ingredients.ts",
+    "Each handler file exports a named 'handler' of type APIGatewayProxyHandler",
+    "apps/api/src/index.ts exports all four handlers with distinct names",
+    "CDK stack defines four separate NodejsFunction constructs with correct entry paths",
+    "CDK stack routes each API Gateway resource to the correct Lambda integration",
+    "Only recipes and sort-ingredients Lambdas have Bedrock permissions",
+    "All four Lambdas have DynamoDB read/write permissions and TABLE_NAME env var",
+    "pnpm nx build api passes (TypeScript type checking)",
+    "pnpm nx build infra passes (CDK stack compiles)",
+    "No behavioral change - all routes, request/response formats, CORS handling, and error handling remain identical"
+  ],
+  "verification": [
+    "source /opt/env_var.sh && . \"$NVM_DIR/nvm.sh\" && nvm use 24 && cd /projects/sandbox/recipe-manager && pnpm nx build api",
+    "source /opt/env_var.sh && . \"$NVM_DIR/nvm.sh\" && nvm use 24 && cd /projects/sandbox/recipe-manager && pnpm nx build infra",
+    "source /opt/env_var.sh && . \"$NVM_DIR/nvm.sh\" && nvm use 24 && cd /projects/sandbox/recipe-manager && pnpm nx lint api"
+  ],
+  "blocked_reason": null,
+  "findings": "All three verification steps passed: pnpm nx build api (TypeScript type-checking), pnpm nx build infra (CDK compilation), pnpm nx lint api (all files clean). The refactoring preserves all existing behavior identically. The recipes handler file ended up at 839 lines (down from 1538 in the monolith) due to the large buildBedrockPrompt function with JSON examples. The sort-ingredients handler includes auth check for userId even though it does not use userId in business logic, matching the original behavior where the main handler checked auth before routing to those functions."
+}

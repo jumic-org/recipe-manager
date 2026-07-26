@@ -64,7 +64,7 @@ Cross-project references use the `@recipe-manager/shared` path alias defined in 
 ## Serverless API
 
 - **API Gateway**: REST API (`RestApi`) with CORS configured for all origins, deployed to the `prod` stage.
-- **Lambda**: Single `NodejsFunction` handler bundled with esbuild (CJS format, minified, source maps). Handles all routes via path and method matching inside the handler.
+- **Lambda**: Four domain-specific `NodejsFunction` handlers (recipes, ingredients-on-hand, supermarkets, sort-ingredients) bundled with esbuild (CJS format, minified, source maps). Each handler manages routes for its own domain via path and method matching.
 - **DynamoDB**: Single table (`RecipesTable`) with composite key (`userId` PK + `id` SK). Pay-per-request billing mode with point-in-time recovery.
 - **Routes**: `GET /recipes`, `POST /recipes`, `GET /recipes/{id}`, `PUT /recipes/{id}`, `DELETE /recipes/{id}`.
 
@@ -92,7 +92,7 @@ A single KMS key (`EncryptionKey`) with automatic rotation encrypts:
 
 ## Key Decisions
 
-- **Single Lambda**: All API routes in one handler for simplicity and reduced cold starts. Path-based routing is internal.
+- **Multi-Lambda architecture**: API routes are split into four domain-specific Lambda handlers (recipes, ingredients-on-hand, supermarkets, sort-ingredients) for improved maintainability and independent scaling. All handlers share a single DynamoDB table.
 - **Single table design**: Recipes are partitioned by `userId` to enforce data isolation at the DynamoDB level.
 - **No custom domain**: CloudFront and API Gateway use AWS-generated domains. Custom domains can be added later.
 - **ID token for auth**: The Cognito ID token (not access token) is used so the Lambda can read user claims directly.
