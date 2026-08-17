@@ -45,18 +45,18 @@
     "@nx/workspace": "23.1.0",
     "@types/aws-lambda": "8.10.162",
     "@types/node": "26.1.1",
-    "@typescript-eslint/eslint-plugin": "^8.65.0",
-    "@typescript-eslint/parser": "^8.65.0",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
     "angular-eslint": "^22.1.0",
     "aws-cdk": "2.1133.0",
     "esbuild": "0.28.1",
-    "eslint": "^10.8.0",
+    "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
     "nx": "23.1.0",
     "prettier": "^3.9.6",
     "ts-node": "10.9.2",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.65.0"
+    "typescript-eslint": "^8.67.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
