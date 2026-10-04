@@ -21,7 +21,7 @@
     "@angular/core": "22.0.8",
     "@angular/forms": "22.0.8",
     "@angular/platform-browser": "22.0.8",
-    "@angular/router": "22.0.8",
+    "@angular/router": "22.2.0",
     "@aws-sdk/client-bedrock-runtime": "^3.1095.0",
     "@aws-sdk/client-dynamodb": "^3.1095.0",
     "@aws-sdk/lib-dynamodb": "^3.1095.0",
