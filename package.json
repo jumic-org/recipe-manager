@@ -27,7 +27,7 @@
     "@aws-sdk/lib-dynamodb": "^3.1095.0",
     "@ngx-translate/core": "^18.0.0",
     "@ngx-translate/http-loader": "^18.0.0",
-    "amazon-cognito-identity-js": "^6.3.20",
+    "amazon-cognito-identity-js": "^6.3.22",
     "aws-cdk-lib": "2.262.1",
     "constructs": "10.7.1",
     "rxjs": "7.8.2",
