@@ -1,0 +1,8 @@
+node_modules/
+dist/
+cdk.out/
+.angular/
+*.log
+.DS_Store
+.dynamodb-local/
+frontend/public/config.json

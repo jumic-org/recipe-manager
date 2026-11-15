@@ -1,0 +1,4 @@
+{
+  "app": "tsx bin/infra.ts",
+  "watch": { "include": ["**"], "exclude": ["node_modules", "cdk.out"] }
+}

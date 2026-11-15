@@ -1,0 +1,9 @@
+{
+  "apiUrl": "https://example.execute-api.eu-central-1.amazonaws.com",
+  "cognito": {
+    "region": "eu-central-1",
+    "userPoolId": "eu-central-1_XXXXXXXXX",
+    "clientId": "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "domain": "https://example.auth.eu-central-1.amazoncognito.com"
+  }
+}

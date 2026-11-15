@@ -1,0 +1,28 @@
+{
+  "app": { "title": "Rezepte" },
+  "nav": {
+    "language": "Sprache",
+    "changePassword": "Passwort ändern",
+    "signOut": "Abmelden"
+  },
+  "recipes": {
+    "title": "Alle Rezepte",
+    "empty": "Noch keine Rezepte.",
+    "loading": "Rezepte werden geladen …",
+    "error": "Die Rezepte konnten nicht geladen werden."
+  },
+  "auth": {
+    "signingIn": "Anmeldung läuft …",
+    "error": "Die Anmeldung ist fehlgeschlagen.",
+    "retry": "Erneut anmelden"
+  },
+  "password": {
+    "title": "Passwort ändern",
+    "current": "Aktuelles Passwort",
+    "new": "Neues Passwort",
+    "submit": "Passwort ändern",
+    "success": "Das Passwort wurde geändert.",
+    "error": "Das Passwort konnte nicht geändert werden. Bitte prüfe das aktuelle Passwort und die Anforderungen an das neue.",
+    "back": "Zurück zu den Rezepten"
+  }
+}

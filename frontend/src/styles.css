@@ -1,0 +1,44 @@
+:root {
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+body {
+  margin: 0;
+}
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #ddd;
+}
+header nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.brand {
+  font-weight: 600;
+  text-decoration: none;
+  color: inherit;
+}
+main {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+button[aria-pressed='true'] {
+  font-weight: 700;
+}
+form {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 24rem;
+}
+label {
+  display: grid;
+  gap: 0.25rem;
+}

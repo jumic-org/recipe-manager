@@ -1,0 +1,28 @@
+{
+  "app": { "title": "Recipes" },
+  "nav": {
+    "language": "Language",
+    "changePassword": "Change password",
+    "signOut": "Sign out"
+  },
+  "recipes": {
+    "title": "All recipes",
+    "empty": "No recipes yet.",
+    "loading": "Loading recipes …",
+    "error": "The recipes could not be loaded."
+  },
+  "auth": {
+    "signingIn": "Signing in …",
+    "error": "Signing in failed.",
+    "retry": "Sign in again"
+  },
+  "password": {
+    "title": "Change password",
+    "current": "Current password",
+    "new": "New password",
+    "submit": "Change password",
+    "success": "The password was changed.",
+    "error": "The password could not be changed. Please check the current password and the requirements for the new one.",
+    "back": "Back to recipes"
+  }
+}
