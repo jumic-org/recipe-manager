@@ -1,15 +1,19 @@
-import dynamodbLocal from "dynamodb-local";
-import { CreateTableCommand, DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
-import { createServer } from "node:net";
+import dynamodbLocal from 'dynamodb-local';
+import { CreateTableCommand, DynamoDBClient, ListTablesCommand } from '@aws-sdk/client-dynamodb';
+import { createServer } from 'node:net';
 
-const TABLE_NAME = "recipe-manager-test";
+const TABLE_NAME = 'recipe-manager-test';
 
 function freePort(): Promise<number> {
   return new Promise((resolve, reject) => {
     const server = createServer();
     server.listen(0, () => {
       const address = server.address();
-      server.close(() => (typeof address === "object" && address ? resolve(address.port) : reject(new Error("no port"))));
+      server.close(() =>
+        typeof address === 'object' && address
+          ? resolve(address.port)
+          : reject(new Error('no port')),
+      );
     });
   });
 }
@@ -23,7 +27,7 @@ async function waitUntilReady(client: DynamoDBClient): Promise<void> {
       await new Promise((resolve) => setTimeout(resolve, 200));
     }
   }
-  throw new Error("DynamoDB Local did not start");
+  throw new Error('DynamoDB Local did not start');
 }
 
 /**
@@ -36,29 +40,29 @@ export default async function setup() {
 
   process.env.DYNAMODB_ENDPOINT = `http://127.0.0.1:${port}`;
   process.env.TABLE_NAME = TABLE_NAME;
-  process.env.AWS_REGION = "eu-central-1";
-  process.env.AWS_ACCESS_KEY_ID = "local";
-  process.env.AWS_SECRET_ACCESS_KEY = "local";
+  process.env.AWS_REGION = 'eu-central-1';
+  process.env.AWS_ACCESS_KEY_ID = 'local';
+  process.env.AWS_SECRET_ACCESS_KEY = 'local';
 
   const client = new DynamoDBClient({ endpoint: process.env.DYNAMODB_ENDPOINT, maxAttempts: 1 });
   await waitUntilReady(client);
   await client.send(
     new CreateTableCommand({
       TableName: TABLE_NAME,
-      BillingMode: "PAY_PER_REQUEST",
+      BillingMode: 'PAY_PER_REQUEST',
       AttributeDefinitions: [
-        { AttributeName: "pk", AttributeType: "S" },
-        { AttributeName: "sk", AttributeType: "S" },
+        { AttributeName: 'pk', AttributeType: 'S' },
+        { AttributeName: 'sk', AttributeType: 'S' },
       ],
       KeySchema: [
-        { AttributeName: "pk", KeyType: "HASH" },
-        { AttributeName: "sk", KeyType: "RANGE" },
+        { AttributeName: 'pk', KeyType: 'HASH' },
+        { AttributeName: 'sk', KeyType: 'RANGE' },
       ],
     }),
   );
   client.destroy();
 
-  return async () => {
+  return () => {
     dynamodbLocal.stop(port);
   };
 }

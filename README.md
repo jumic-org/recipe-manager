@@ -52,9 +52,13 @@ Running the same command again updates the deployed app. To remove the stack, ru
 ## Develop
 
 ```sh
-pnpm typecheck   # all packages
-pnpm test        # backend tests
+pnpm typecheck     # all packages
+pnpm test          # backend tests
+pnpm lint          # ESLint (use lint:fix to fix what it can)
+pnpm format        # Prettier (use format:check to only check)
 ```
+
+A pre-commit hook (husky and lint-staged) lints and formats the staged files.
 
 The backend tests call the Lambda handler the way API Gateway does and run against DynamoDB Local. On the first run, the DynamoDB Local jar is downloaded to the system temp directory.
 
@@ -65,3 +69,11 @@ pnpm --filter frontend start
 ```
 
 The app is served at `http://localhost:4200`, which the Cognito app client already accepts as a sign-in address.
+
+## Contribute
+
+Nobody can push to `main`. Open a pull request instead:
+
+- The PR title must follow [Conventional Commits](https://www.conventionalcommits.org/), for example `feat: add recipe search`. The PR is squash-merged and the title becomes the commit message.
+- CI must pass: `lint`, `typecheck`, `test` and `build`. The merge queue runs the same checks again before it merges.
+- Dependabot opens weekly update PRs. Patch and minor updates merge themselves once CI is green. Major updates wait for a manual review.
