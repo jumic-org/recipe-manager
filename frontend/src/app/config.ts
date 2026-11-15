@@ -16,6 +16,10 @@ export interface AppConfig {
 export class ConfigService {
   private config?: AppConfig;
 
+  get loaded(): boolean {
+    return this.config !== undefined;
+  }
+
   get value(): AppConfig {
     if (!this.config) throw new Error('Configuration not loaded');
     return this.config;
