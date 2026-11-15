@@ -5,7 +5,8 @@ import { catchError, map, of, startWith } from 'rxjs';
 import type { Recipe } from '@recipe-manager/shared';
 import { RecipeApi } from './recipe-api.service';
 
-type ListState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; recipes: Recipe[] };
+type ListState =
+  { status: 'loading' } | { status: 'error' } | { status: 'ready'; recipes: Recipe[] };
 
 @Component({
   selector: 'app-recipe-list',

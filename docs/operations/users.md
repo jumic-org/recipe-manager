@@ -7,7 +7,7 @@ Self-registration is switched off. Users are created and removed by hand in the 
 1. Sign in to the AWS console and switch to the region **Europe (Frankfurt) `eu-central-1`**.
 2. Open **Amazon Cognito** and choose **User pools**.
 3. Open the user pool of the stack. Its ID is the `UserPoolId` value printed by `pnpm run deploy`.
-4. Choose **Users** in the left menu (under *User management*).
+4. Choose **Users** in the left menu (under _User management_).
 
 ## Create a User
 

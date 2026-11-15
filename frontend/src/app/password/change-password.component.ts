@@ -64,9 +64,13 @@ type Result = 'success' | 'wrongCurrent' | 'invalid' | 'error';
     </ul>
 
     @if (result(); as result) {
-      <p [attr.role]="result === 'success' ? 'status' : 'alert'">{{ 'password.' + (result === 'success' ? 'success' : result) | translate }}</p>
+      <p [attr.role]="result === 'success' ? 'status' : 'alert'">
+        {{ 'password.' + (result === 'success' ? 'success' : result) | translate }}
+      </p>
     }
-    <p><a routerLink="/">{{ 'password.back' | translate }}</a></p>
+    <p>
+      <a routerLink="/">{{ 'password.back' | translate }}</a>
+    </p>
   `,
   styles: `
     .rules {
@@ -94,7 +98,11 @@ export class ChangePasswordComponent {
   protected readonly rules = computed(() => {
     const password = this.proposed();
     return [
-      { key: 'password.ruleLength', count: PASSWORD_POLICY.minLength, met: password.length >= PASSWORD_POLICY.minLength },
+      {
+        key: 'password.ruleLength',
+        count: PASSWORD_POLICY.minLength,
+        met: password.length >= PASSWORD_POLICY.minLength,
+      },
       { key: 'password.ruleLowercase', count: 0, met: /\p{Ll}/u.test(password) },
       { key: 'password.ruleUppercase', count: 0, met: /\p{Lu}/u.test(password) },
       { key: 'password.ruleDigit', count: 0, met: /\d/.test(password) },
@@ -120,25 +128,30 @@ export class ChangePasswordComponent {
     this.busy.set(true);
     this.result.set(null);
     try {
-      const response = await fetch(`https://cognito-idp.${this.config.value.cognito.region}.amazonaws.com/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-amz-json-1.1',
-          'X-Amz-Target': 'AWSCognitoIdentityProviderService.ChangePassword',
+      const response = await fetch(
+        `https://cognito-idp.${this.config.value.cognito.region}.amazonaws.com/`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-amz-json-1.1',
+            'X-Amz-Target': 'AWSCognitoIdentityProviderService.ChangePassword',
+          },
+          body: JSON.stringify({
+            AccessToken: await this.auth.accessToken(),
+            PreviousPassword: this.current(),
+            ProposedPassword: this.proposed(),
+          }),
         },
-        body: JSON.stringify({
-          AccessToken: await this.auth.accessToken(),
-          PreviousPassword: this.current(),
-          ProposedPassword: this.proposed(),
-        }),
-      });
+      );
       if (response.ok) {
         this.current.set('');
         this.proposed.set('');
         this.confirmation.set('');
         this.result.set('success');
       } else {
-        this.result.set(this.failure(await response.json().catch(() => ({}))));
+        this.result.set(
+          this.failure((await response.json().catch(() => ({}))) as { __type?: string }),
+        );
       }
     } catch {
       this.result.set('error');

@@ -1,9 +1,9 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import type { Recipe } from "@recipe-manager/shared";
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import type { Recipe } from '@recipe-manager/shared';
 
 /** All Recipes of the Collection share one partition; there is exactly one Collection. */
-const RECIPES_PARTITION = "RECIPES";
+const RECIPES_PARTITION = 'RECIPES';
 
 export interface RecipeStore {
   listAll(): Promise<Recipe[]>;
@@ -23,8 +23,8 @@ export function createRecipeStore(options: { tableName: string; endpoint?: strin
         const page = await client.send(
           new QueryCommand({
             TableName: options.tableName,
-            KeyConditionExpression: "pk = :pk",
-            ExpressionAttributeValues: { ":pk": RECIPES_PARTITION },
+            KeyConditionExpression: 'pk = :pk',
+            ExpressionAttributeValues: { ':pk': RECIPES_PARTITION },
             ExclusiveStartKey: startKey,
           }),
         );

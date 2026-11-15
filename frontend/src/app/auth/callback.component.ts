@@ -20,7 +20,11 @@ export class CallbackComponent implements OnInit {
   private readonly router = inject(Router);
   protected readonly failed = signal(false);
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
+    void this.completeSignIn();
+  }
+
+  private async completeSignIn(): Promise<void> {
     try {
       await this.router.navigateByUrl(await this.auth.completeSignIn(), { replaceUrl: true });
     } catch {

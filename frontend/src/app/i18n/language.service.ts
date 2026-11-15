@@ -25,7 +25,9 @@ export class LanguageService {
     } catch {
       // storage unavailable: the choice just is not remembered
     }
-    return new Promise((resolve) => this.translate.use(language).subscribe({ complete: () => resolve(undefined) }));
+    return new Promise((resolve) =>
+      this.translate.use(language).subscribe({ complete: () => resolve(undefined) }),
+    );
   }
 
   private stored(): Language | null {

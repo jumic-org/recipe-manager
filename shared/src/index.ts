@@ -1,2 +1,2 @@
-export type * from "./recipe";
-export * from "./passwordPolicy";
+export type * from './recipe';
+export * from './passwordPolicy';
