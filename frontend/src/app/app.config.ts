@@ -16,8 +16,11 @@ export const appConfig: ApplicationConfig = {
     provideTranslateService({ fallbackLang: 'de' }),
     provideTranslateHttpLoader({ prefix: '/i18n/', suffix: '.json' }),
     provideAppInitializer(async () => {
-      await inject(ConfigService).load();
-      await inject(LanguageService).init();
+      // inject() only works before the first await.
+      const config = inject(ConfigService);
+      const language = inject(LanguageService);
+      await config.load();
+      await language.init();
     }),
   ],
 };
