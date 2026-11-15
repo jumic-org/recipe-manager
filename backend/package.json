@@ -16,7 +16,7 @@
     "@types/aws-lambda": "^8.10.0",
     "@types/node": "^22.0.0",
     "dynamodb-local": "^0.0.38",
-    "typescript": "^5.9.0",
+    "typescript": "^7.0.2",
     "vitest": "^3.0.0"
   }
 }
