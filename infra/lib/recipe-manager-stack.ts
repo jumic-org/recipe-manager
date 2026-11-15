@@ -12,6 +12,7 @@ import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import type { Construct } from "constructs";
+import { PASSWORD_POLICY } from "@recipe-manager/shared";
 
 const repoRoot = path.join(import.meta.dirname, "..", "..");
 const LOCAL_DEV_ORIGIN = "http://localhost:4200";
@@ -60,6 +61,7 @@ export class RecipeManagerStack extends Stack {
       signInAliases: { username: true, email: true },
       autoVerify: { email: true },
       standardAttributes: { email: { required: true, mutable: true } },
+      passwordPolicy: PASSWORD_POLICY,
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       featurePlan: cognito.FeaturePlan.ESSENTIALS,
       removalPolicy: RemovalPolicy.RETAIN,

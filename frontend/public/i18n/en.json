@@ -1,5 +1,7 @@
 {
-  "app": { "title": "Recipes" },
+  "app": {
+    "title": "Recipes"
+  },
   "nav": {
     "language": "Language",
     "changePassword": "Change password",
@@ -22,7 +24,17 @@
     "new": "New password",
     "submit": "Change password",
     "success": "The password was changed.",
-    "error": "The password could not be changed. Please check the current password and the requirements for the new one.",
-    "back": "Back to recipes"
+    "error": "The password could not be changed. Please try again later.",
+    "back": "Back to recipes",
+    "rules": "The new password must contain:",
+    "ruleLength": "at least {{count}} characters",
+    "ruleLowercase": "a lowercase letter",
+    "ruleUppercase": "an uppercase letter",
+    "ruleDigit": "a digit",
+    "ruleSymbol": "a special character",
+    "confirm": "Repeat new password",
+    "mismatch": "The passwords do not match.",
+    "wrongCurrent": "The current password is wrong.",
+    "invalid": "The new password does not meet the requirements."
   }
 }
