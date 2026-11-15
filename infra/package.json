@@ -15,7 +15,7 @@
     "@recipe-manager/shared": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.6.6",
     "aws-cdk": "^2.1000.0",
     "esbuild": "^0.28.0",
     "tsx": "^4.0.0",
