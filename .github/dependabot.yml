@@ -1,12 +1,9 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directories:
-      - /
-      - /frontend
-      - /backend
-      - /shared
-      - /infra
+    # Dependabot reads the whole pnpm workspace from the root. Listing the packages as well
+    # opens duplicate PRs.
+    directory: /
     schedule:
       interval: weekly
       day: monday
