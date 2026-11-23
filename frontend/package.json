@@ -9,12 +9,12 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/common": "^22.2.0",
-    "@angular/compiler": "^22.2.0",
-    "@angular/core": "^22.2.0",
-    "@angular/forms": "^22.2.0",
-    "@angular/platform-browser": "^22.2.0",
-    "@angular/router": "^22.2.0",
+    "@angular/common": "^22.3.0",
+    "@angular/compiler": "^22.3.0",
+    "@angular/core": "^22.3.0",
+    "@angular/forms": "^22.3.0",
+    "@angular/platform-browser": "^22.3.0",
+    "@angular/router": "^22.3.0",
     "@ngx-translate/core": "^18.1.0",
     "@ngx-translate/http-loader": "^18.0.0",
     "@recipe-manager/shared": "workspace:*",
@@ -23,9 +23,9 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^22.2.7",
-    "@angular/cli": "^22.2.7",
-    "@angular/compiler-cli": "^22.2.0",
+    "@angular/build": "^22.3.0",
+    "@angular/cli": "^22.3.0",
+    "@angular/compiler-cli": "^22.3.0",
     "typescript": "~6.0.2"
   }
 }
